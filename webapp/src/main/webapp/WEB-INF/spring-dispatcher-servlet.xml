@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+                    
+        <!-- properties --> 
+        <bean id="applicationPropertyResource" class="org.springframework.core.io.ClassPathResource">
+                <constructor-arg value="application.properties" />
+        </bean>
+        <bean  
+                class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+                <property name="location" ref="applicationPropertyResource"/>
+                <property name="ignoreUnresolvablePlaceholders" value="true"/>
+        </bean>
+                    
+
+         <mvc:annotation-driven>
+<!--	    <mvc:message-converters>
+	        <bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+	        	<property name="objectMapper" ref="jsonObjectMapper"/>  
+	        </bean>
+	    </mvc:message-converters>-->
+	</mvc:annotation-driven>
+    
+	<mvc:default-servlet-handler />
+
+        <!--           Services             -->
+
+        <import resource="classpath:/open-user-service.xml" />
+        
+        <!--           Controllers             -->
+        
+<!--        <bean class="com.wadpam.rnr.web.MonitorController" />
+
+    <bean id="jsonObjectMapper" class="com.goldengekko.serverutils.SkipNullObjectMapper" init-method="init" />-->
+	
+</beans>

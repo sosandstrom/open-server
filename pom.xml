@@ -1,0 +1,21 @@
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.wadpam.openserver</groupId>
+    <artifactId>parent</artifactId>
+    <version>1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Open-Server parent</name>
+
+    <modules>
+         <module>errors</module>
+         <module>users</module>
+         <module>webapp</module>
+    </modules>
+
+    <scm>
+        <url>https://github.com/sosandstrom/open-server</url>
+        <developerConnection>scm:git:ssh://git@github.com/sosandstrom/open-server.git</developerConnection>
+    </scm>
+</project>

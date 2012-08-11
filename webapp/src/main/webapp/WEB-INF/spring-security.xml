@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<b:beans xmlns="http://www.springframework.org/schema/security"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:b="http://www.springframework.org/schema/beans"
+         xmlns:s="http://www.springframework.org/schema/security"
+         xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+
+    <b:import resource="classpath:/domain-security.xml" />
+        
+    <http pattern="/favicon.ico" security="none" />
+    <http pattern="/api/*/css/**" security="none" />
+    <http pattern="/js/**/*.js" security="none" />
+    <http pattern="/development-bundle/**" security="none" />
+    <http pattern="/index.html" security="none" />
+    <http pattern="/api/*/brandadmin/*.html" security="none" />
+    <http pattern="/api/*/domainadmin/*.html" security="none" />
+    <http pattern="/api/*/localOffersForms.html" security="none" />
+    
+    <http pattern="/api/*/blob/v*/*" security="none" />
+    <http pattern="/api/monitor/**" security="none" />
+    <http pattern="/api/*/monitor/**" security="none" />
+    <!-- 
+	<http pattern="/_ah/upload/**" security="none" />
+	 -->
+	
+    <http realm="Nokadi" create-session="stateless"
+        pattern="/**" authentication-manager-ref="apiAuthenticationManager">
+
+        <http-basic />
+        <custom-filter position="REMEMBER_ME_FILTER" ref="apiAuthenticationFilter" />
+        <logout logout-success-url="/index.html" />
+        
+        <intercept-url pattern="/api/*/brand/v*/create" access="ROLE_DOMAIN" />
+
+        <intercept-url pattern="/api/**" access="ROLE_USER" />
+                       
+    </http>
+    
+    <b:bean id="apiAuthenticationFilter" class="com.goldengekko.users.security.CookieAuthenticationFilter">
+<!--        <b:constructor-arg value="\A/api/"/>-->
+        <b:property name="authenticationManager" ref="apiAuthenticationManager" />
+<!--        <b:property name="authenticationSuccessHandler" ref="voidAuthenticationSuccessHandler" />-->
+<!--        <b:property name="userDetailsService" ref="domainUserService" />-->
+    </b:bean>
+    <authentication-manager alias="apiAuthenticationManager">
+        <authentication-provider ref="preAuthenticatedAuthenticationProvider" />
+    </authentication-manager>
+    
+    <b:bean id="preAuthenticatedAuthenticationProvider" class="org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider">
+        <b:property name="preAuthenticatedUserDetailsService" ref="domainUserService" />
+    </b:bean>
+
+    <b:bean id="voidAuthenticationSuccessHandler" class="com.goldengekko.users.security.VoidAuthenticationSuccessHandler" />
+</b:beans>
