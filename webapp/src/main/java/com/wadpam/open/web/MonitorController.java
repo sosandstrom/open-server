@@ -1,7 +1,7 @@
-package com.wadpam.openuser.web;
+package com.wadpam.open.web;
 
 import com.google.appengine.api.NamespaceManager;
-import com.wadpam.openuser.json.JMonitor;
+import com.wadpam.open.json.JMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

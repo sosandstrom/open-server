@@ -13,10 +13,9 @@ xsi:schemaLocation="http://appengine.google.com/ns/1.0 http://googleappengine.go
     <public-root>/static</public-root>
 
     <static-files>
-        <include path="/favicon.ico" />
+        <include path="/static/favicon.ico" />
         <include path="/**.js" />
         <include path="/**.css" />
-        <include path="/development-bundle/**" />
         <include path="/**.html" />
     </static-files>
     <sessions-enabled>true</sessions-enabled>

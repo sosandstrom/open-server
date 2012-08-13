@@ -1,4 +1,3 @@
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
@@ -7,9 +6,9 @@
         <artifactId>parent</artifactId>
         <version>1-SNAPSHOT</version>
     </parent>
-    <artifactId>errors</artifactId>
+    <artifactId>jsonp</artifactId>
     <packaging>jar</packaging>
-    <name>Open-Server errors</name>
+    <name>Open-Server jsonp</name>
 
     <!-- Specify hard-coded project properties here -->
     <properties>
@@ -46,6 +45,25 @@
                 </configuration>
             </plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.8</version>
+                <configuration>
+                    <author>false</author>
+                    <doclet>com.wadpam.docrest.DocRestDoclet</doclet>
+                    <docletArtifact>
+                        <groupId>com.wadpam</groupId>
+                        <artifactId>docrest</artifactId>
+                        <version>${docrest.version}</version>
+                    </docletArtifact>
+                    <encoding>UTF-8</encoding>
+                    <javadocExecutable>${javadocExecutable}</javadocExecutable>
+                    <sourcepath>src/main/java</sourcepath>
+                    <useStandardDocletOptions>false</useStandardDocletOptions>
+                    <verbose>true</verbose>
+                </configuration>
+            </plugin>
         </plugins>
         
     </build>
@@ -57,6 +75,23 @@
             <version>${spring.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-core-asl</artifactId>
+            <version>1.9.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <version>1.9.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-api-1.0-sdk</artifactId>
+            <version>${gae.version}</version>
+        </dependency>
+        
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -70,18 +105,14 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- for javadoc -->
         <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-core-asl</artifactId>
-            <version>1.7.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-            <version>1.7.2</version>
+            <groupId>com.wadpam</groupId>
+            <artifactId>docrest</artifactId>
+            <version>${docrest.version}</version>
+            <scope>provided</scope>
         </dependency>
 
-        <!-- for javadoc -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

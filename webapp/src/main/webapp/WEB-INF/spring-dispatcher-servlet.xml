@@ -15,13 +15,21 @@
                 <property name="ignoreUnresolvablePlaceholders" value="true"/>
         </bean>
                     
+        <!--           Filters (on web.xml)             -->
+        
+        <bean id="domainFilter" class="com.wadpam.open.domain.service.DomainFilter">
+        </bean>
+
+        <bean id="jsonpFilter" class="com.wadpam.open.jsonp.JsonpCallbackFilter">
+        </bean>
+                    
 
          <mvc:annotation-driven>
-<!--	    <mvc:message-converters>
+	    <mvc:message-converters>
 	        <bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
 	        	<property name="objectMapper" ref="jsonObjectMapper"/>  
 	        </bean>
-	    </mvc:message-converters>-->
+	    </mvc:message-converters>
 	</mvc:annotation-driven>
     
 	<mvc:default-servlet-handler />
@@ -32,8 +40,8 @@
         
         <!--           Controllers             -->
         
-<!--        <bean class="com.wadpam.rnr.web.MonitorController" />
+        <bean class="com.wadpam.open.web.MonitorController" />
 
-    <bean id="jsonObjectMapper" class="com.goldengekko.serverutils.SkipNullObjectMapper" init-method="init" />-->
+    <bean id="jsonObjectMapper" class="com.wadpam.open.json.SkipNullObjectMapper" init-method="init" />
 	
 </beans>

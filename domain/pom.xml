@@ -6,9 +6,9 @@
         <artifactId>parent</artifactId>
         <version>1-SNAPSHOT</version>
     </parent>
-    <artifactId>users</artifactId>
+    <artifactId>domain</artifactId>
     <packaging>jar</packaging>
-    <name>Open-Server users</name>
+    <name>Open-Server domain</name>
 
     <!-- Specify hard-coded project properties here -->
     <properties>
@@ -46,7 +46,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <basePackage>com.wadpam.open.user</basePackage>
+                    <basePackage>com.wadpam.open.domain</basePackage>
                     <persistenceType>AED</persistenceType>
                     <containerManagedEntityManager>false
                     </containerManagedEntityManager>
@@ -174,17 +174,6 @@
             <artifactId>spring-webmvc</artifactId>
             <version>${spring.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-tx</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>cglib</groupId>
-            <artifactId>cglib</artifactId>
-            <version>2.2.2</version>
-        </dependency>
 
         <dependency>
             <groupId>com.google.appengine</groupId>
@@ -205,12 +194,6 @@
             <scope>provided</scope>
         </dependency>
 
-	<dependency>
-		<groupId>org.apache.velocity</groupId>
-		<artifactId>velocity</artifactId>
-		<version>1.6.2</version>
-	</dependency>
-            
         <!-- for javadoc -->
         <dependency>
             <groupId>com.wadpam</groupId>
@@ -226,19 +209,6 @@
             <scope>test</scope>
         </dependency>
 
-	<!--mem cache-->
-	<dependency>
-		<groupId>net.sf.jsr107cache</groupId>
-		<artifactId>jsr107cache</artifactId>
-		<version>1.1</version>
-	</dependency>
-	<dependency>
-		<groupId>com.google.appengine</groupId>
-		<artifactId>appengine-jsr107cache</artifactId>
-		<version>${gae.version}</version>
-		<scope>runtime</scope>
-	</dependency>
-		
     </dependencies>
     
     <repositories>

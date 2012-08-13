@@ -1,6 +1,6 @@
-package com.wadpam.openuser.web;
+package com.wadpam.open.web;
 
-import com.wadpam.openuser.json.JMonitor;
+import com.wadpam.open.json.JMonitor;
 import static org.junit.Assert.*;
 
 import org.junit.After;

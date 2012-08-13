@@ -1,4 +1,4 @@
-package com.wadpam.openuser.service;
+package com.wadpam.open.domain.service;
 
 import com.google.appengine.api.NamespaceManager;
 import java.io.IOException;

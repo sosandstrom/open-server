@@ -1,4 +1,4 @@
-package com.wadpam.openuser.json;
+package com.wadpam.open.json;
 
 /**
  *

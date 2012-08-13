@@ -21,6 +21,12 @@
 
         <import resource="classpath*:spring-dao.xml" />
         
+        <bean id="domainFilter" class="com.wadpam.openuser.service.DomainFilter">
+        </bean>
+
+        <bean id="jsonpFilter" class="com.wadpam.openuser.jsonp.JsonpCallbackFilter">
+        </bean>
+        
 <!--        <bean id="connectionFactoryLocator" class="com.goldengekko.users.social.DomainConnectionFactoryRegistry" scope="request">
             <aop:scoped-proxy/>
             <property name="userService" ref="domainUserService" />
@@ -68,7 +74,7 @@
 
         <bean class="com.goldengekko.users.web.SignOutController" />
 -->
-
+        <bean class="com.wadpam.openuser.web.MonitorController" />
 <!--            
         <bean id="sessionController" class="com.goldengekko.users.web.SessionController">
             <property name="analyticsService" ref="analyticsService" />
@@ -84,4 +90,12 @@
            	<property name="analyticsService" ref="analyticsService"/>
     </bean>
 -->        
+    <!-- memory cache -->
+<!--    <bean id="emptyMap" class="java.util.HashMap" />
+    <bean id="memCacheManager" class="net.sf.jsr107cache.CacheManager" factory-method="getInstance" />        
+    <bean id="memCacheFactory" factory-bean="memCacheManager" factory-method="getCacheFactory" />        
+    <bean id="memCache" factory-bean="memCacheFactory" factory-method="createCache">
+        <constructor-arg ref="emptyMap" />
+    </bean>-->
+	    
 </beans>

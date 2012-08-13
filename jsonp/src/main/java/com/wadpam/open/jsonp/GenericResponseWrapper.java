@@ -1,4 +1,4 @@
-package com.wadpam.openuser.jsonp;
+package com.wadpam.open.jsonp;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;

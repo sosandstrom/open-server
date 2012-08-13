@@ -12,6 +12,8 @@
          <module>errors</module>
          <module>users</module>
          <module>webapp</module>
+        <module>domain</module>
+        <module>jsonp</module>
     </modules>
 
     <scm>
