@@ -205,11 +205,11 @@
             <scope>provided</scope>
         </dependency>
 
-	<dependency>
-		<groupId>org.apache.velocity</groupId>
-		<artifactId>velocity</artifactId>
-		<version>1.6.2</version>
-	</dependency>
+        <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity</artifactId>
+            <version>1.6.2</version>
+        </dependency>
             
         <!-- for javadoc -->
         <dependency>
@@ -226,18 +226,18 @@
             <scope>test</scope>
         </dependency>
 
-	<!--mem cache-->
-	<dependency>
-		<groupId>net.sf.jsr107cache</groupId>
-		<artifactId>jsr107cache</artifactId>
-		<version>1.1</version>
-	</dependency>
-	<dependency>
-		<groupId>com.google.appengine</groupId>
-		<artifactId>appengine-jsr107cache</artifactId>
-		<version>${gae.version}</version>
-		<scope>runtime</scope>
-	</dependency>
+        <!--mem cache-->
+        <dependency>
+            <groupId>net.sf.jsr107cache</groupId>
+            <artifactId>jsr107cache</artifactId>
+            <version>1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-jsr107cache</artifactId>
+            <version>${gae.version}</version>
+            <scope>runtime</scope>
+        </dependency>
 		
     </dependencies>
     
