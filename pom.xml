@@ -14,7 +14,23 @@
          <module>webapp</module>
         <module>domain</module>
         <module>jsonp</module>
+        <module>transactions-gae</module>
     </modules>
+    
+    <developers>
+        <developer>
+            <id>mattiaslevin</id>
+            <name>Mattias Levin</name>
+            <email>mattias.levin@gmail.com</email>
+            <url>http://www.linkedin.com/in/mattiaslevin</url>
+        </developer>
+        <developer>
+            <id>sosandstrom</id>
+            <name>Ola Sandstrom</name>
+            <email>s.o.sandstrom@gmail.com</email>
+            <url>http://www.linkedin.com/in/sosandstrom</url>
+        </developer>
+    </developers>
 
     <scm>
         <url>https://github.com/sosandstrom/open-server</url>
