@@ -1,6 +1,7 @@
 package com.wadpam.open.jsonp;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 
 import javax.servlet.ServletOutputStream;
@@ -15,11 +16,43 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper {
 
     private final ByteArrayOutputStream output;
     private int                         contentLength;
+    private int                         httpStatus = 200;
+    private String                      redirectUrl;
 
     public GenericResponseWrapper(HttpServletResponse response) {
         super(response);
 
         output = new ByteArrayOutputStream();
+    }
+
+    @Override
+    public void sendError(int sc) throws IOException {
+        httpStatus = sc;
+        super.sendError(sc);
+    }
+
+    @Override
+    public void sendError(int sc, String msg) throws IOException {
+        httpStatus = sc;
+        super.sendError(sc, msg);
+    }
+
+
+    @Override
+    public void setStatus(int sc) {
+        httpStatus = sc;
+        super.setStatus(sc);
+    }
+
+    @Override
+    public void sendRedirect(String location) throws IOException {
+        httpStatus = 302;
+        redirectUrl = location;
+        super.sendRedirect(location);
+    }
+
+    public int getStatus() {
+        return httpStatus;
     }
 
     public byte[] getData() {
@@ -43,4 +76,7 @@ public class GenericResponseWrapper extends HttpServletResponseWrapper {
         return contentLength;
     }
 
+    public String getRedirectUrl() {
+        return redirectUrl;
+    }
 }

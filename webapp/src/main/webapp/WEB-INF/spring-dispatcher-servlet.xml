@@ -5,26 +5,26 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
                     
-        <!-- properties --> 
-        <bean id="applicationPropertyResource" class="org.springframework.core.io.ClassPathResource">
-                <constructor-arg value="application.properties" />
-        </bean>
-        <bean  
-                class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-                <property name="location" ref="applicationPropertyResource"/>
-                <property name="ignoreUnresolvablePlaceholders" value="true"/>
-        </bean>
-                    
-        <!--           Filters (on web.xml)             -->
-        
-        <bean id="domainFilter" class="com.wadpam.open.domain.service.DomainFilter">
-        </bean>
+    <!-- properties -->
+    <bean id="applicationPropertyResource" class="org.springframework.core.io.ClassPathResource">
+            <constructor-arg value="application.properties" />
+    </bean>
+    <bean
+            class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+            <property name="location" ref="applicationPropertyResource"/>
+            <property name="ignoreUnresolvablePlaceholders" value="true"/>
+    </bean>
 
-        <bean id="jsonpFilter" class="com.wadpam.open.jsonp.JsonpCallbackFilter">
-        </bean>
+    <!--           Filters (on web.xml)             -->
+
+    <bean id="domainFilter" class="com.wadpam.open.domain.service.DomainFilter">
+    </bean>
+
+    <bean id="jsonpFilter" class="com.wadpam.open.jsonp.JsonpCallbackFilter">
+    </bean>
                     
 
-         <mvc:annotation-driven>
+    <mvc:annotation-driven>
 	    <mvc:message-converters>
 	        <bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
 	        	<property name="objectMapper" ref="jsonObjectMapper"/>  
@@ -34,13 +34,13 @@
     
 	<mvc:default-servlet-handler />
 
-        <!--           Services             -->
+    <!--           Services             -->
 
-        <import resource="classpath:/open-user-service.xml" />
-        
-        <!--           Controllers             -->
-        
-        <bean class="com.wadpam.open.web.MonitorController" />
+    <import resource="classpath:/open-user-service.xml" />
+
+    <!--           Controllers             -->
+
+    <bean class="com.wadpam.open.web.MonitorController" />
 
     <bean id="jsonObjectMapper" class="com.wadpam.open.json.SkipNullObjectMapper" init-method="init" />
 	

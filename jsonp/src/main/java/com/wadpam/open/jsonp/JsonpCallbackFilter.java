@@ -42,6 +42,7 @@ public class JsonpCallbackFilter implements Filter {
 
             chain.doFilter(request, wrapper);
             httpResponse.setContentType("text/javascript;charset=UTF-8");
+
             final OutputStream out = httpResponse.getOutputStream();
             out.write(callback.getBytes());
             out.write('(');

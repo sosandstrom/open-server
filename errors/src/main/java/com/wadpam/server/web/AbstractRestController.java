@@ -24,9 +24,9 @@ public abstract class AbstractRestController {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractRestController.class);
     public static final ObjectMapper MAPPER = new ObjectMapper();
     
-    protected void doHandle(HttpServletResponse response, Throwable e, 
-            HttpStatus status) {
+    protected void doHandle(HttpServletResponse response, Throwable e, HttpStatus status) {
         LOG.warn("Handling error for {} {}", status, e.getLocalizedMessage());
+        LOG.warn("Stack track {}", e.getStackTrace());
         final JRestError body = new JRestError(status.value());
         
         // for all
