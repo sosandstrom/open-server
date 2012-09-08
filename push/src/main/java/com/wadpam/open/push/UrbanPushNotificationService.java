@@ -49,7 +49,9 @@ public class UrbanPushNotificationService implements PushNotificationService {
         
         MappingJacksonHttpMessageConverter jsonMessageConverter = new MappingJacksonHttpMessageConverter();
         jsonMessageConverter.setObjectMapper(MAPPER);
-        final List<HttpMessageConverter<?>> messageConverters = (List<HttpMessageConverter<?>>) Arrays.asList((HttpMessageConverter<?>)jsonMessageConverter);
+        final List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
+        messageConverters.add(jsonMessageConverter);
+        
         TEMPLATE.setMessageConverters(messageConverters);
     }
     
