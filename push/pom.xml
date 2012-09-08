@@ -1,0 +1,127 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.wadpam.openserver</groupId>
+        <artifactId>parent</artifactId>
+        <version>1-SNAPSHOT</version>
+    </parent>
+    <artifactId>push</artifactId>
+    <packaging>jar</packaging>
+    <name>Open-Server push</name>
+
+    <!-- Specify hard-coded project properties here -->
+    <properties>
+        <logging.level>ALL</logging.level>
+        <downloadSources>false</downloadSources>
+        <gae.version>1.7.0</gae.version>
+        <spring.version>3.1.1.RELEASE</spring.version>
+        <spring.security.version>3.1.0.RELEASE</spring.security.version>
+        <spring-social.version>1.0.1.RELEASE</spring-social.version>
+        <docrest.version>1.13</docrest.version>
+        <javadocExecutable>${java.home}/../bin/javadoc</javadocExecutable>
+    </properties>
+
+    <build>
+        <plugins>
+            <!-- Java compiler version -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-eclipse-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <wtpversion>2.0</wtpversion>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.8</version>
+                <configuration>
+                    <author>false</author>
+                    <doclet>com.wadpam.docrest.DocRestDoclet</doclet>
+                    <docletArtifact>
+                        <groupId>com.wadpam</groupId>
+                        <artifactId>docrest</artifactId>
+                        <version>${docrest.version}</version>
+                    </docletArtifact>
+                    <encoding>UTF-8</encoding>
+                    <javadocExecutable>${javadocExecutable}</javadocExecutable>
+                    <sourcepath>src/main/java</sourcepath>
+                    <useStandardDocletOptions>false</useStandardDocletOptions>
+                    <verbose>true</verbose>
+                </configuration>
+            </plugin>
+        </plugins>
+        
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>jsonp</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.6</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-core-asl</artifactId>
+            <version>1.9.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <version>1.9.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+
+        <!-- for javadoc -->
+        <dependency>
+            <groupId>com.wadpam</groupId>
+            <artifactId>docrest</artifactId>
+            <version>${docrest.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.8.2</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+    
+    <repositories>
+    </repositories>
+
+</project>

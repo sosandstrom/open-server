@@ -14,7 +14,8 @@
          <module>webapp</module>
         <module>domain</module>
         <module>jsonp</module>
-        <module>transactions-gae</module>
+         <module>push</module>
+       <module>transactions-gae</module>
     </modules>
     
     <developers>
