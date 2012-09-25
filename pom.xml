@@ -19,6 +19,10 @@
         <module>security-gae</module>
     </modules>
     
+    <properties>
+        <docrest.version>1.15</docrest.version>
+    </properties>
+    
     <developers>
         <developer>
             <id>mattiaslevin</id>

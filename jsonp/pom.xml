@@ -18,8 +18,8 @@
         <spring.version>3.1.1.RELEASE</spring.version>
         <spring.security.version>3.1.0.RELEASE</spring.security.version>
         <spring-social.version>1.0.1.RELEASE</spring-social.version>
-        <docrest.version>1.13</docrest.version>
         <javadocExecutable>${java.home}/../bin/javadoc</javadocExecutable>
+        <mardao.version>2.0.1-SNAPSHOT</mardao.version>
     </properties>
 
     <build>
@@ -54,7 +54,7 @@
                     <doclet>com.wadpam.docrest.DocRestDoclet</doclet>
                     <docletArtifact>
                         <groupId>com.wadpam</groupId>
-                        <artifactId>docrest</artifactId>
+                        <artifactId>docrest-doclet</artifactId>
                         <version>${docrest.version}</version>
                     </docletArtifact>
                     <encoding>UTF-8</encoding>
@@ -73,6 +73,12 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
             <version>${spring.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>net.sf.mardao</groupId>
+            <artifactId>mardao-core</artifactId>
+            <version>${mardao.version}</version>
         </dependency>
 
         <dependency>
@@ -108,7 +114,7 @@
         <!-- for javadoc -->
         <dependency>
             <groupId>com.wadpam</groupId>
-            <artifactId>docrest</artifactId>
+            <artifactId>docrest-api</artifactId>
             <version>${docrest.version}</version>
             <scope>provided</scope>
         </dependency>

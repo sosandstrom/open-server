@@ -77,18 +77,21 @@ public class UrbanPushNotificationService implements PushNotificationService {
         final String path = String.format("%s/api/push", BASE_URL);
         final JUrbanRequest request = createRequest(identifiers);
         
-        TEMPLATE.postForEntity(path, request, JUrbanResponse.class);
+        JUrbanResponse response = TEMPLATE.postForObject(path, request, JUrbanResponse.class);
+        LOG.debug("pushed Notifications to {} devices, got {}", identifiers.length, response);
     }
 
     @Override
     public void register(String identifier) throws IOException {
         final String path = String.format("%s/api/device_tokens/{identifier}", BASE_URL);
+        LOG.debug("register for {}", path);
         TEMPLATE.put(path, null, identifier);
     }
 
     @Override
     public void unregister(String identifier) throws IOException {
         final String path = String.format("%s/api/device_tokens/{identifier}", BASE_URL);
+        LOG.debug("unregister for {}", path);
         TEMPLATE.delete(path, identifier);
     }
 
