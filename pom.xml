@@ -16,6 +16,7 @@
         <module>jsonp</module>
          <module>push</module>
        <module>transactions-gae</module>
+        <module>security-gae</module>
     </modules>
     
     <developers>

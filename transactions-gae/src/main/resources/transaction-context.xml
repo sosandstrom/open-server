@@ -24,7 +24,7 @@
                 <aop:pointcut id="transactionMethods"
                               expression="within(com.wadpam.rnr.service.RnrService)
                               and (execution(* add*(..)) or execution(* delete*(..)) or execution(* update*(..)))
-                              and @annotation(com.wadpam.rnr.datastore.Idempotent)"/>
+                              and @annotation(com.wadpam.open.transaction.Idempotent)"/>
                 <aop:around pointcut-ref="transactionMethods" method="doConcurrentOperation" />
             </aop:aspect>
         </aop:config>
