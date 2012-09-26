@@ -34,11 +34,16 @@ public abstract class AbstractRestController {
     protected void doHandleWithFullStackTrace(HttpServletResponse response, Exception e, HttpStatus status) {
 
         // Make sure we print out the stack track to the console and log
-        LOG.error("Handling error for {} {}", status, e.getLocalizedMessage());
+        LOG.error("", e);
 
-        // Print the full stack trace
-        e.printStackTrace();
-        // TODO How will this look on GAE
+        doHandle(response, e, status);
+    }
+
+    // Handle the exception and also print a full stack trace
+    protected void doHandleWithLimitedTrace(HttpServletResponse response, Exception e, HttpStatus status) {
+
+        // Make sure we print out the stack track to the console and log
+        LOG.error("Caught REST error:{}", e.getMessage());
 
         doHandle(response, e, status);
     }
@@ -54,9 +59,10 @@ public abstract class AbstractRestController {
 
         StackTraceElement topFrame = e.getStackTrace()[0];
         StringBuilder moreInfo = new StringBuilder();
-        moreInfo.append("Class: ").append(topFrame.getClassName())
-                .append("method: ").append(topFrame.getMethodName())
-                .append("line: ").append(topFrame.getLineNumber());
+        moreInfo.append("exception:").append(e.getClass().getName())
+                .append(" class:").append(topFrame.getClassName())
+                .append(" method:").append(topFrame.getMethodName())
+                .append(" line:").append(topFrame.getLineNumber());
         body.setMoreInfo(moreInfo.toString());
         
         final Class clazz = e.getClass();
@@ -84,26 +90,26 @@ public abstract class AbstractRestController {
     @ExceptionHandler(BadRequestException.class)
     @ResponseBody
     public void handleBadRequest(HttpServletResponse response, BadRequestException e) {
-        doHandle(response, e, HttpStatus.BAD_REQUEST);
+        doHandleWithLimitedTrace(response, e, HttpStatus.BAD_REQUEST);
     }
     
     @ExceptionHandler(NotFoundException.class)
     @ResponseBody
     public void handleNotFound(HttpServletResponse response, NotFoundException e) {
-        doHandle(response, e, HttpStatus.NOT_FOUND);
+        doHandleWithLimitedTrace(response, e, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(RestTestException.class)
     @ResponseBody
     public void handleTestException(HttpServletResponse response, RestTestException e) {
         LOG.debug("Test exception caught");
-        doHandle(response, e, HttpStatus.BAD_REQUEST);
+        doHandleWithLimitedTrace(response, e, HttpStatus.BAD_REQUEST);
     }
     
     @ExceptionHandler(RestException.class)
     @ResponseBody
     public void handleRestError(HttpServletResponse response, RestException e) {
-        doHandle(response, e, HttpStatus.INTERNAL_SERVER_ERROR);
+        doHandleWithLimitedTrace(response, e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     // All other exceptions
