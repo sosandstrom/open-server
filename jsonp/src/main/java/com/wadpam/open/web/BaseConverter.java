@@ -132,5 +132,38 @@ public abstract class BaseConverter {
         return Long.toString(from);
     }
 
+    public static Collection<Long> toLongs(Collection<String> from) {
+        if (null == from) {
+            return null;
+        }
+
+        final Collection<Long> to = new ArrayList<Long>();
+
+        for(String s : from) {
+            try {
+                to.add(Long.parseLong(s));
+            }
+            catch (NumberFormatException sometimes) {
+                to.add(null);
+            }
+        }
+
+        return to;
+    }
+
+    public static Collection<String> toString(Collection<Long> from) {
+        if (null == from) {
+            return null;
+        }
+
+        final Collection<String> to = new ArrayList<String>(from.size());
+
+        for(Long l : from) {
+            to.add(l.toString());
+        }
+
+        return to;
+    }
+    
     
 }
