@@ -4,12 +4,12 @@ package com.wadpam.server.exceptions;
  * Base class for all REST exceptions
  * @author sosandstrom
  */
-public class RestError extends Error {
+public class RestException extends RuntimeException {
     private int code;
     private String developerMessage;
     private int status;
 
-    public RestError(int code, String message) {
+    public RestException(int code, String message) {
         super(message);
         this.code = code;
     }

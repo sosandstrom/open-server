@@ -1,11 +1,16 @@
 package com.wadpam.open.web;
 
+import com.google.appengine.api.datastore.GeoPt;
 import com.wadpam.open.json.JBaseObject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+
+import com.wadpam.open.json.JLocation;
 import net.sf.mardao.core.domain.AbstractCreatedUpdatedEntity;
 import net.sf.mardao.core.domain.AbstractLongEntity;
+import net.sf.mardao.core.geo.DLocation;
+
 
 /**
  *
@@ -54,17 +59,49 @@ public abstract class BaseConverter {
 
         to.setId(toLong(from.getId()));
     }
-    
-    public Collection<JBaseObject> convert(Iterable<Object> from) {
+
+    // Convert iterable
+    public Collection<?> convert(Iterable<?> from) {
         final Collection<JBaseObject> returnValue = new ArrayList<JBaseObject>();
-        
+
         JBaseObject to;
         for (Object o : from) {
-            to = convertBase(from);
+            to = convertBase(o);
             returnValue.add(to);
         }
         
         return returnValue;
+    }
+
+    // Convert collection
+    public Collection<?> convert(Collection<?> from) {
+        final Collection<JBaseObject> returnValue = new ArrayList<JBaseObject>();
+
+        JBaseObject to;
+        for (Object o : from) {
+            to = convertBase(o);
+            returnValue.add(to);
+        }
+
+        return returnValue;
+    }
+
+    // Convert GAE GeoPt
+    static public JLocation convert(GeoPt from) {
+        if (null == from) {
+            return null;
+        }
+
+        return new JLocation(from.getLatitude(), from.getLongitude());
+    }
+
+    // Convert Mardao DLocation
+    static public JLocation convert(DLocation from) {
+        if (null == from) {
+            return null;
+        }
+
+        return new JLocation(from.getLatitude(), from.getLongitude());
     }
 
     public static Long toLong(Date from) {
