@@ -2,6 +2,7 @@ package com.wadpam.open.push;
 
 import com.wadpam.open.push.urban.JUrbanResponse;
 import com.wadpam.open.json.SkipNullObjectMapper;
+import com.wadpam.open.push.urban.APS;
 import com.wadpam.open.push.urban.JUrbanRequest;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -59,6 +60,9 @@ public class UrbanPushNotificationService implements PushNotificationService {
         final JUrbanRequest request = new JUrbanRequest();
         
         request.setDeviceTokens(Arrays.asList(identifiers));
+        APS aps = new APS();
+        aps.setAlert("pass push");
+        request.setAps(aps);
         
         return request;
     }
@@ -84,14 +88,14 @@ public class UrbanPushNotificationService implements PushNotificationService {
     @Override
     public void register(String identifier) throws IOException {
         final String path = String.format("%s/api/device_tokens/{identifier}", BASE_URL);
-        LOG.debug("register for {}", path);
+        LOG.debug("register for {} where identifier='{}'", path, identifier);
         TEMPLATE.put(path, null, identifier);
     }
 
     @Override
     public void unregister(String identifier) throws IOException {
         final String path = String.format("%s/api/device_tokens/{identifier}", BASE_URL);
-        LOG.debug("unregister for {}", path);
+        LOG.debug("unregister for {} where identifier='{}'", path, identifier);
         TEMPLATE.delete(path, identifier);
     }
 

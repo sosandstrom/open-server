@@ -34,20 +34,10 @@ public abstract class AbstractRestController {
     protected void doHandleWithFullStackTrace(HttpServletResponse response, Exception e, HttpStatus status) {
 
         // Make sure we print out the stack track to the console and log
-        LOG.error("", e);
+        LOG.error(String.format("Handling error for HTTP %s %s", status, e.getLocalizedMessage()), e);
 
         doHandle(response, e, status);
     }
-
-    // Handle the exception and also print a full stack trace
-    protected void doHandleWithLimitedTrace(HttpServletResponse response, Exception e, HttpStatus status) {
-
-        // Make sure we print out the stack track to the console and log
-        LOG.error("Caught REST error:{}", e.getMessage());
-
-        doHandle(response, e, status);
-    }
-
 
     // Return a json structure explaining the error
     protected void doHandle(HttpServletResponse response, Exception e, HttpStatus status) {
@@ -90,26 +80,26 @@ public abstract class AbstractRestController {
     @ExceptionHandler(BadRequestException.class)
     @ResponseBody
     public void handleBadRequest(HttpServletResponse response, BadRequestException e) {
-        doHandleWithLimitedTrace(response, e, HttpStatus.BAD_REQUEST);
+        doHandle(response, e, HttpStatus.BAD_REQUEST);
     }
     
     @ExceptionHandler(NotFoundException.class)
     @ResponseBody
     public void handleNotFound(HttpServletResponse response, NotFoundException e) {
-        doHandleWithLimitedTrace(response, e, HttpStatus.NOT_FOUND);
+        doHandle(response, e, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(RestTestException.class)
     @ResponseBody
     public void handleTestException(HttpServletResponse response, RestTestException e) {
         LOG.debug("Test exception caught");
-        doHandleWithLimitedTrace(response, e, HttpStatus.BAD_REQUEST);
+        doHandle(response, e, HttpStatus.BAD_REQUEST);
     }
     
     @ExceptionHandler(RestException.class)
     @ResponseBody
     public void handleRestError(HttpServletResponse response, RestException e) {
-        doHandleWithLimitedTrace(response, e, HttpStatus.INTERNAL_SERVER_ERROR);
+        doHandle(response, e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     // All other exceptions
