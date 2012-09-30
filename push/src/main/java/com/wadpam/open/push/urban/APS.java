@@ -7,7 +7,7 @@ package com.wadpam.open.push.urban;
  */
 public class APS implements java.io.Serializable {
 	private Integer badge;
-	private Object alert;
+	private String alert;
 	private String sound;
 
 	public Integer getBadge() {
@@ -25,18 +25,18 @@ public class APS implements java.io.Serializable {
 		this.badge = iBadge;
 	}
 
-	public Alert getAlert() {
-		return (Alert) alert;
+	public String getAlert() {
+		return alert;
 	}
 
 	public void setAlert(String alert) {
 		this.alert = alert;
 	}
 
-	public void setAlert(Alert a) {
-		this.alert = a;
-	}
-
+//	public void setAlert(Alert a) {
+//		this.alert = a;
+//	}
+//
 	public String getSound() {
 		return sound;
 	}
