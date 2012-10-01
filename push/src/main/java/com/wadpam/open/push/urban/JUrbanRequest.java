@@ -10,7 +10,7 @@ import java.util.*;
  */
 public class JUrbanRequest implements java.io.Serializable {
 	private List<String> apids;
-	private List<String> deviceTokens;
+	private List<String> device_tokens;
 	private List<String> aliases;
 	private List<String> tags;
 	private List<Calendar> scheduleFor;
@@ -24,19 +24,19 @@ public class JUrbanRequest implements java.io.Serializable {
 		this.payload.put(key, value);
 	}
 
-	public List<String> getDeviceTokens() {
-		return deviceTokens;
-	}
+    public List<String> getDevice_tokens() {
+        return device_tokens;
+    }
 
-	public void setDeviceTokens(List<String> deviceTokens) {
-		this.deviceTokens = deviceTokens;
-	}
+    public void setDevice_tokens(List<String> device_tokens) {
+        this.device_tokens = device_tokens;
+    }
 
 	public void addDeviceToken(String token) {
-		if (this.deviceTokens == null) {
-			this.deviceTokens = new ArrayList<String>();
+		if (this.device_tokens == null) {
+			this.device_tokens = new ArrayList<String>();
 		}
-		this.getDeviceTokens().add(token);
+		this.getDevice_tokens().add(token);
 	}
 
 	public List<String> getAliases() {
@@ -52,9 +52,6 @@ public class JUrbanRequest implements java.io.Serializable {
 	}
 
 	public List<String> getTags() {
-		if (tags == null) {
-			tags = new ArrayList<String>();
-		}
 		return tags;
 	}
 

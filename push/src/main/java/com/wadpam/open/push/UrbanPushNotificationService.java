@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -54,14 +55,15 @@ public class UrbanPushNotificationService implements PushNotificationService {
         messageConverters.add(jsonMessageConverter);
         
         TEMPLATE.setMessageConverters(messageConverters);
+        MAPPER.setSerializationInclusion(JsonSerialize.Inclusion.NON_NULL);
     }
     
     protected JUrbanRequest createRequest(String[] identifiers) {
         final JUrbanRequest request = new JUrbanRequest();
         
-        request.setDeviceTokens(Arrays.asList(identifiers));
+        request.setDevice_tokens(Arrays.asList(identifiers));
         APS aps = new APS();
-        aps.setAlert("pass push");
+        aps.setAlert("pass_push");
         request.setAps(aps);
         
         return request;
@@ -80,9 +82,10 @@ public class UrbanPushNotificationService implements PushNotificationService {
         
         final String path = String.format("%s/api/push", BASE_URL);
         final JUrbanRequest request = createRequest(identifiers);
+        final String json = MAPPER.writeValueAsString(request);
         
         JUrbanResponse response = TEMPLATE.postForObject(path, request, JUrbanResponse.class);
-        LOG.debug("pushed Notifications to {} devices, got {}", identifiers.length, response);
+        LOG.debug("pushed {}, got {}", json, response);
     }
 
     @Override
