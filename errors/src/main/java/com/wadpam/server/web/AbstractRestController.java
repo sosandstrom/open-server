@@ -3,12 +3,12 @@ package com.wadpam.server.web;
 import com.wadpam.server.exceptions.BadRequestException;
 import com.wadpam.server.exceptions.NotFoundException;
 import com.wadpam.server.exceptions.RestException;
-import com.wadpam.server.exceptions.RestTestException;
 import com.wadpam.server.json.JRestError;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.http.HttpServletResponse;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -28,6 +28,10 @@ public abstract class AbstractRestController {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractRestController.class);
 
     public static final ObjectMapper MAPPER = new ObjectMapper();
+    
+    public AbstractRestController() {
+        MAPPER.getSerializationConfig().setSerializationInclusion(JsonSerialize.Inclusion.NON_NULL);
+    }
 
 
     // Handle the exception and also print a full stack trace
@@ -46,6 +50,7 @@ public abstract class AbstractRestController {
         
         // for all
         body.setDeveloperMessage(e.getLocalizedMessage());
+        body.setMessage(e.getLocalizedMessage());
 
         StackTraceElement topFrame = e.getStackTrace()[0];
         StringBuilder moreInfo = new StringBuilder();
@@ -60,6 +65,9 @@ public abstract class AbstractRestController {
             
             final RestException restError = (RestException) e;
             body.setCode(restError.getCode());
+            if (null != restError.getDeveloperMessage()) {
+                body.setDeveloperMessage(restError.getDeveloperMessage());
+            }
         }
         try {
             response.setContentType("application/json");
@@ -89,13 +97,6 @@ public abstract class AbstractRestController {
         doHandle(response, e, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(RestTestException.class)
-    @ResponseBody
-    public void handleTestException(HttpServletResponse response, RestTestException e) {
-        LOG.debug("Test exception caught");
-        doHandle(response, e, HttpStatus.BAD_REQUEST);
-    }
-    
     @ExceptionHandler(RestException.class)
     @ResponseBody
     public void handleRestError(HttpServletResponse response, RestException e) {

@@ -9,9 +9,10 @@ public class RestException extends RuntimeException {
     private String developerMessage;
     private int status;
 
-    public RestException(int code, String message) {
+    public RestException(int code, int status, String message) {
         super(message);
         this.code = code;
+        this.status = status;
     }
 
     

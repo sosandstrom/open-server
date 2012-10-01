@@ -1,5 +1,7 @@
 package com.wadpam.server.exceptions;
 
+import org.springframework.http.HttpStatus;
+
 /**
  * This exception indicates bad request.
  * @author sosandstrom
@@ -7,7 +9,7 @@ package com.wadpam.server.exceptions;
 public class BadRequestException extends RestException {
 
     public BadRequestException(int code, String message) {
-        super(code, message);
+        super(code, HttpStatus.BAD_REQUEST.value(), message);
     }
 
 }
