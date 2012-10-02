@@ -8,8 +8,11 @@ import org.springframework.http.HttpStatus;
  */
 public class NotFoundException extends RestException {
 
-    public NotFoundException(int code, String message) {
-        super(code, HttpStatus.NOT_FOUND.value(), message);
+    public NotFoundException(int code, 
+            String developerMessage,
+            String moreInfo,
+            String message) {
+        super(code, developerMessage, moreInfo, HttpStatus.NOT_FOUND.value(), message);
     }
 
 }

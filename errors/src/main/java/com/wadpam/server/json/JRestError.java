@@ -9,6 +9,7 @@ public class JRestError {
     private String developerMessage;
     private String message;
     private String moreInfo;
+    private String stackInfo;
     private int status;
 
     public JRestError() {
@@ -48,6 +49,14 @@ public class JRestError {
 
     public void setMoreInfo(String moreInfo) {
         this.moreInfo = moreInfo;
+    }
+
+    public String getStackInfo() {
+        return stackInfo;
+    }
+
+    public void setStackInfo(String stackInfo) {
+        this.stackInfo = stackInfo;
     }
 
     public int getStatus() {

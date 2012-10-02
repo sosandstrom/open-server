@@ -7,15 +7,21 @@ package com.wadpam.server.exceptions;
 public class RestException extends RuntimeException {
     private int code;
     private String developerMessage;
+    private String moreInfo;
     private int status;
 
     public RestException(int code, int status, String message) {
-        super(message);
-        this.code = code;
-        this.status = status;
+        this(code, null, null, status, message);
     }
 
-    
+    public RestException(int code, String developerMessage, String moreInfo, int status, String message) {
+        super(message);
+        this.code = code;
+        this.developerMessage = developerMessage;
+        this.status = status;
+        this.moreInfo = moreInfo;
+    }
+
     public int getCode() {
         return code;
     }
@@ -38,6 +44,14 @@ public class RestException extends RuntimeException {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public String getMoreInfo() {
+        return moreInfo;
+    }
+
+    public void setMoreInfo(String moreInfo) {
+        this.moreInfo = moreInfo;
     }
     
 }
