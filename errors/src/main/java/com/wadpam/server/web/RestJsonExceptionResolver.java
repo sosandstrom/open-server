@@ -27,39 +27,49 @@ public class RestJsonExceptionResolver extends AbstractHandlerExceptionResolver
     
     @Override
     protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception exception) {
-                ModelAndView mav = new ModelAndView(this);
+        // ignore Spring Security AuthenticationExceptions:
+        try {
+            Class clazz = getClass().getClassLoader().loadClass("org.springframework.security.core.AuthenticationException");
+            if (clazz.isAssignableFrom(exception.getClass())) {
+                return null;
+            }
+        }
+        catch (ClassNotFoundException processIfNotOnClasspath) {
+        }
+        
+        ModelAndView mav = new ModelAndView(this);
 //                mav.setViewName("MappingJacksonJsonView");
-                
-                final JRestError error = new JRestError();
-                if (null != exception) {
-                    error.setMessage(exception.getLocalizedMessage());
-                    
-                    StackTraceElement topFrame = exception.getStackTrace()[0];
-                    StringBuilder stackTraceMessage = new StringBuilder();
-                    stackTraceMessage.append("exception:").append(exception.getClass().getName())
-                            .append(" class:").append(topFrame.getClassName())
-                            .append(" method:").append(topFrame.getMethodName())
-                            .append(" line:").append(topFrame.getLineNumber());
-                    error.setStackInfo(stackTraceMessage.toString());
-                    
-                    if (RestException.class.isAssignableFrom(exception.getClass())) {
-                        final RestException re = (RestException) exception;
-                        error.setCode(re.getCode());
-                        
-                        if (null != re.getDeveloperMessage()) {
-                            error.setDeveloperMessage(re.getDeveloperMessage());
-                        }
-                        error.setStatus(re.getStatus());
-                        error.setMoreInfo(re.getMoreInfo());
-                    }
-                    else {
-                        error.setStatus(500);
-                    }
-                    
+
+        final JRestError error = new JRestError();
+        if (null != exception) {
+            error.setMessage(exception.getLocalizedMessage());
+
+            StackTraceElement topFrame = exception.getStackTrace()[0];
+            StringBuilder stackTraceMessage = new StringBuilder();
+            stackTraceMessage.append("exception:").append(exception.getClass().getName())
+                    .append(" class:").append(topFrame.getClassName())
+                    .append(" method:").append(topFrame.getMethodName())
+                    .append(" line:").append(topFrame.getLineNumber());
+            error.setStackInfo(stackTraceMessage.toString());
+
+            if (RestException.class.isAssignableFrom(exception.getClass())) {
+                final RestException re = (RestException) exception;
+                error.setCode(re.getCode());
+
+                if (null != re.getDeveloperMessage()) {
+                    error.setDeveloperMessage(re.getDeveloperMessage());
                 }
-                
-                mav.addObject(KEY_ERROR_OBJECT, error);
-                return mav;
+                error.setStatus(re.getStatus());
+                error.setMoreInfo(re.getMoreInfo());
+            }
+            else {
+                error.setStatus(500);
+            }
+
+        }
+
+        mav.addObject(KEY_ERROR_OBJECT, error);
+        return mav;
     }
 
     @Override
