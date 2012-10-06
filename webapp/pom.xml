@@ -25,7 +25,7 @@
         <itest.include>**/*ITest.java</itest.include>
         <surefire.default.skip>true</surefire.default.skip>
         <javadocExecutable>${java.home}/../bin/javadoc</javadocExecutable>
-        <docrest.version>1.13</docrest.version>
+        <docrest.version>1.15</docrest.version>
         <logging.level>ALL</logging.level>
     </properties>
 
@@ -92,9 +92,8 @@
         <!-- for javadoc -->
         <dependency>
             <groupId>com.wadpam</groupId>
-            <artifactId>docrest</artifactId>
+            <artifactId>docrest-api</artifactId>
             <version>${docrest.version}</version>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -270,7 +269,7 @@
                     <doclet>com.wadpam.docrest.DocRestDoclet</doclet>
                     <docletArtifact>
                         <groupId>com.wadpam</groupId>
-                        <artifactId>docrest</artifactId>
+                        <artifactId>docrest-doclet</artifactId>
                         <version>${docrest.version}</version>
                     </docletArtifact>
                     <encoding>UTF-8</encoding>
