@@ -1,16 +1,20 @@
 package com.wadpam.open.json;
 
 /**
- *
- * @author os
+ * Implement a basic monitor controller that can be used for monitoring uptime of a backend.
+ * @author sosandstrom
  */
 public class JMonitor {
 
     private Long currentTimeMillis;
     private String ipAddress;
-    private String version;
+    private String mavenVersion;
+    private String gaeAppId;
+    private String gaeVersion;
     private String namespace;
 
+
+    // Setters and getters
     public Long getCurrentTimeMillis() {
         return currentTimeMillis;
     }
@@ -27,12 +31,12 @@ public class JMonitor {
         this.ipAddress = ipAddress;
     }
 
-    public String getVersion() {
-        return version;
+    public String getMavenVersion() {
+        return mavenVersion;
     }
 
-    public void setVersion(String version) {
-        this.version = version;
+    public void setMavenVersion(String mavenVersion) {
+        this.mavenVersion = mavenVersion;
     }
 
     public String getNamespace() {
@@ -41,5 +45,21 @@ public class JMonitor {
 
     public void setNamespace(String namespace) {
         this.namespace = namespace;
+    }
+
+    public String getGaeAppId() {
+        return gaeAppId;
+    }
+
+    public void setGaeAppId(String gaeAppId) {
+        this.gaeAppId = gaeAppId;
+    }
+
+    public String getGaeVersion() {
+        return gaeVersion;
+    }
+
+    public void setGaeVersion(String gaeVersion) {
+        this.gaeVersion = gaeVersion;
     }
 }

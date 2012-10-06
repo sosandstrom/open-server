@@ -1,6 +1,7 @@
 package com.wadpam.open.web;
 
 import com.google.appengine.api.NamespaceManager;
+import com.google.appengine.api.utils.SystemProperty;
 import com.wadpam.open.json.JMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +27,10 @@ public class MonitorController {
     public ResponseEntity<JMonitor> getV10() {
         final JMonitor body = new JMonitor();
         body.setCurrentTimeMillis(System.currentTimeMillis());
+        body.setMavenVersion(System.getProperty("maven.application.version", "N/A"));
         body.setNamespace(NamespaceManager.get());
-        body.setVersion(System.getProperty("maven.application.version", "N/A"));
+        body.setGaeAppId(SystemProperty.applicationId.get());
+        body.setGaeVersion(SystemProperty.applicationVersion.get());
         return new ResponseEntity<JMonitor>(body, HttpStatus.OK);
     }
     

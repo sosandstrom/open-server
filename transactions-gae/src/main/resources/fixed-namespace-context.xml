@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd">
+
+
+    <!--
+        Fixed GAE namespace
+
+        Include this file if you like to to able t annotate methods to run in a fixed GAE namespace.
+        
+        In your application, you need to define the aop:config with aspect and pointcuts, e.g.
+
+
+        
+        <aop:config>
+            <aop:aspect id="gaeFixedNamespaceAspect" ref="gaeFixedNamespaceExecutor">
+                <aop:pointcut id="fixedNamespaceMethods"
+                              expression="within(com.wadpam.pocketvenue.service.VenueService)
+                              and @annotation(com.wadpam.open.transaction.FixedNamespace)"/>
+                <aop:around pointcut-ref="fixedNamespaceMethods" method="doFixedNamespaceOperation" />
+            </aop:aspect>
+        </aop:config>
+
+    -->
+
+    <bean id="gaeFixedNamespaceExecutor" class="com.wadpam.open.transaction.GaeFixedNamespaceExecutor">
+        <property name="order" value="30"/>
+        <property name="namespace" value="backoffice"/>
+    </bean>
+
+
+
+
+</beans>

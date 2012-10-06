@@ -21,18 +21,6 @@ public class GaeConcurrentOperationExecutor implements Ordered {
     private int maxRetries = DEFAULT_MAX_RETRIES;
     private int order = 1;
 
-    public void setMaxRetries(int maxRetries) {
-        this.maxRetries = maxRetries;
-    }
-
-    public int getOrder() {
-        return this.order;
-    }
-
-    public void setOrder(int order) {
-        this.order = order;
-    }
-
     public Object doConcurrentOperation(ProceedingJoinPoint pjp) throws Throwable {
         int numberOfAttempts = 0;
         ConcurrentModificationException concurrentModificationException = null;
@@ -55,5 +43,19 @@ public class GaeConcurrentOperationExecutor implements Ordered {
 
         LOG.warn("Datastore transaction failed max number of tries due to Concurrent Modification Exception, not more retries.");
         throw concurrentModificationException;
+    }
+
+
+    // Getters and setters
+    public void setMaxRetries(int maxRetries) {
+        this.maxRetries = maxRetries;
+    }
+
+    public int getOrder() {
+        return this.order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 }
