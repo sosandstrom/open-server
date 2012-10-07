@@ -2,34 +2,34 @@ package com.wadpam.open.json;
 
 /**
  * A JLocation contains the latitude and longitude coordinates.
- * 
- * @author os
+ * @author sosandstrom
  */
 public class JLocation {
-    private float latitude;
-    private float longitude;
+
+    private Float latitude;
+    private Float longitude;
 
     public JLocation() {
     }
 
-    public JLocation(float latitude, float longitude) {
+    public JLocation(Float latitude, Float longitude) {
         this.latitude = latitude;
         this.longitude = longitude;
     }
 
-    public float getLatitude() {
+    public Float getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(float latitude) {
+    public void setLatitude(Float latitude) {
         this.latitude = latitude;
     }
 
-    public float getLongitude() {
+    public Float getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(float longitude) {
+    public void setLongitude(Float longitude) {
         this.longitude = longitude;
     }
 

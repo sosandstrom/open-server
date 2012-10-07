@@ -62,6 +62,9 @@ public abstract class BaseConverter {
 
     // Convert iterable
     public Collection<?> convert(Iterable<?> from) {
+        if (null == from)
+            return new ArrayList<JBaseObject>();
+
         final Collection<JBaseObject> returnValue = new ArrayList<JBaseObject>();
 
         JBaseObject to;
@@ -75,6 +78,9 @@ public abstract class BaseConverter {
 
     // Convert collection
     public Collection<?> convert(Collection<?> from) {
+        if (null == from)
+            return new ArrayList<JBaseObject>();
+
         final Collection<JBaseObject> returnValue = new ArrayList<JBaseObject>();
 
         JBaseObject to;

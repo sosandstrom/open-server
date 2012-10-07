@@ -70,13 +70,13 @@ public abstract class AbstractRestController {
             }
         }
         try {
+            response.setStatus(status.value());
             response.setContentType("application/json");
             final PrintWriter writer = response.getWriter();
             final String json = MAPPER.writeValueAsString(body);
             writer.print(json);
             writer.flush();
             writer.close();
-            response.setStatus(status.value());
         } catch (IOException ex) {
             LOG.error("Unexpected", ex);
         }
