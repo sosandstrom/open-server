@@ -12,7 +12,6 @@
 
     <!-- Specify hard-coded project properties here -->
     <properties>
-        <gae.version>1.7.0</gae.version>
         <gae.application.version>lab</gae.application.version>
         <gae.application.id>open-user</gae.application.id>
         <spring.version>3.1.1.RELEASE</spring.version>
@@ -25,7 +24,6 @@
         <itest.include>**/*ITest.java</itest.include>
         <surefire.default.skip>true</surefire.default.skip>
         <javadocExecutable>${java.home}/../bin/javadoc</javadocExecutable>
-        <docrest.version>1.15</docrest.version>
         <logging.level>ALL</logging.level>
     </properties>
 

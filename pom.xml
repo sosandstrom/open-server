@@ -9,18 +9,20 @@
     <name>Open-Server parent</name>
 
     <modules>
-         <module>errors</module>
-         <module>users</module>
-         <module>webapp</module>
+        <module>errors</module>
         <module>domain</module>
         <module>jsonp</module>
-         <module>push</module>
-       <module>transactions-gae</module>
+        <module>push</module>
+        <module>transactions-gae</module>
         <module>security-gae</module>
+        <module>users</module>
+        <module>webapp</module>
     </modules>
     
     <properties>
-        <docrest.version>1.15</docrest.version>
+        <gae.version>1.7.0</gae.version>
+        <docrest.version>1.17</docrest.version>
+        <mardao.version>2.0.1</mardao.version>
     </properties>
     
     <developers>
@@ -65,6 +67,33 @@
             <url>file:../mvn-repo/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>sosandstrom-github-releases</id>
+            <name>sosandstrom Maven releases repo at GitHub</name>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <url>https://raw.github.com/sosandstrom/maven-repo/master/releases</url>
+        </pluginRepository>
+    </pluginRepositories>
+    <repositories>
+        <repository>
+            <id>sosandstrom-github-releases</id>
+            <name>sosandstrom Maven releases repo at GitHub</name>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <url>https://raw.github.com/sosandstrom/maven-repo/master/releases</url>
+        </repository>
+    </repositories>
 
     <!--Profiles for handling different location of tools.jar on OSX-->
     <profiles>

@@ -14,48 +14,14 @@
     <properties>
         <logging.level>ALL</logging.level>
         <downloadSources>false</downloadSources>
-        <gae.version>1.7.0</gae.version>
         <spring.version>3.1.1.RELEASE</spring.version>
         <spring.security.version>3.1.0.RELEASE</spring.security.version>
         <spring-social.version>1.0.1.RELEASE</spring-social.version>
-        <mardao.version>1.33</mardao.version>
-        <docrest.version>1.13</docrest.version>
         <javadocExecutable>${java.home}/../bin/javadoc</javadocExecutable>
     </properties>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>net.sf.mardao</groupId>
-                <artifactId>mardao-maven-plugin</artifactId>
-                <version>${mardao.version}</version>
-                <executions>
-                    <execution>
-                        <id>generate-generics</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate-sources</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>generate-daos</id>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>process-classes</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <basePackage>com.wadpam.open.user</basePackage>
-                    <persistenceType>AED</persistenceType>
-                    <containerManagedEntityManager>false
-                    </containerManagedEntityManager>
-                    <containerManagedTransactionManager>false
-                    </containerManagedTransactionManager>
-                    <sourceVersion>1.6</sourceVersion>
-                </configuration>
-            </plugin>
-
             <!-- Java compiler version -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -83,6 +49,31 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>net.sf.mardao</groupId>
+                <artifactId>mardao-maven-plugin</artifactId>
+                <version>${mardao.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-generics</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate-sources</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>generate-daos</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>process-classes</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <basePackage>com.wadpam.open.user</basePackage>
+                </configuration>
             </plugin>
 
             <plugin>
@@ -138,7 +129,7 @@
                     <doclet>com.wadpam.docrest.DocRestDoclet</doclet>
                     <docletArtifact>
                         <groupId>com.wadpam</groupId>
-                        <artifactId>docrest</artifactId>
+                        <artifactId>docrest-doclet</artifactId>
                         <version>${docrest.version}</version>
                     </docletArtifact>
                     <encoding>UTF-8</encoding>
@@ -160,13 +151,8 @@
         </dependency>
         <dependency>
             <groupId>net.sf.mardao</groupId>
-            <artifactId>mardao-aed</artifactId>
+            <artifactId>mardao-gae</artifactId>
             <version>${mardao.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.geronimo.specs</groupId>
-            <artifactId>geronimo-jpa_3.0_spec</artifactId>
-            <version>1.1.1</version>
         </dependency>
 
         <dependency>
@@ -214,9 +200,8 @@
         <!-- for javadoc -->
         <dependency>
             <groupId>com.wadpam</groupId>
-            <artifactId>docrest</artifactId>
+            <artifactId>docrest-api</artifactId>
             <version>${docrest.version}</version>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -241,7 +226,4 @@
 		
     </dependencies>
     
-    <repositories>
-    </repositories>
-
 </project>
