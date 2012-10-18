@@ -1,5 +1,6 @@
 package com.wadpam.open.json;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 /**
@@ -12,29 +13,30 @@ public class JCursorPage<T extends JBaseObject> {
      * The cursor used to return the next page of items
      * The no cursor is returned, end of pagination have been reached
      */
-    private String cursor;
+    private Serializable cursorKey;
 
     /**
      * The number of items to return.
      * If the number of items actually returned are less then the requested page size, end of pagination have been reached.
      */
-    private Long pageSize;
+    private int pageSize;
 
     /** The products */
     private Collection<T> items;
 
     @Override
     public String toString() {
-        return String.format("cursor:%s page size:%d products:%s", cursor, pageSize, items);
+        return String.format("cursor:%s page size:%d products:%s", cursorKey, pageSize, items);
     }
 
     // Setters and getters
-    public String getCursor() {
-        return cursor;
+
+    public Serializable getCursorKey() {
+        return cursorKey;
     }
 
-    public void setCursor(String cursor) {
-        this.cursor = cursor;
+    public void setCursorKey(Serializable cursorKey) {
+        this.cursorKey = cursorKey;
     }
 
     public Collection<T> getItems() {
@@ -45,11 +47,11 @@ public class JCursorPage<T extends JBaseObject> {
         this.items = items;
     }
 
-    public Long getPageSize() {
+    public int getPageSize() {
         return pageSize;
     }
 
-    public void setPageSize(Long pageSize) {
+    public void setPageSize(int pageSize) {
         this.pageSize = pageSize;
     }
 }
