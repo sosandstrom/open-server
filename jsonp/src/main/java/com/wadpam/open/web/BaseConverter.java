@@ -63,7 +63,7 @@ public abstract class BaseConverter {
     }
 
     // Convert iterable
-    public Collection<JBaseObject> convert(Iterable<AbstractLongEntity> from) {
+    public Collection<?> convert(Iterable<?> from) {
         if (null == from)
             return new ArrayList<JBaseObject>();
 
@@ -101,7 +101,7 @@ public abstract class BaseConverter {
         
         to.setPageSize(from.getRequestedPageSize());
         to.setCursorKey(from.getCursorKey());
-        to.setItems(convert((Collection<AbstractLongEntity>) from.getItems()));
+        to.setItems((Collection<JBaseObject>)convert((Collection<AbstractLongEntity>) from.getItems()));
         
         return to;
     }
