@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.wadpam.openserver</groupId>
         <artifactId>parent</artifactId>
-        <version>2-SNAPSHOT</version>
+        <version>3-SNAPSHOT</version>
     </parent>
     <artifactId>webapp</artifactId>
     <packaging>war</packaging>
@@ -12,7 +12,6 @@
 
     <!-- Specify hard-coded project properties here -->
     <properties>
-        <gae.version>1.7.0</gae.version>
         <gae.application.version>lab</gae.application.version>
         <gae.application.id>open-user</gae.application.id>
         <spring.version>3.1.1.RELEASE</spring.version>
@@ -25,7 +24,6 @@
         <itest.include>**/*ITest.java</itest.include>
         <surefire.default.skip>true</surefire.default.skip>
         <javadocExecutable>${java.home}/../bin/javadoc</javadocExecutable>
-        <docrest.version>1.15</docrest.version>
         <logging.level>ALL</logging.level>
     </properties>
 
@@ -256,6 +254,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.7</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>

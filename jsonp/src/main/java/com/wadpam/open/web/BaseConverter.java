@@ -2,11 +2,13 @@ package com.wadpam.open.web;
 
 import com.google.appengine.api.datastore.GeoPt;
 import com.wadpam.open.json.JBaseObject;
+import com.wadpam.open.json.JCursorPage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
 import com.wadpam.open.json.JLocation;
+import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.domain.AbstractCreatedUpdatedEntity;
 import net.sf.mardao.core.domain.AbstractLongEntity;
 import net.sf.mardao.core.geo.DLocation;
@@ -61,7 +63,7 @@ public abstract class BaseConverter {
     }
 
     // Convert iterable
-    public Collection<?> convert(Iterable<?> from) {
+    public Collection<JBaseObject> convert(Iterable<AbstractLongEntity> from) {
         if (null == from)
             return new ArrayList<JBaseObject>();
 
@@ -73,22 +75,6 @@ public abstract class BaseConverter {
             returnValue.add(to);
         }
         
-        return returnValue;
-    }
-
-    // Convert collection
-    public Collection<?> convert(Collection<?> from) {
-        if (null == from)
-            return new ArrayList<JBaseObject>();
-
-        final Collection<JBaseObject> returnValue = new ArrayList<JBaseObject>();
-
-        JBaseObject to;
-        for (Object o : from) {
-            to = convertBase(o);
-            returnValue.add(to);
-        }
-
         return returnValue;
     }
 
@@ -109,6 +95,18 @@ public abstract class BaseConverter {
 
         return new JLocation(from.getLatitude(), from.getLongitude());
     }
+    
+    public <D extends AbstractLongEntity> JCursorPage<JBaseObject> convertPage(CursorPage<D, Long> from) {
+        final JCursorPage<JBaseObject> to = new JCursorPage<JBaseObject>();
+        
+        to.setPageSize(from.getRequestedPageSize());
+        to.setCursorKey(from.getCursorKey());
+        to.setItems(convert((Collection<AbstractLongEntity>) from.getItems()));
+        
+        return to;
+    }
+
+    
 
     public static Long toLong(Date from) {
         if (null == from) {
