@@ -9,13 +9,13 @@
     <name>Open-Server parent</name>
 
     <modules>
-         <module>errors</module>
-         <module>users</module>
-         <module>webapp</module>
+        <module>errors</module>
+        <module>users</module>
+        <module>webapp</module>
         <module>domain</module>
         <module>jsonp</module>
-         <module>push</module>
-       <module>transactions-gae</module>
+        <module>push</module>
+        <module>transactions-gae</module>
         <module>security-gae</module>
     </modules>
     

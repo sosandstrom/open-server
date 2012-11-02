@@ -11,6 +11,16 @@ public class ServerErrorException extends RestException {
     /**
      * Internal temporary server error exception.
      * @param code unique error code that can be used for localization in the app
+     * @param message error message
+     */
+    public ServerErrorException(int code, String message) {
+        this(code, null, null, message);
+    }
+
+
+    /**
+     * Internal temporary server error exception.
+     * @param code unique error code that can be used for localization in the app
      * @param developerMessage developer message
      * @param moreInfo typically a url where more info can be found
      * @param message error message

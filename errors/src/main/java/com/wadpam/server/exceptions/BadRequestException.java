@@ -14,7 +14,7 @@ public class BadRequestException extends RestException {
      * @param message error message
      */
     public BadRequestException(int code, String message) {
-        super(code, HttpStatus.BAD_REQUEST.value(), message);
+        this(code, null, null, message);
     }
 
 

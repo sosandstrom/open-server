@@ -10,6 +10,7 @@ public class RestException extends RuntimeException {
     private String moreInfo;
     private int status;
 
+
     public RestException(int code, int status, String message) {
         this(code, null, null, status, message);
     }
