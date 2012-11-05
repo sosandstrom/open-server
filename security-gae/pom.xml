@@ -17,8 +17,7 @@
         <spring.version>3.1.1.RELEASE</spring.version>
         <spring.security.version>3.1.1.RELEASE</spring.security.version>
         <spring-social.version>1.0.1.RELEASE</spring-social.version>
-        <mardao.version>2.0.4-SNAPSHOT</mardao.version>
-        <openserver.version>3-SNAPSHOT</openserver.version>
+        <mardao.version>2.0.4</mardao.version>
         <docrest.version>1.15</docrest.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <javadocExecutable>${java.home}/../bin/javadoc</javadocExecutable>
@@ -145,25 +144,25 @@
         <dependency>
             <groupId>com.wadpam.openserver</groupId>
             <artifactId>domain</artifactId>
-            <version>${openserver.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.wadpam.openserver</groupId>
             <artifactId>jsonp</artifactId>
-            <version>${openserver.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.wadpam.openserver</groupId>
             <artifactId>errors</artifactId>
-            <version>${openserver.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.wadpam.openserver</groupId>
             <artifactId>transactions-gae</artifactId>
-            <version>${openserver.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
