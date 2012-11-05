@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:s="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+
+
+       http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+
+
+    <!--           Back office security             -->
+    <s:http pattern="/api/backoffice/admin/login" security="none" />
+    <s:http pattern="/api/backoffice/admin/logout" security="none" />
+
+    <s:http realm="backoffice-api"
+            create-session="stateless"
+            pattern="/api/backoffice/**"
+            authentication-manager-ref="backofficeAuthenticationManager"
+            access-decision-manager-ref="backofficeAccessDecisionManager"
+            entry-point-ref="gaeEntryPoint">
+        <s:anonymous enabled="false"/>
+        <s:intercept-url pattern="/api/backoffice/admin" access="ROLE_PENDING" />
+        <s:intercept-url pattern="/api/backoffice/app/all" access="ROLE_ADMIN" />
+        <s:intercept-url pattern="/api/backoffice/app/*" access="ROLE_USER" />
+        <s:intercept-url pattern="/api/backoffice/app/*/password" access="ROLE_USER" />
+        <s:intercept-url pattern="/api/backoffice/**" access="ROLE_ADMIN" />
+        <s:custom-filter position="PRE_AUTH_FILTER" ref="gaePreAuthenticationProcessingFilter" />
+    </s:http>
+
+    <bean id="backofficeAuthenticationManager" class="org.springframework.security.authentication.ProviderManager">
+        <property name="providers">
+            <list>
+                <ref local="preAuthenticatedAuthenticationProvider"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="preAuthenticatedAuthenticationProvider" class="org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider">
+        <property name="preAuthenticatedUserDetailsService" ref="gaeUserService" />
+    </bean>
+
+    <bean id="gaeUserService" class="com.wadpam.rnr.security.GaeUserDetailsService" >
+     <property name="appAdminDao" ref="dAppAdminDao" />
+    </bean>
+
+    <bean id="gaeEntryPoint" class="com.wadpam.rnr.security.GaeAuthenticationEntryPoint" />
+
+    <bean id="gaePreAuthenticationProcessingFilter" class="com.wadpam.rnr.security.GaePreAuthenticatedProcessingFilter">
+        <property name="authenticationManager" ref="backofficeAuthenticationManager" />
+    </bean>
+
+    <bean id="backofficeAccessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
+        <property name="decisionVoters">
+            <list>
+                <ref bean="roleVoter" />
+                <bean class="org.springframework.security.access.vote.AuthenticatedVoter" />
+            </list>
+        </property>
+    </bean>
+
+    <bean id="roleVoter" class="org.springframework.security.access.vote.RoleHierarchyVoter">
+        <constructor-arg ref="roleHierarchy" />
+    </bean>
+
+    <bean id="roleHierarchy" class="org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl">
+        <property name="hierarchy">
+            <value>
+                ROLE_ADMIN > ROLE_USER
+                ROLE_USER > ROLE_PENDING
+            </value>
+        </property>
+    </bean>
+
+
+    <!--           App security             -->
+    <s:http realm="app-api"
+            create-session="stateless"
+            pattern="/api/**"
+            authentication-manager-ref="apiAuthenticationManager">
+        <s:anonymous enabled="true" granted-authority="ROLE_APP" key="aL5Mge85F"/>  <!-- Set to true to turn off API authentication -->
+        <s:intercept-url pattern="/api/**" access="ROLE_APP" />
+    <s:http-basic />
+    </s:http>
+
+    <bean id="apiAuthenticationManager" class="org.springframework.security.authentication.ProviderManager">
+        <property name="providers">
+            <list>
+                <ref local="daoAuthenticationProvider"/>
+                <ref local="anonymousAuthenticationProvider"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="daoAuthenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
+        <property name="userDetailsService" ref="apiUserService"/>
+    </bean>
+
+    <bean id="apiUserService" class="com.wadpam.rnr.security.ApiUserDetailsService">
+        <property name="appDao" ref="dAppDao" />
+    </bean>
+
+    <bean id="anonymousAuthenticationProvider" class="org.springframework.security.authentication.AnonymousAuthenticationProvider">
+        <property name="key" value="aL5Mge85F"/>
+    </bean>
+
+    <!--           Domain object security             -->
+    <s:global-method-security pre-post-annotations="enabled">
+        <s:expression-handler ref="expressionHandler"/>
+    </s:global-method-security>
+
+    <bean id="expressionHandler" class="org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler">
+        <property name="permissionEvaluator" ref="permissionEvaluator"/>
+    </bean>
+
+    <bean id="permissionEvaluator" class="com.wadpam.rnr.security.DomainAccessPermissionEvaluator">
+        <constructor-arg index="0">
+            <map key-type="java.lang.String" value-type="com.wadpam.rnr.security.Permission">
+                <entry key="isAppAdmin" value-ref="appPermission"/>
+                <entry key="isAdmin" value-ref="adminPermission"/>
+            </map>
+        </constructor-arg>
+    </bean>
+
+    <bean id="appPermission" class="com.wadpam.rnr.security.AppPermission">
+        <property name="appDao" ref="dAppDao" />
+    </bean>
+
+    <bean id="adminPermission" class="com.wadpam.rnr.security.AdminPermission">
+        <property name="appAdminDao" ref="dAppAdminDao" />
+    </bean>
+
+
+</beans>
