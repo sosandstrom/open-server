@@ -1,22 +1,26 @@
-package com.wadpam.server.json;
+package com.wadpam.open.exceptions;
 
 /**
- *
- * @author os
+ * Base class for all REST exceptions
+ * @author sosandstrom
  */
-public class JRestError {
+public class RestException extends RuntimeException {
     private int code;
     private String developerMessage;
-    private String message;
     private String moreInfo;
-    private String stackInfo;
     private int status;
 
-    public JRestError() {
+
+    public RestException(int code, int status, String message) {
+        this(code, null, null, status, message);
     }
 
-    public JRestError(int status) {
+    public RestException(int code, String developerMessage, String moreInfo, int status, String message) {
+        super(message);
+        this.code = code;
+        this.developerMessage = developerMessage;
         this.status = status;
+        this.moreInfo = moreInfo;
     }
 
     public int getCode() {
@@ -35,12 +39,12 @@ public class JRestError {
         this.developerMessage = developerMessage;
     }
 
-    public String getMessage() {
-        return message;
+    public int getStatus() {
+        return status;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setStatus(int status) {
+        this.status = status;
     }
 
     public String getMoreInfo() {
@@ -50,22 +54,5 @@ public class JRestError {
     public void setMoreInfo(String moreInfo) {
         this.moreInfo = moreInfo;
     }
-
-    public String getStackInfo() {
-        return stackInfo;
-    }
-
-    public void setStackInfo(String stackInfo) {
-        this.stackInfo = stackInfo;
-    }
-
-    public int getStatus() {
-        return status;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
-    }
-    
     
 }

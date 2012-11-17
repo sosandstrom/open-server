@@ -1,4 +1,4 @@
-package com.wadpam.openserver;
+package com.wadpam.open;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

@@ -1,4 +1,4 @@
-package com.wadpam.server.exceptions;
+package com.wadpam.open.exceptions;
 
 import org.springframework.http.HttpStatus;
 

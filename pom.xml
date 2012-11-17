@@ -17,6 +17,7 @@
         <module>security-gae</module>
         <module>users</module>
         <module>webapp</module>
+        <module>analytics</module>
     </modules>
     
     <properties>

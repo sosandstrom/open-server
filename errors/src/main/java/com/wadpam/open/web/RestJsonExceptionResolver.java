@@ -1,7 +1,7 @@
-package com.wadpam.server.web;
+package com.wadpam.open.web;
 
-import com.wadpam.server.exceptions.RestException;
-import com.wadpam.server.json.JRestError;
+import com.wadpam.open.exceptions.RestException;
+import com.wadpam.open.json.JRestError;
 import java.io.PrintWriter;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;

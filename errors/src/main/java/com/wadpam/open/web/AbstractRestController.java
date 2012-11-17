@@ -1,9 +1,9 @@
-package com.wadpam.server.web;
+package com.wadpam.open.web;
 
-import com.wadpam.server.exceptions.BadRequestException;
-import com.wadpam.server.exceptions.NotFoundException;
-import com.wadpam.server.exceptions.RestException;
-import com.wadpam.server.json.JRestError;
+import com.wadpam.open.exceptions.BadRequestException;
+import com.wadpam.open.exceptions.NotFoundException;
+import com.wadpam.open.exceptions.RestException;
+import com.wadpam.open.json.JRestError;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.http.HttpServletResponse;
