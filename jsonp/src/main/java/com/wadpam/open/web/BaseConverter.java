@@ -1,6 +1,8 @@
 package com.wadpam.open.web;
 
 import com.google.appengine.api.datastore.GeoPt;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.wadpam.open.json.JBaseObject;
 import com.wadpam.open.json.JCursorPage;
 import java.util.ArrayList;
@@ -79,7 +81,7 @@ public abstract class BaseConverter {
     }
 
     // Convert GAE GeoPt
-    static public JLocation convert(GeoPt from) {
+    public static JLocation convert(GeoPt from) {
         if (null == from) {
             return null;
         }
@@ -88,7 +90,7 @@ public abstract class BaseConverter {
     }
 
     // Convert Mardao DLocation
-    static public JLocation convert(DLocation from) {
+    public static JLocation convert(DLocation from) {
         if (null == from) {
             return null;
         }
@@ -96,17 +98,16 @@ public abstract class BaseConverter {
         return new JLocation(from.getLatitude(), from.getLongitude());
     }
     
-    public <D extends AbstractLongEntity> JCursorPage<JBaseObject> convertPage(CursorPage<D, Long> from) {
+    public <D extends AbstractLongEntity> JCursorPage<? extends JBaseObject> convertPage(CursorPage<D, Long> from) {
         final JCursorPage<JBaseObject> to = new JCursorPage<JBaseObject>();
         
-        to.setPageSize(from.getRequestedPageSize());
+        to.setPageSize(from.getItems().size());
         to.setCursorKey(from.getCursorKey());
         to.setItems((Collection<JBaseObject>)convert((Collection<AbstractLongEntity>) from.getItems()));
         
         return to;
     }
 
-    
 
     public static Long toLong(Date from) {
         if (null == from) {
@@ -127,6 +128,10 @@ public abstract class BaseConverter {
             return null;
         }
         return new Date(from);
+    }
+
+    public static String toString(Key key) {
+        return KeyFactory.keyToString(key);
     }
 
     public static String toString(Long from) {

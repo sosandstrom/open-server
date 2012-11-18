@@ -69,6 +69,13 @@
     </build>
 
     <dependencies>
+
+        <dependency>
+            <groupId>com.wadpam.openserver</groupId>
+            <artifactId>errors</artifactId>
+            <version>${parent.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
