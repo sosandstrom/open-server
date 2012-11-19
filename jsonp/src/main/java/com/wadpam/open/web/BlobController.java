@@ -93,4 +93,20 @@ public class BlobController extends AbstractRestController {
         this.blobstoreService.serve(blobKey, response);
     }
 
+    /**
+     * Delete a blob.
+     * @param  key The blob store key
+     * @return 200 if successful
+     */
+    @RequestMapping(value="", method= RequestMethod.DELETE, params = "key")
+    @ResponseBody
+    public void deleteBlob(HttpServletRequest request,
+                        HttpServletResponse response,
+                        @RequestParam(required = true) String key) throws IOException {
+        LOG.debug("Delete blob with key:{}", key);
+
+        BlobKey blobKey = new BlobKey(key);
+        this.blobstoreService.delete(blobKey);
+    }
+
 }
