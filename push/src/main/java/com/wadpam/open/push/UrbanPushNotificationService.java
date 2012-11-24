@@ -39,8 +39,9 @@ public class UrbanPushNotificationService implements PushNotificationService {
             super.prepareConnection(connection, httpMethod);
 
             // Basic Authentication for Police API
-            connection.setRequestProperty("Authorization",
-                    buildAuthorization(clientKey, clientSecret));
+            final String basic = buildAuthorization(clientKey, clientSecret);
+            LOG.debug("Authorization: {}", basic);
+            connection.setRequestProperty("Authorization", basic);
         }
     };
     private final RestTemplate TEMPLATE = new RestTemplate(REQUEST_FACTORY);
@@ -61,9 +62,14 @@ public class UrbanPushNotificationService implements PushNotificationService {
     protected JUrbanRequest createRequest(String[] identifiers) {
         final JUrbanRequest request = new JUrbanRequest();
         
-        request.setDevice_tokens(Arrays.asList(identifiers));
+        final ArrayList<String> ids = new ArrayList();
+        for (String id : identifiers) {
+            ids.add(id.toUpperCase());
+        }
+        
+        request.setDevice_tokens(ids);
         APS aps = new APS();
-        aps.setAlert("pass_push");
+        aps.setAlert("Hello Erik");
         request.setAps(aps);
         
         return request;
@@ -80,26 +86,27 @@ public class UrbanPushNotificationService implements PushNotificationService {
             return;
         } 
         
-        final String path = String.format("%s/api/push", BASE_URL);
+        final String path = String.format("%s/api/push/", BASE_URL);
         final JUrbanRequest request = createRequest(identifiers);
         final String json = MAPPER.writeValueAsString(request);
         
+        LOG.debug("push {} on {}", json, path);
         JUrbanResponse response = TEMPLATE.postForObject(path, request, JUrbanResponse.class);
         LOG.debug("pushed {}, got {}", json, response);
     }
 
     @Override
     public void register(String identifier) throws IOException {
-        final String path = String.format("%s/api/device_tokens/{identifier}", BASE_URL);
+        final String path = String.format("%s/api/device_tokens/{identifier}/", BASE_URL);
         LOG.debug("register for {} where identifier='{}'", path, identifier);
-        TEMPLATE.put(path, null, identifier);
+        TEMPLATE.put(path, null, identifier.toUpperCase());
     }
 
     @Override
     public void unregister(String identifier) throws IOException {
-        final String path = String.format("%s/api/device_tokens/{identifier}", BASE_URL);
+        final String path = String.format("%s/api/device_tokens/{identifier}/", BASE_URL);
         LOG.debug("unregister for {} where identifier='{}'", path, identifier);
-        TEMPLATE.delete(path, identifier);
+        TEMPLATE.delete(path, identifier.toUpperCase());
     }
 
     /**
