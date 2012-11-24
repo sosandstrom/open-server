@@ -1,5 +1,8 @@
 package com.wadpam.open.analytics.google;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.Locale;
+
 /**
  * Contains information about a device.
  * @author mattiaslevin
@@ -28,7 +31,41 @@ public class Device {
     private String userAgent;
 
 
-    @Override
+    // Create a default iPhone5 with basic settings
+    public static Device defaultiPhoneDevice() {
+        Device device = new Device();
+        device.screenResolution = "1136x640";
+        device.viewPortResolution = "1136x640";
+        device.colorDepth = "24-bit";
+        device.userLanguage = Locale.getDefault().getLanguage();
+        device.userAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25";
+        return device;
+    }
+
+    // Create a default iPad with basic settings
+    public static Device defaultiPadDevice() {
+        Device device = new Device();
+        device.screenResolution = "2048x1536";
+        device.viewPortResolution = "2048x1536";
+        device.colorDepth = "24-bit";
+        device.userLanguage = Locale.getDefault().getLanguage();
+        device.userAgent = "Mozilla/5.0 (iPad; CPU OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25";
+        return device;
+    }
+
+    // Create a default profile from http request
+    public static Device defaultDevice(HttpServletRequest request) {
+        Device device = new Device();
+        device.screenResolution = "1136x640";
+        device.colorDepth = "24-bit";
+        device.userLanguage = request.getLocale().getLanguage();
+        if (null == device.userLanguage || device.userLanguage.isEmpty())
+            device.userLanguage = Locale.getDefault().getLanguage();
+        device.userAgent = request.getHeader("User-Agent");
+        return device;
+    }
+
+        @Override
     public String toString() {
         return String.format("User-agent:%s", this.userAgent);
     }
@@ -90,4 +127,5 @@ public class Device {
     public void setViewPortResolution(String viewPortResolution) {
         this.viewPortResolution = viewPortResolution;
     }
+
 }
