@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.wadpam.openserver</groupId>
         <artifactId>parent</artifactId>
-        <version>4-SNAPSHOT</version>
+        <version>5-SNAPSHOT</version>
     </parent>
     <artifactId>jsonp</artifactId>
     <packaging>jar</packaging>
@@ -73,7 +73,7 @@
         <dependency>
             <groupId>com.wadpam.openserver</groupId>
             <artifactId>errors</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
