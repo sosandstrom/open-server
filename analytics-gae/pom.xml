@@ -71,13 +71,13 @@
         <dependency>
             <groupId>com.wadpam.openserver</groupId>
             <artifactId>analytics</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.wadpam.openserver</groupId>
             <artifactId>errors</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
