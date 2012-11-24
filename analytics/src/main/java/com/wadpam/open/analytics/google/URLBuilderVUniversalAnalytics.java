@@ -1,4 +1,4 @@
-package com.wadpam.open.analytics;
+package com.wadpam.open.analytics.google;
 
 /**
  * Implement the universal analytics format.
@@ -6,7 +6,7 @@ package com.wadpam.open.analytics;
  */
 public class URLBuilderVUniversalAnalytics extends AbstractURLBuilder {
 
-    public URLBuilderVUniversalAnalytics(ConfigurationData configurationData, VisitorData visitorData, DeviceData deviceData) {
+    public URLBuilderVUniversalAnalytics(TrackerConfiguration configurationData, Visitor visitorData, Device deviceData) {
         super(configurationData, visitorData, deviceData);
     }
 
@@ -16,7 +16,7 @@ public class URLBuilderVUniversalAnalytics extends AbstractURLBuilder {
     }
 
     @Override
-    String buildURL(PageData data) {
+    String buildURL(Page data) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

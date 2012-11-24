@@ -1,17 +1,15 @@
-package com.wadpam.open.analytics;
+package com.wadpam.open.analytics.google;
 
 /**
  * information about a single session.
  * @author mattiaslevin
  */
-public class SessionData {
-
+public class Session {
 
     /** Session start time stamp */
     private long sessionStart;
 
-
-    public SessionData() {
+    public Session() {
         this.sessionStart = now();
     }
 

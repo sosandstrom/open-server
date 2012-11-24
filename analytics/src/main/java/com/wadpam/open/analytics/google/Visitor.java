@@ -1,12 +1,10 @@
-package com.wadpam.open.analytics;
-
-import java.security.SecureRandom;
+package com.wadpam.open.analytics.google;
 
 /**
  * Contains information about a visitor.
  * @author mattiaslevin
  */
-public class VisitorData {
+public class Visitor {
 
     /** Unique visitor id */
     private int visitorId;
@@ -20,20 +18,8 @@ public class VisitorData {
     /** Number of visits */
     private int visits;
 
-    /** Current session from the visitor */
-    private SessionData session;
-
-
-    /**
-     * Create a first time visitor.
-     * Generate a visitor id and and set correct time stamps.
-     * @return a new visitor
-     */
-    public static VisitorData createFirstTimeVisitor() {
-        int visitorId = (new SecureRandom().nextInt() & 0x7FFFFFFF);
-        long now = now();
-        return new VisitorData(visitorId, now, now, 1, new SessionData());
-    }
+    /** Current session for the visitor */
+    private Session session;
 
 
     /**
@@ -45,8 +31,8 @@ public class VisitorData {
      * @param visits the number of visits
      * @return a new visitor
      */
-    public static VisitorData createVisitorWithNewSession(int visitorId, long timestampFirst, long timestampPrevious, int visits) {
-        return new VisitorData(visitorId, timestampFirst, timestampPrevious, visits, new SessionData());
+    public static Visitor visitorWithNewSession(int visitorId, long timestampFirst, long timestampPrevious, int visits) {
+        return new Visitor(visitorId, timestampFirst, timestampPrevious, visits, new Session());
     }
 
 
@@ -58,7 +44,7 @@ public class VisitorData {
      * @param visits number of visits
      * @param session current session for the user
      */
-    public VisitorData(int visitorId, long timestampFirst, long timestampPrevious, int visits, SessionData session) {
+    public Visitor(int visitorId, long timestampFirst, long timestampPrevious, int visits, Session session) {
         this.visitorId = visitorId;
         this.timestampFirst = timestampFirst;
         this.timestampPrevious = timestampPrevious;
@@ -72,7 +58,7 @@ public class VisitorData {
     public void startNewSession() {
         this.timestampPrevious = this.session.getSessionStart();
         this.visits++;
-        this.session = new SessionData();
+        this.session = new Session();
     }
 
 
@@ -120,11 +106,11 @@ public class VisitorData {
         this.visits = visits;
     }
 
-    public SessionData getSession() {
+    public Session getSession() {
         return session;
     }
 
-    public void setSession(SessionData session) {
+    public void setSession(Session session) {
         this.session = session;
     }
 }

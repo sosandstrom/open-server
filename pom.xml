@@ -18,6 +18,7 @@
         <module>users</module>
         <module>webapp</module>
         <module>analytics</module>
+        <module>analytics-gae</module>
     </modules>
     
     <properties>

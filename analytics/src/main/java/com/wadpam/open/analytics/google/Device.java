@@ -1,10 +1,10 @@
-package com.wadpam.open.analytics;
+package com.wadpam.open.analytics.google;
 
 /**
  * Contains information about a device.
  * @author mattiaslevin
  */
-public class DeviceData {
+public class Device {
 
     /** The encoding */
     private String encoding = "UTF-8";

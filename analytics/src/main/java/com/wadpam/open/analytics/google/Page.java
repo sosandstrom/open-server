@@ -1,4 +1,6 @@
-package com.wadpam.open.analytics;
+package com.wadpam.open.analytics.google;
+
+import com.wadpam.open.analytics.google.CustomVariable;
 
 import java.util.List;
 
@@ -6,7 +8,7 @@ import java.util.List;
  * Base class for GA requests containing common parameters.
  * @author mattiaslevin
  */
-public class PageData {
+public class Page {
 
     // Page views
 

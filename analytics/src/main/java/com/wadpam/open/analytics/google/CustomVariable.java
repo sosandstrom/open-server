@@ -1,4 +1,4 @@
-package com.wadpam.open.analytics;
+package com.wadpam.open.analytics.google;
 
 /**
  * Represent a custom variable.
@@ -20,12 +20,16 @@ public class CustomVariable {
         }
     }
 
+    /** The index of the variable, must be consistent across requests */
     private int index;
 
+    /** The name of the variable */
     private String name;
 
+    /** Value */
     private String value;
 
+    /** The scope of the variable */
     private Scope scope;
 
 
@@ -35,10 +39,10 @@ public class CustomVariable {
     }
 
     /**
-     * Create a custom variable
-     * @param index The index of the custom var. MUST be consistent through requests
-     * @param name The name of the custom var. MUST be consistent through requests
-     * @param value The value
+     * Create a custom variable.
+     * @param index the index of the custom var. MUST be consistent through requests
+     * @param name the name of the custom var. MUST be consistent through requests
+     * @param value the value
      * @param scope scope
      */
     public CustomVariable(int index, String name, String value, Scope scope) {

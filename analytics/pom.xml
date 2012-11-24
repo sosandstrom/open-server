@@ -8,12 +8,13 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>analytics</artifactId>
     <packaging>jar</packaging>
-    <name>analytics</name>
+    <name>Open-Server analytics</name>
 
     <properties>
         <java.version>1.6</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.version>3.1.1.RELEASE</spring.version>
+        <gae.version>1.7.0</gae.version>
     </properties>
 
     <dependencies>
@@ -40,6 +41,7 @@
             <version>1.6.1</version>
             <scope>runtime</scope>
         </dependency>
+
 
         <dependency>
             <groupId>junit</groupId>
