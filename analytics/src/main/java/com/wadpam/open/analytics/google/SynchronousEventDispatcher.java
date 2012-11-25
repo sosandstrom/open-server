@@ -21,13 +21,14 @@ import java.util.List;
  * Implement a synchronous Google Analytics dispatcher.
  * @author mattiaslevin
  */
-public class SynchronousEventDispatcher implements EventDispatcher {
+public class SynchronousEventDispatcher extends EventDispatcher {
     static final Logger LOG = LoggerFactory.getLogger(SynchronousEventDispatcher.class);
 
     private RestTemplate restTemplate;
 
     // Constructor
-    public SynchronousEventDispatcher(String userAgent) {
+    public SynchronousEventDispatcher(String host, String remoteAddress, String userAgent) {
+        super(host, remoteAddress, userAgent);
 
         // Configure the rest template
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
@@ -35,11 +36,10 @@ public class SynchronousEventDispatcher implements EventDispatcher {
         factory.setReadTimeout(10 * 1000); // 10s read timeout
         this.restTemplate = new RestTemplate(factory);
 
-        // Set the user agent
-        ClientHttpRequestInterceptor userAgentHeader =
-                new UserAgentHeaderHttpRequestInterceptor(userAgent);
+        // Set header values
+        ClientHttpRequestInterceptor headerInterceptor = new HeaderRequestInterceptor();
         List<ClientHttpRequestInterceptor> interceptors = new ArrayList<ClientHttpRequestInterceptor>();
-        interceptors.add(userAgentHeader);
+        interceptors.add(headerInterceptor);
         restTemplate.setInterceptors(interceptors);
     }
 
@@ -61,7 +61,7 @@ public class SynchronousEventDispatcher implements EventDispatcher {
                             //LOG.debug("Received number of bytes:{}", bytes.length);
                             return true;
                         } else {
-                            LOG.warn("Logging request to Google Analytics failed");
+                            LOG.warn("Request to Google Analytics failed");
                             return false;
                         }
                     }
@@ -70,20 +70,21 @@ public class SynchronousEventDispatcher implements EventDispatcher {
         return response;
     }
 
-    // Set user agent header
-    private class UserAgentHeaderHttpRequestInterceptor implements ClientHttpRequestInterceptor {
-        private final String headerValue;
-
-        public UserAgentHeaderHttpRequestInterceptor(String headerValue) {
-            this.headerValue = headerValue;
-        }
+    // Set headers
+    private class HeaderRequestInterceptor implements ClientHttpRequestInterceptor {
 
         public ClientHttpResponse intercept(HttpRequest request,
                                             byte[] body,
                                             ClientHttpRequestExecution execution) throws IOException {
 
             HttpRequestWrapper requestWrapper = new HttpRequestWrapper(request);
-            requestWrapper.getHeaders().set("User-Agent", headerValue);
+//            if (null != getHost())
+//                requestWrapper.getHeaders().set("Host", getHost());
+            if (null != getUserAgent())
+                requestWrapper.getHeaders().set("User-Agent", getUserAgent());
+            if (null != getRemoteAddress()) {
+                requestWrapper.getHeaders().set("X-Forwarded-For", getRemoteAddress());                requestWrapper.getHeaders().set("X-Real-IP", getRemoteAddress());
+            }
 
             return execution.execute(requestWrapper, body);
         }

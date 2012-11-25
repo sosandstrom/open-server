@@ -17,7 +17,7 @@ public abstract class OpenAnalyticsTracker {
     }
 
     /**
-     * Track a page view referrer and custom variables
+     * Track a page view referrer and custom variables.
      * @param pageURL the page url, e.g. /page/. Must be provided
      * @param pageTitle the title of the page
      * @param hostName the host name
@@ -25,8 +25,11 @@ public abstract class OpenAnalyticsTracker {
      * @param referrerSite optional. The referrer site
      * @param customVariables optional. List of custom variables
      */
-    public abstract void trackPageView(String pageURL, String pageTitle, String hostName,
-                                       String referrerPage, String referrerSite,
+    public abstract void trackPageView(String pageURL,
+                                       String pageTitle,
+                                       String hostName,
+                                       String referrerPage,
+                                       String referrerSite,
                                        List<CustomVariable> customVariables);
 
 
@@ -35,9 +38,9 @@ public abstract class OpenAnalyticsTracker {
         this.trackEvent(category, action, null, null, null);
     }
 
-    /** Track without value */
-    public void trackEvent(String category, String action, String label) {
-        this.trackEvent(category, action, label, null, null);
+    /** Track without custom variable */
+    public void trackEvent(String category, String action, String label, int value) {
+        this.trackEvent(category, action, label, value, null);
     }
 
     /**
@@ -48,7 +51,10 @@ public abstract class OpenAnalyticsTracker {
      * @param value optional. The value
      * @param customVariables optional. custom variables
      */
-    public abstract void trackEvent(String category, String action, String label,
-                                    Integer value, List<CustomVariable> customVariables);
+    public abstract void trackEvent(String category,
+                                    String action,
+                                    String label,
+                                    Integer value,
+                                    List<CustomVariable> customVariables);
 
 }

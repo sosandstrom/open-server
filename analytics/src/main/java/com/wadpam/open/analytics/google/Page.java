@@ -1,7 +1,5 @@
 package com.wadpam.open.analytics.google;
 
-import com.wadpam.open.analytics.google.CustomVariable;
-
 import java.util.List;
 
 /**
@@ -109,8 +107,6 @@ public class Page {
     }
 
     // Setters and getter
-
-
     public String getEventAction() {
         return eventAction;
     }
@@ -207,19 +203,19 @@ public class Page {
         this.utmctr = utmctr;
     }
 
-    public List<CustomVariable> getCustomVariables() {
-        return customVariables;
-    }
-
-    public void setCustomVariables(List<CustomVariable> customVariables) {
-        this.customVariables = customVariables;
-    }
-
     public String getUtmr() {
         return utmr;
     }
 
     public void setUtmr(String utmr) {
         this.utmr = utmr;
+    }
+
+    public List<CustomVariable> getCustomVariables() {
+        return customVariables;
+    }
+
+    public void setCustomVariables(List<CustomVariable> customVariables) {
+        this.customVariables = customVariables;
     }
 }

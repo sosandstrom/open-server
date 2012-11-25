@@ -58,16 +58,17 @@ public class URLBuilderV5_3_8 extends AbstractURLBuilder {
         StringBuilder eventSB = new StringBuilder();
         if (null != data.getEventAction() && null != data.getEventCategory()) {
             params.put("utmt", "event");
-            //sb.append("&utmt=event");
 
             // Format 5(category*action*label*value)
 
             // Category and action
-            eventSB.append("5(").append(data.getEventCategory()).append("*").append(data.getEventAction());
+            eventSB.append("5(").append(urlEncode(data.getEventCategory())).
+                    append("*").
+                    append(urlEncode(data.getEventAction()));
 
             // Label
             if(data.getEventLabel() != null){
-                eventSB.append("*").append(data.getEventLabel());
+                eventSB.append("*").append(urlEncode(data.getEventLabel()));
             }
 
             // Value
@@ -94,9 +95,9 @@ public class URLBuilderV5_3_8 extends AbstractURLBuilder {
                 CustomVariable customVariable = iterator.next();
 
                 // <index>!<name>*<index>!<name>...
-                names.append(customVariable.getIndex()).append("!").append(customVariable.getName());
+                names.append(customVariable.getIndex()).append("!").append(urlEncode(customVariable.getName()));
                 // <index>!<value>*<index>!<value>...
-                values.append(customVariable.getIndex()).append("!").append(customVariable.getValue());
+                values.append(customVariable.getIndex()).append("!").append(urlEncode(customVariable.getValue()));
                 // <index>!<scope>*<index>!<scope>..
                 scope.append(customVariable.getIndex()).append("!").append(customVariable.getScope().getValue());
 
@@ -123,7 +124,6 @@ public class URLBuilderV5_3_8 extends AbstractURLBuilder {
             params.put("utmcs", this.device.getEncoding());
         } else {
             params.put("utmcs", "-");
-            //sb.append("&utmcs=-");
         }
 
         // Screen resolution
@@ -151,7 +151,7 @@ public class URLBuilderV5_3_8 extends AbstractURLBuilder {
 
         // Flash version
         if(null != this.device.getFlashVersion()) {
-            params.put("utmfl", this.device.getFlashVersion());
+            params.put("utmfl", urlEncode(this.device.getFlashVersion()));
         }
 
         // Page views

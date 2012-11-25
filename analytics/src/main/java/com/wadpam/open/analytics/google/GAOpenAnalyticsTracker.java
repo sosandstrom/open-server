@@ -61,7 +61,10 @@ public class GAOpenAnalyticsTracker extends OpenAnalyticsTracker {
         this.urlBuilder = new URLBuilderV5_3_8(trackerConfig, visitor, device);
 
         // Set the default event dispatcher strategy
-        this.eventDispatcher = new SynchronousEventDispatcher(device.getUserAgent());
+        this.eventDispatcher = new SynchronousEventDispatcher(
+                device.getHost(),
+                device.getRemoteAddress(),
+                device.getUserAgent());
     }
 
 
@@ -72,8 +75,11 @@ public class GAOpenAnalyticsTracker extends OpenAnalyticsTracker {
 
     // Track a page view
     @Override
-    public void trackPageView(String pageURL, String pageTitle, String hostName,
-                              String referrerPage, String referrerSite,
+    public void trackPageView(String pageURL,
+                              String pageTitle,
+                              String hostName,
+                              String referrerPage,
+                              String referrerSite,
                               List<CustomVariable> customVariables) {
         LOG.debug("Track page view for url:{} and tile:{}", pageURL, pageTitle);
 
@@ -93,7 +99,10 @@ public class GAOpenAnalyticsTracker extends OpenAnalyticsTracker {
 
     // Track event
     @Override
-    public void trackEvent(String category, String action, String label, Integer value,
+    public void trackEvent(String category,
+                           String action,
+                           String label,
+                           Integer value,
                            List<CustomVariable> customVariables) {
         LOG.debug("Track event for category:{} and action:{}", category, action);
 

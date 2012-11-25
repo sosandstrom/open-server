@@ -25,7 +25,7 @@ public class Profile {
      * @param device device data
      * @return a tracker
      */
-    public OpenAnalyticsTracker getTracker(Visitor visitor, Device device) {
+    public GAOpenAnalyticsTracker getTracker(Visitor visitor, Device device) {
         return new GAOpenAnalyticsTracker(this.configurationData, visitor, device);
     }
 

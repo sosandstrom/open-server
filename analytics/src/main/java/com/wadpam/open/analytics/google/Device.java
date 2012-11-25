@@ -27,6 +27,12 @@ public class Device {
     /** Flash version */
     private String flashVersion;
 
+    /** The host */
+    private String host;
+
+    /** Remote address */
+    private String remoteAddress;
+
     /** User agent */
     private String userAgent;
 
@@ -61,6 +67,8 @@ public class Device {
         device.userLanguage = request.getLocale().getLanguage();
         if (null == device.userLanguage || device.userLanguage.isEmpty())
             device.userLanguage = Locale.getDefault().getLanguage();
+        device.host = request.getHeader("Host");
+        device.remoteAddress = request.getRemoteAddr();
         device.userAgent = request.getHeader("User-Agent");
         return device;
     }
@@ -128,4 +136,19 @@ public class Device {
         this.viewPortResolution = viewPortResolution;
     }
 
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public String getRemoteAddress() {
+        return remoteAddress;
+    }
+
+    public void setRemoteAddress(String remoteAddress) {
+        this.remoteAddress = remoteAddress;
+    }
 }

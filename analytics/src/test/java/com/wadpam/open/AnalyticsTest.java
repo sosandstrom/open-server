@@ -27,7 +27,7 @@ public class AnalyticsTest {
     private Device deviceData = new Device();
     private Visitor visitorData;
 
-    private OpenAnalyticsTracker tracker;
+    private GAOpenAnalyticsTracker tracker;
 
     public AnalyticsTest() {
 
@@ -51,7 +51,7 @@ public class AnalyticsTest {
     public void setup() {
         this.visitorData.startNewSession();
         this.tracker = this.profile.getTracker(this.visitorData, this.deviceData);
-        //tracker.setDebug(true);
+        //this.tracker.setDebug(true);
     }
 
     @After
@@ -73,7 +73,7 @@ public class AnalyticsTest {
     public void eventWithLabel() {
         LOG.info("Event with label and value");
 
-        tracker.trackEvent("category1", "action1", "label", 2, null);
+        tracker.trackEvent("category1", "action1", "label", 2);
 
         assertTrue(true);
     }
