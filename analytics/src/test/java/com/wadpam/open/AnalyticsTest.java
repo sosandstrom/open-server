@@ -41,7 +41,7 @@ public class AnalyticsTest {
         this.deviceData.setEncoding("UTF-8");
         this.deviceData.setFlashVersion("11");
         this.deviceData.setScreenResolution("800x600");
-        this.deviceData.setUserLanguage("fi");
+        this.deviceData.setUserLanguage("sv");
         this.deviceData.setColorDepth("24-bit");
         this.deviceData.setUserAgent("Mozilla/5.0(iPad; U; CPU iPhone OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B314 Safari/531.21.10");
     }
@@ -51,7 +51,7 @@ public class AnalyticsTest {
     public void setup() {
         this.visitorData.startNewSession();
         this.tracker = this.profile.getTracker(this.visitorData, this.deviceData);
-        //this.tracker.setDebug(true);
+        this.tracker.setDebug(true);
     }
 
     @After
@@ -64,7 +64,7 @@ public class AnalyticsTest {
     public void basicEvent() {
         LOG.info("Test basic event");
 
-        tracker.trackEvent("category1", "action1");
+        tracker.trackEvent("category 1", "action 1");
 
         assertTrue(true);
     }
@@ -73,7 +73,7 @@ public class AnalyticsTest {
     public void eventWithLabel() {
         LOG.info("Event with label and value");
 
-        tracker.trackEvent("category1", "action1", "label", 2);
+        tracker.trackEvent("category 1", "action 1", "A label", 2);
 
         assertTrue(true);
     }
@@ -83,10 +83,10 @@ public class AnalyticsTest {
         LOG.info("Event with custom variable");
 
         List<CustomVariable> customVars = new ArrayList<CustomVariable>();
-        customVars.add(new CustomVariable(1, "name1", "value1"));
-        customVars.add(new CustomVariable(2, "name2", "value2"));
+        customVars.add(new CustomVariable(1, "name 1", "value 1"));
+        customVars.add(new CustomVariable(2, "name 2", "value 2"));
 
-        tracker.trackEvent("category1", "action1", "label", 2, customVars);
+        tracker.trackEvent("category 1", "action 1", "A label", 2, customVars);
 
         assertTrue(true);
     }
@@ -96,7 +96,7 @@ public class AnalyticsTest {
     public void basicPageView() {
         LOG.info("Test basic page view");
 
-        tracker.trackPageView("/page/url", "Title", "legend-passbook.appspot.com");
+        tracker.trackPageView("/page/url", "A Title", "legend-passbook.appspot.com");
 
         assertTrue(true);
     }
@@ -105,7 +105,7 @@ public class AnalyticsTest {
     public void pageViewWithReferrer() {
         LOG.info("Page view with referrer");
 
-        tracker.trackPageView("/page/url", "Title", "www.testhost.com", "/referrer/page", "www.referrerhost.com", null);
+        tracker.trackPageView("/page/url", "A Title", "www.testhost.com", "/referrer/page", "www.referrerhost.com", null);
 
         assertTrue(true);
     }
@@ -115,10 +115,10 @@ public class AnalyticsTest {
         LOG.info("Page view with referrer");
 
         List<CustomVariable> customVars = new ArrayList<CustomVariable>();
-        customVars.add(new CustomVariable(1, "name1", "value1"));
-        customVars.add(new CustomVariable(2, "name2", "value2"));
+        customVars.add(new CustomVariable(1, "name 1", "value 1"));
+        customVars.add(new CustomVariable(2, "name 2", "value 2"));
 
-        tracker.trackPageView("/page/url", "Title", "www.testhostname.com", "/referrer/page", "www.referrerhose.com", customVars);
+        tracker.trackPageView("/page/url", "A Title", "www.testhostname.com", "/referrer/page", "www.referrerhost.com", customVars);
 
         assertTrue(true);
     }

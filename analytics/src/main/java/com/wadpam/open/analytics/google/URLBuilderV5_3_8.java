@@ -2,6 +2,7 @@ package com.wadpam.open.analytics.google;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.util.UriUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -276,7 +277,9 @@ public class URLBuilderV5_3_8 extends AbstractURLBuilder {
             return null;
         }
         try {
-            return URLEncoder.encode(string, "UTF-8");
+            // Google Analytics expect %20 encoding to space
+            //return URLEncoder.encode(string, "UTF-8");        // Will encode space to +
+            return UriUtils.encodeQueryParam(string, "UTF-8");  // Will encode space to %20
         } catch (UnsupportedEncodingException e) {
             LOG.error("URL encodes does not support character format");
             throw new IllegalArgumentException();
