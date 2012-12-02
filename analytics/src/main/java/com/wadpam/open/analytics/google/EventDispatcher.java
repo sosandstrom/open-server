@@ -19,7 +19,7 @@ public abstract class EventDispatcher {
 
 
     // Constructor
-    protected EventDispatcher(String host, String remoteAddress, String userAgent) {
+    public EventDispatcher(String host, String remoteAddress, String userAgent) {
         this.host = host;
         this.remoteAddress = remoteAddress;
         this.userAgent = userAgent;
@@ -31,7 +31,7 @@ public abstract class EventDispatcher {
      * @param uri the url to use
      * @return true if the dispatch was successful (in case of asynchronous request it will always return true)
      */
-    abstract boolean dispatch(URI uri);
+    public abstract boolean dispatch(URI uri);
 
 
     // Setters and getters

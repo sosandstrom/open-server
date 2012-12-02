@@ -78,12 +78,13 @@ public class SynchronousEventDispatcher extends EventDispatcher {
                                             ClientHttpRequestExecution execution) throws IOException {
 
             HttpRequestWrapper requestWrapper = new HttpRequestWrapper(request);
-//            if (null != getHost())
+//            if (null != getHost())                   // Not allowed to set this value
 //                requestWrapper.getHeaders().set("Host", getHost());
             if (null != getUserAgent())
                 requestWrapper.getHeaders().set("User-Agent", getUserAgent());
             if (null != getRemoteAddress()) {
-                requestWrapper.getHeaders().set("X-Forwarded-For", getRemoteAddress());                requestWrapper.getHeaders().set("X-Real-IP", getRemoteAddress());
+                requestWrapper.getHeaders().set("X-Forwarded-For", getRemoteAddress());
+                requestWrapper.getHeaders().set("X-Real-IP", getRemoteAddress());
             }
 
             return execution.execute(requestWrapper, body);

@@ -16,12 +16,17 @@ import java.net.URLEncoder;
  * An event dispatcher using GAE tasks.
  * @author mattiaslevin
  */
-public class TaskEventDispatcher implements EventDispatcher {
+public class TaskEventDispatcher extends EventDispatcher {
     static final Logger LOG = LoggerFactory.getLogger(TaskEventDispatcher.class);
 
 
+    // Constructor
+    public TaskEventDispatcher(String host, String remoteAddress, String userAgent) {
+        super(host, remoteAddress, userAgent);
+    }
+
+
     // Dispatch the event using GAE task queue
-    @Override
     public boolean dispatch(URI uri) {
         LOG.debug("Dispatch the event using GAE task queue");
 
@@ -29,7 +34,11 @@ public class TaskEventDispatcher implements EventDispatcher {
         try {
             String encodedURL = URLEncoder.encode(uri.toURL().toString(), "UTF-8");
             Queue queue = QueueFactory.getDefaultQueue();
-            queue.add(TaskOptions.Builder.withUrl("/api/analytics/task").param("url", encodedURL));
+
+            // TODO Incomplete implementation
+            String workerUrl = String.format("/api/_admin/%s/user/export", "brand");
+
+            queue.add(TaskOptions.Builder.withUrl(workerUrl).param("url", encodedURL));
         } catch (UnsupportedEncodingException e) {
             LOG.error("Not possible to encode url with reason:{}", e.getMessage());
             throw new IllegalArgumentException(e);

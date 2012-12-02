@@ -42,11 +42,12 @@ public class AnalyticsController extends AbstractRestController {
                               @RequestParam(required = false) String userAgent) {
         LOG.debug("GAE sent event task");
 
+        // TODO incomplete implementation
+
         // Decode
-        // TODO ?
 
         // Forward
-        EventDispatcher dispatcher = new SynchronousEventDispatcher(userAgent);
+        EventDispatcher dispatcher = new SynchronousEventDispatcher("host", "remote", userAgent);
         try {
             dispatcher.dispatch(new URI(url));
         } catch (URISyntaxException e) {
