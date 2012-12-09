@@ -6,9 +6,9 @@
         <artifactId>parent</artifactId>
         <version>5-SNAPSHOT</version>
     </parent>
-    <artifactId>domain</artifactId>
+    <artifactId>j2ee</artifactId>
     <packaging>jar</packaging>
-    <name>Open-Server domain</name>
+    <name>Open-Server J2EE Compatibility</name>
 
     <!-- Specify hard-coded project properties here -->
     <properties>
@@ -72,12 +72,6 @@
             <artifactId>errors</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>j2ee</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
@@ -85,13 +79,6 @@
             <version>${spring.version}</version>
         </dependency>
 
-<!--        <dependency>
-            <groupId>com.google.appengine</groupId>
-            <artifactId>appengine-api-1.0-sdk</artifactId>
-            <version>${gae.version}</version>
-            <scope>provided</scope>
-        </dependency>-->
-        
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -104,6 +91,23 @@
             <version>2.3</version>
             <scope>provided</scope>
         </dependency>
+        
+<!--        <dependency>
+            <groupId>net.sf.jsr107cache</groupId>
+            <artifactId>jsr107cache</artifactId>
+            <version>1.1</version>
+            <scope>provided</scope>
+        </dependency>-->
+        <dependency>
+           <groupId>net.sf.ehcache</groupId>
+           <artifactId>ehcache-core</artifactId>
+           <version>2.6.2</version>
+        </dependency>
+<!--        <dependency>
+           <groupId>net.sf.ehcache</groupId>
+           <artifactId>ehcache-jcache</artifactId>
+           <version>1.2</version>
+        </dependency>-->
 
         <!-- for javadoc -->
         <dependency>

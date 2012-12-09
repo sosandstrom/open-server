@@ -10,6 +10,7 @@
 
     <modules>
         <module>errors</module>
+        <module>j2ee</module>
         <module>domain</module>
         <module>jsonp</module>
         <module>push</module>

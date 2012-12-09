@@ -32,83 +32,7 @@
                     <target>1.6</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
-<!--                <executions>
-                    <execution>
-                        <id>compile-entities</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                        <configuration>
-                            <verbose>false</verbose>
-                            <fork>true</fork>
-                            <includes>
-                                <include>**/domain/*.java</include>
-                            </includes>
-                        </configuration>
-                    </execution>
-                </executions>-->
             </plugin>
-
-<!--            <plugin>
-                <groupId>net.sf.mardao</groupId>
-                <artifactId>mardao-maven-plugin</artifactId>
-                <version>${mardao.version}</version>
-                <executions>
-                    <execution>
-                        <id>generate-generics</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate-sources</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>generate-daos</id>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>process-classes</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <basePackage>com.wadpam.open.user</basePackage>
-                </configuration>
-            </plugin>-->
-
-<!--            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.5</version>
-                <executions>
-                    <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>
-                                    ${project.basedir}/target/generated-sources/dao
-                                </source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>add-test-source</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-test-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.basedir}/src/test/groovy
-                                </source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>-->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -143,12 +67,6 @@
     </build>
 
     <dependencies>
-<!--        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>errors</artifactId>
-            <version>${project.version}</version>
-        </dependency>-->
-        
         <dependency>
             <groupId>net.sf.mardao</groupId>
             <artifactId>mardao-core</artifactId>

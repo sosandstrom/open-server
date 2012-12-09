@@ -75,6 +75,12 @@
             <artifactId>errors</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.wadpam.openserver</groupId>
+            <artifactId>j2ee</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
@@ -99,11 +105,12 @@
             <version>1.9.2</version>
         </dependency>
 
-        <dependency>
+<!--        <dependency>
             <groupId>com.google.appengine</groupId>
             <artifactId>appengine-api-1.0-sdk</artifactId>
             <version>${gae.version}</version>
-        </dependency>
+            <scope>provided</scope>
+        </dependency>-->
         
         <dependency>
             <groupId>org.slf4j</groupId>
