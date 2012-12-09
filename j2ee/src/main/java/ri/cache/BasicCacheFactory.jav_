@@ -1,0 +1,30 @@
+package ri.cache;
+
+import java.util.Map;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.jcache.JCache;
+import net.sf.jsr107cache.Cache;
+import net.sf.jsr107cache.CacheException;
+import net.sf.jsr107cache.CacheFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+//import net.sf.jsr107cache.CacheManager;
+
+/**
+ *
+ * @author os
+ */
+public class BasicCacheFactory implements CacheFactory {
+    
+    final static Logger LOG = LoggerFactory.getLogger(BasicCacheFactory.class);
+
+    @Override
+    public Cache createCache(Map map) throws CacheException {
+        net.sf.ehcache.CacheManager manager = CacheManager.getInstance();
+        net.sf.ehcache.Cache cache = manager.getCache("fifoCache");
+        LOG.info("got cache {} for map {}", cache, map);
+        net.sf.jsr107cache.Cache returnValue = new JCache(cache);
+        return returnValue;
+    }
+    
+}

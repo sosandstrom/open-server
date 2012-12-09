@@ -6,20 +6,18 @@
         <artifactId>parent</artifactId>
         <version>5-SNAPSHOT</version>
     </parent>
-    <artifactId>jsonp</artifactId>
+    <artifactId>j2ee</artifactId>
     <packaging>jar</packaging>
-    <name>Open-Server jsonp</name>
+    <name>Open-Server J2EE Compatibility</name>
 
     <!-- Specify hard-coded project properties here -->
     <properties>
         <logging.level>ALL</logging.level>
         <downloadSources>false</downloadSources>
-        <gae.version>1.7.0</gae.version>
         <spring.version>3.1.1.RELEASE</spring.version>
         <spring.security.version>3.1.0.RELEASE</spring.security.version>
         <spring-social.version>1.0.1.RELEASE</spring-social.version>
         <javadocExecutable>${java.home}/../bin/javadoc</javadocExecutable>
-        <mardao.version>2.0.4</mardao.version>
     </properties>
 
     <build>
@@ -69,17 +67,10 @@
     </build>
 
     <dependencies>
-
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>errors</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.wadpam.openserver</groupId>
-            <artifactId>j2ee</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -87,31 +78,7 @@
             <artifactId>spring-webmvc</artifactId>
             <version>${spring.version}</version>
         </dependency>
-        
-        <dependency>
-            <groupId>net.sf.mardao</groupId>
-            <artifactId>mardao-core</artifactId>
-            <version>${mardao.version}</version>
-        </dependency>
 
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-core-asl</artifactId>
-            <version>1.9.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-            <version>1.9.2</version>
-        </dependency>
-
-<!--        <dependency>
-            <groupId>com.google.appengine</groupId>
-            <artifactId>appengine-api-1.0-sdk</artifactId>
-            <version>${gae.version}</version>
-            <scope>provided</scope>
-        </dependency>-->
-        
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -124,13 +91,29 @@
             <version>2.3</version>
             <scope>provided</scope>
         </dependency>
+        
+<!--        <dependency>
+            <groupId>net.sf.jsr107cache</groupId>
+            <artifactId>jsr107cache</artifactId>
+            <version>1.1</version>
+            <scope>provided</scope>
+        </dependency>-->
+        <dependency>
+           <groupId>net.sf.ehcache</groupId>
+           <artifactId>ehcache-core</artifactId>
+           <version>2.6.2</version>
+        </dependency>
+<!--        <dependency>
+           <groupId>net.sf.ehcache</groupId>
+           <artifactId>ehcache-jcache</artifactId>
+           <version>1.2</version>
+        </dependency>-->
 
         <!-- for javadoc -->
         <dependency>
             <groupId>com.wadpam</groupId>
             <artifactId>docrest-api</artifactId>
             <version>${docrest.version}</version>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -142,7 +125,4 @@
 
     </dependencies>
     
-    <repositories>
-    </repositories>
-
 </project>

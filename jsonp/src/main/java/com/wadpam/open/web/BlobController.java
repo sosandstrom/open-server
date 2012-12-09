@@ -106,7 +106,7 @@ public class BlobController extends AbstractRestController {
         LOG.debug("Delete blob with key:{}", key);
 
         BlobKey blobKey = new BlobKey(key);
-        this.blobstoreService.delete(blobKey);
+        blobstoreService.delete(blobKey);
     }
 
 }
