@@ -71,7 +71,7 @@
     <dependencies>
 
         <dependency>
-            <groupId>com.wadpam.openserver</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>errors</artifactId>
             <version>${project.version}</version>
         </dependency>
