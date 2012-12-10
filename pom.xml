@@ -20,6 +20,7 @@
         <module>webapp</module>
         <module>analytics</module>
         <module>analytics-gae</module>
+        <module>tools-gae</module>
     </modules>
     
     <properties>
