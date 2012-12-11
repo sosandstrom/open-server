@@ -1,7 +1,10 @@
 package com.wadpam.open.cache;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
@@ -56,8 +59,15 @@ public class EhCacheWrapper implements net.sf.jsr107cache.Cache {
     }
 
     @Override
-    public void putAll(Map map) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void putAll(Map plainMap) {
+        Map<Serializable, Serializable> map = plainMap;
+        Element element;
+        ArrayList<Element> elements = new ArrayList<Element>();
+        for (Entry<Serializable, Serializable> entry : map.entrySet()) {
+            element = new Element(entry.getKey(), entry.getValue());
+            elements.add(element);
+        }
+        ehCache.putAll(elements);
     }
 
     @Override

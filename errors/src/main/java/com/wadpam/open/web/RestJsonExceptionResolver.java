@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
@@ -17,6 +19,7 @@ import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
  */
 public class RestJsonExceptionResolver extends AbstractHandlerExceptionResolver 
     implements View {
+    static final Logger LOG = LoggerFactory.getLogger(RestJsonExceptionResolver.class);
     
     public static final String KEY_ERROR_OBJECT = "error";
     
@@ -69,6 +72,8 @@ public class RestJsonExceptionResolver extends AbstractHandlerExceptionResolver
         }
 
         mav.addObject(KEY_ERROR_OBJECT, error);
+        LOG.debug("Resolved exception is", exception);
+        LOG.debug("Returning error object {}", error);
         return mav;
     }
 

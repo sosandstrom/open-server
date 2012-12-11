@@ -12,6 +12,12 @@ public class JRestError {
     private String stackInfo;
     private int status;
 
+    @Override
+    public String toString() {
+        return String.format("HTTP %d {code:%d, developerMessage:%s, message:%s, stackInfo:%s}", 
+                status, code, developerMessage, message, stackInfo);
+    }
+    
     public JRestError() {
     }
 
