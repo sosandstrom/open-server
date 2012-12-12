@@ -32,26 +32,26 @@ public class AnalyticsTest {
     public AnalyticsTest() {
 
         // Create profile
-        this.profile = new Profile("test-profile", "UA-35889513-2");
+        profile = Profile.getInstance("test-profile", "UA-35889513-2");
 
         // Set visitor
         this.visitorData = Visitor.visitorWithNewSession(999, now() - 50000, now() - 4000, 10);
 
         // Set device data
-        this.deviceData.setEncoding("UTF-8");
-        this.deviceData.setFlashVersion("11");
-        this.deviceData.setScreenResolution("800x600");
-        this.deviceData.setUserLanguage("sv");
-        this.deviceData.setColorDepth("24-bit");
-        this.deviceData.setUserAgent("Mozilla/5.0(iPad; U; CPU iPhone OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B314 Safari/531.21.10");
+        deviceData.setEncoding("UTF-8");
+        deviceData.setFlashVersion("11");
+        deviceData.setScreenResolution("800x600");
+        deviceData.setUserLanguage("sv");
+        deviceData.setColorDepth("24-bit");
+        deviceData.setUserAgent("Mozilla/5.0(iPad; U; CPU iPhone OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B314 Safari/531.21.10");
     }
 
 
     @Before
     public void setup() {
-        this.visitorData.startNewSession();
-        this.tracker = this.profile.getTracker(this.visitorData, this.deviceData);
-        this.tracker.setDebug(true);
+        visitorData.startNewSession();
+        tracker = this.profile.getTracker(this.visitorData, this.deviceData);
+        tracker.setDebug(true);
     }
 
     @After

@@ -21,8 +21,8 @@ import java.util.UUID;
  */
 @Controller
 @RequestMapping(value="{domain}/common")
-public class CommonController extends AbstractRestController {
-    private static final Logger LOG = LoggerFactory.getLogger(CommonController.class);
+public class UUIDController extends AbstractRestController {
+    private static final Logger LOG = LoggerFactory.getLogger(UUIDController.class);
 
 
     private UUIDCreatedListener uuidCallback;

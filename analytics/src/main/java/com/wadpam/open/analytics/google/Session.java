@@ -6,7 +6,7 @@ package com.wadpam.open.analytics.google;
  */
 public class Session {
 
-    /** Session start time stamp */
+    /** Session start time stamp, unix timestamp (seconds since 1970) */
     private long sessionStart;
 
     public Session() {

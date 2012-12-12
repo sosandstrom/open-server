@@ -82,7 +82,7 @@ public class AnalyticsController extends AbstractRestController {
             trackerName = "default";
         }
 
-        Profile profile = new Profile(trackerName, trackerId);
+        Profile profile = Profile.getInstance(trackerName, trackerId);
 
         Visitor visitor = Visitor.visitorWithNewSession(userId, now(), now(), 1);
         Device device = Device.defaultDevice(request);
@@ -124,7 +124,7 @@ public class AnalyticsController extends AbstractRestController {
             trackerName = "default";
         }
 
-        Profile profile = new Profile(trackerName, trackerId);
+        Profile profile = Profile.getInstance(trackerName, trackerId);
 
         Visitor visitor = Visitor.visitorWithNewSession(userId, now(), now(), 1);
         Device device = Device.defaultDevice(request);

@@ -26,8 +26,8 @@ public class Visitor {
      * Create a visitor with a new session.
      * Session timestamp will be set to current system time
      * @param visitorId existing visitor id
-     * @param timestampFirst first time the user visited
-     * @param timestampPrevious the previous time the user visited
+     * @param timestampFirst first time the user visited, unix timestamp (seconds since 1970)
+     * @param timestampPrevious the previous time the user visited, unix timestamp (seconds since 1970)
      * @param visits the number of visits
      * @return a new visitor
      */
@@ -39,8 +39,8 @@ public class Visitor {
     /**
      * Constructor
      * @param visitorId unique visitor id
-     * @param timestampFirst first time the user visited
-     * @param timestampPrevious the previous time the user visited
+     * @param timestampFirst first time the user visited, unix timestamp (seconds since 1970)
+     * @param timestampPrevious the previous time the user visited, unix timestamp (seconds since 1970)
      * @param visits number of visits
      * @param session current session for the user
      */
@@ -65,11 +65,6 @@ public class Visitor {
     // Restart the current session
     public void resetCurrentSession() {
         this.session.resetCurrentSession();
-    }
-
-    // Return now
-    private static long now() {
-        return System.currentTimeMillis() / 1000L;
     }
 
 

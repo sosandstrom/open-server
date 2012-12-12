@@ -26,7 +26,7 @@ import java.util.Map;
 @Controller
 @RequestMapping(value="{domain}/blob")
 public class BlobController extends AbstractRestController {
-    private static final Logger LOG = LoggerFactory.getLogger(CommonController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BlobController.class);
 
     private BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
 
@@ -36,7 +36,7 @@ public class BlobController extends AbstractRestController {
      * @return a blobstore upload url
      */
     @RestReturn(value=Map.class, entity=Map.class, code={
-            @RestCode(code=200, message="OK", description="Upload url created"),
+            @RestCode(code=200, message="OK", description="Upload url created")
     })
     @RequestMapping(value="upload", method= RequestMethod.GET)
     @ResponseBody
