@@ -27,7 +27,7 @@ public class IsAliveController extends AbstractRestController {
      *  default values of not ok.
      */
     /** Category name */
-    private String category = "Tools";
+    private String category = "Monitoring";
     /** Action name */
     private String action = "IsAlive";
     /** Custom variable index */
@@ -36,52 +36,56 @@ public class IsAliveController extends AbstractRestController {
     private String customVariableName = "Hour";
 
     /**
-     * Set a tracking code if you like all is alive envents to
+     * Set a tracking code if you like all is alive events to
      * be handled by same analytic account.
      */
     private String trackingCode;
 
-    /**
-     * Set a tracking code mapper callback class that will be used
-     * to decide with unique tracker id to used based on domain
-     * and/or id provided in the request
-     */
-    private TrackingCodeMapper trackingCodeMapper;
+
+    @ModelAttribute
+    public String addTrackingCode(HttpServletRequest request) {
+        final String trackingCode = (String) request.getAttribute("trackingCode");
+        //LOG.debug("Add tracking code {}", trackingCode);
+        return trackingCode;
+    }
 
 
     /**
      * Indicate the the app is alive and running.
-     * @param id unique id of the app or possibly the location of the app
-     * @return http 200 always
+     * @param trackingCode The tracking code that will be used
+     *                     The recommendation is to configuring an interceptor that finds
+     *                     and configure the correct tracking code.
+     * @param id unique id of the app or possibly the location of the app.
+     *           If this value is provided it will be used as label in the tracking.
+     * @param hour the hour the event was sent, e.g. 00, 01, 02 .. 11, 12, 13 .. 22, 23.
+     *             If this parameter if provider a customer variable will be included in
+     *             the tracking.
+     * @return http 200 always unless server error
      */
     @RestReturn(value=Void.class, entity=Void.class, code={
             @RestCode(code=200, message="OK", description="IsAlive was logged")
     })
-    @RequestMapping(method= RequestMethod.GET)
+    @RequestMapping(method= RequestMethod.POST)
     @ResponseBody
     public void isAlive(HttpServletRequest request,
                         @PathVariable String domain,
-                        @RequestParam(required = false) String id) {
-        LOG.debug("Log is alive message from:{}", id);
-
-        // Get the current hour - 01, 02, 03 .. 23 etc
-        Calendar calendar = Calendar.getInstance();
-        String hour = String.format("%d", calendar.get(Calendar.HOUR_OF_DAY));
-        LOG.debug("Hour:{}", hour);
-
-        long now = calendar.getTimeInMillis() / 1000;
+                        @ModelAttribute String trackingCode,
+                        @RequestParam(required = false) String id,
+                        @RequestParam(required = false) String hour) {
+        LOG.debug("Log is alive message from:{} with tacking code:{}", id, trackingCode);
 
         // Create device
         Device device = Device.defaultDevice(request);
         // Create visitor
+        long now = new Date().getTime() / 1000;
         Visitor visitor = Visitor.visitorWithNewSession(id.hashCode(), now, now, 1);
 
         // Create profile
         Profile profile = null;
         if (null != trackingCode) {
             profile = Profile.getInstance("IsAliveTracker", trackingCode);
-        } else if (null != trackingCodeMapper) {
-            profile = Profile.getInstance("IsAliveTracker", domain, trackingCodeMapper);
+        } else if (null != this.trackingCode) {
+            profile = Profile.getInstance("IsAliveTracker", this.trackingCode);
         }  else {
             LOG.info("No tracker configured, is alive message will not be sent to any tracker");
             return;
@@ -90,9 +94,14 @@ public class IsAliveController extends AbstractRestController {
         // Create tracker
         OpenAnalyticsTracker tracker = profile.getTracker(visitor, device);
 
+        // Custom variables
+        List<CustomVariable> customVariables = null;
+        if (null != hour) {
+            customVariables = new ArrayList<CustomVariable>(1);
+            customVariables.add(new CustomVariable(customVariableIndex, customVariableName, hour));
+        }
+
         // Send events to Google Analytics
-        List<CustomVariable> customVariables = new ArrayList<CustomVariable>(1);
-        customVariables.add(new CustomVariable(customVariableIndex, customVariableName, hour));
         tracker.trackEvent(category, action, id, 1, customVariables);
     }
 
@@ -118,7 +127,4 @@ public class IsAliveController extends AbstractRestController {
         this.trackingCode = trackingCode;
     }
 
-    public void setTrackingCodeMapper(TrackingCodeMapper trackingCodeMapper) {
-        this.trackingCodeMapper = trackingCodeMapper;
-    }
 }
