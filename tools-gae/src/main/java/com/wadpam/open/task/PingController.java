@@ -56,6 +56,9 @@ public class PingController {
         
         // re-queue the task ?
         if ((null == cachedToken || cachedToken.equals(token)) && 0 < interval) {
+            if (null == cachedToken) {
+                MEMCACHE_SERVICE.put(uri, token);
+            }
             scheduleTask(uri, System.currentTimeMillis(), interval, token);
         }
         
