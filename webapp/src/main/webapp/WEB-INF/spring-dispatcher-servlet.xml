@@ -40,6 +40,8 @@
 
     <!--           Controllers             -->
 
+    <bean class="com.wadpam.open.task.PingController" />
+
     <bean class="com.wadpam.open.web.MonitorController" />
 
     <bean id="jsonObjectMapper" class="com.wadpam.open.json.SkipNullObjectMapper" init-method="init" />

@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping("_admin/{domain}/ping")
 public class PingController {
+    /** Will only schedule a next PING if current time is beyond this timestamp */
+    public static final String NEXT_TIMESTAMP = "_next_timestamp";
     
     final MemcacheService MEMCACHE_SERVICE = MemcacheServiceFactory.getMemcacheService(null);
     
@@ -66,14 +68,19 @@ public class PingController {
     }
 
     protected void scheduleTask(final String uri, final long currentMillis, Long interval, final String token) {
-        final TaskOptions options = TaskOptions.Builder
-                .withUrl(uri)
-                .etaMillis(currentMillis + interval)
-                .param("interval", interval.toString())
-                .param("token", token);
-        
-        final Queue queue = QueueFactory.getDefaultQueue();
-        queue.add(options);
+        // Will only schedule a next PING if current time is beyond this timestamp
+        final Long minNextTime = (Long) MEMCACHE_SERVICE.get(NEXT_TIMESTAMP);
+        if (null == minNextTime || minNextTime <= currentMillis) {
+            MEMCACHE_SERVICE.put(NEXT_TIMESTAMP, currentMillis + interval);
+            final TaskOptions options = TaskOptions.Builder
+                    .withUrl(uri)
+                    .etaMillis(currentMillis + interval)
+                    .param("interval", interval.toString())
+                    .param("token", token);
+
+            final Queue queue = QueueFactory.getDefaultQueue();
+            queue.add(options);
+        }
     }
     
 }
