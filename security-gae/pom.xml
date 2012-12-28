@@ -13,12 +13,9 @@
     <properties>
         <logging.level>ALL</logging.level>
         <downloadSources>false</downloadSources>
-        <gae.version>1.7.0</gae.version>
         <spring.version>3.1.1.RELEASE</spring.version>
         <spring.security.version>3.1.1.RELEASE</spring.security.version>
         <spring-social.version>1.0.1.RELEASE</spring-social.version>
-        <mardao.version>2.0.4</mardao.version>
-        <docrest.version>1.15</docrest.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <javadocExecutable>${java.home}/../bin/javadoc</javadocExecutable>
     </properties>

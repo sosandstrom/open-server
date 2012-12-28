@@ -13,7 +13,6 @@
     <!-- Specify hard-coded project properties here -->
     <properties>
         <downloadSources>false</downloadSources>
-        <gae.version>1.7.0</gae.version>
         <spring.version>3.1.1.RELEASE</spring.version>
         <spring.security.version>3.1.0.RELEASE</spring.security.version>
         <spring-social.version>1.0.1.RELEASE</spring-social.version>
