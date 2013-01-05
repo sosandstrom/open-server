@@ -3,7 +3,6 @@ package com.wadpam.open.mvc;
 import com.wadpam.open.json.JBaseObject;
 import com.wadpam.open.json.JCursorPage;
 import com.wadpam.open.json.JLocation;
-import com.wadpam.open.web.BaseConverter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,9 +41,6 @@ public abstract class CrudController<
     
     protected static final Logger LOG = LoggerFactory.getLogger(CrudController.class);
     
-//    @Autowired
-//    protected BaseConverter CONVERTER;
-//    
     @Autowired
     protected CrudService<J, T, ID> service;
     

@@ -23,7 +23,6 @@ import net.sf.mardao.core.geo.DLocation;
 public abstract class BaseConverter {
 
     public abstract JBaseObject convertBase(Object from);
-    public abstract Object convertJson(JBaseObject from);
     
     public static void convert(AbstractCreatedUpdatedEntity from, JBaseObject to) {
         if (null == from || null == to) {
