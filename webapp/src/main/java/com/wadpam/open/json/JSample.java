@@ -14,6 +14,11 @@ public class JSample extends JBaseObject {
     public void setName(String name) {
         this.name = name;
     }
+
+    @Override
+    protected String subString() {
+        return String.format("createdDate:%d", getCreatedDate());
+    }
     
     
 }

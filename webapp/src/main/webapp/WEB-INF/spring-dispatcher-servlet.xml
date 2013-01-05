@@ -45,6 +45,7 @@
     <import resource="classpath:/spring-dao.xml" />
     
     <bean class="com.wadpam.open.service.SampleService" />
+    <bean class="com.wadpam.open.service.ComplexService" />
 
     <!--           Controllers             -->
 
@@ -53,7 +54,14 @@
     <bean class="com.wadpam.open.web.MonitorController" />
     
     <bean class="com.wadpam.open.web.SampleController" />
+    <bean class="com.wadpam.open.web.ComplexController" />
 
+    <!--           View stuff             -->
+        
     <bean id="jsonObjectMapper" class="com.wadpam.open.json.SkipNullObjectMapper" init-method="init" />
+    
+    <bean id="restExceptionResolver" class="com.wadpam.open.web.RestJsonExceptionResolver">
+        <property name="order" value="100" />
+    </bean>
 	
 </beans>
