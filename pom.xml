@@ -13,6 +13,7 @@
         <module>j2ee</module>
         <module>domain</module>
         <module>jsonp</module>
+        <module>mvc-boiler</module>
         <module>push</module>
         <module>transactions-gae</module>
         <module>security-gae</module>
