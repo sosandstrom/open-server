@@ -1,13 +1,14 @@
 package com.wadpam.open.mvc;
 
-import com.wadpam.open.exceptions.NotFoundException;
 import com.wadpam.open.exceptions.RestException;
 import com.wadpam.open.json.JBaseObject;
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.Date;
+import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.dao.Dao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -50,6 +51,16 @@ public class CrudService<
         return domain;
     }
     
+    public Iterable<T> getByPrimaryKeys(Collection<ID> ids) {
+        final Iterable<T> entities = dao.queryByPrimaryKeys(null, ids);
+        
+        return entities;
+    }
+
+    public CursorPage<T, ID> getPage(int pageSize, Serializable cursorKey) {
+        return dao.queryPage(pageSize, cursorKey);
+    }
+    
     public ID getSimpleKey(T domain) {
         return dao.getSimpleKey(domain);
     }
@@ -75,5 +86,8 @@ public class CrudService<
         return id;
     }
     
-    
+    public CursorPage<ID, ID> whatsChanged(Date since, int pageSize, Serializable cursorKey) {
+        // TODO: include deletes from Audit table
+        return dao.whatsChanged(since, pageSize, cursorKey);
+    }
 }

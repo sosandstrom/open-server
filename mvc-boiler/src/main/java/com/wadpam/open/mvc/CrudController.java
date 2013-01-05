@@ -1,13 +1,18 @@
 package com.wadpam.open.mvc;
 
+import com.wadpam.docrest.domain.RestCode;
+import com.wadpam.docrest.domain.RestReturn;
 import com.wadpam.open.exceptions.NotFoundException;
 import com.wadpam.open.json.JBaseObject;
 import com.wadpam.open.json.JCursorPage;
 import com.wadpam.open.json.JLocation;
 import java.io.Serializable;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.sf.mardao.core.CursorPage;
@@ -16,6 +21,7 @@ import net.sf.mardao.core.domain.AbstractLongEntity;
 import net.sf.mardao.core.geo.DLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.view.RedirectView;
 
 /**
@@ -141,6 +148,26 @@ public abstract class CrudController<
         return body;
     }
     
+    /**
+     * Queries for non-deleted entities. If not found or soft-deleted, it will be excluded from the response.
+     * @param id array of ids to retrieve
+     * @param pageSize default is 10
+     * @param cursorKey null to get first page
+     * @return a Collection of non-deleted J objects
+     */
+    @RestReturn(value=List.class, code={
+        @RestCode(code=200, description="A CursorPage with JSON entities", message="OK")})
+    @RequestMapping(value="v10", method={RequestMethod.GET, RequestMethod.POST}, params={"id"})
+    @ResponseBody
+    public Collection<J> getExisting(
+            @RequestParam ID[] id
+            ) {
+        final Iterable<T> page = service.getByPrimaryKeys(Arrays.asList(id));
+        
+        final Collection<J> body = convert(page);
+        return body;
+    }
+
     @RequestMapping(value="v10/{id}", method=RequestMethod.POST, consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public RedirectView updateFromForm(
             HttpServletRequest request,
@@ -191,6 +218,35 @@ public abstract class CrudController<
             @RequestHeader(value=NAME_X_REQUESTED_WITH, required=false) String xRequestedWith,
             @RequestBody J jEntity) {
         return updateFromForm(request, response, domain, id, xRequestedWith, jEntity);
+    }
+    
+    /**
+     * Queries for a (next) page of ids which has changed since last update.
+     * Header If-Modified-Since is required, timestamp of last update; use "Sat, 29 Oct 1994 19:43:31 GMT" if none
+     * @param pageSize default is 10
+     * @param cursorKey null to get first page
+     * @return a page of ids that has updatedDate >= lastModified, or 304 Not Modified
+     */
+    @RestReturn(value=JCursorPage.class, entity=Long.class, code={
+        @RestCode(code=200, description="A CursorPage with ids", message="OK"),
+        @RestCode(code=304, description="Nothing changed since", message="Not Modified")})
+    @RequestMapping(value="v10", method= RequestMethod.GET, headers={"If-Modified-Since"})
+    @ResponseBody
+    public CursorPage<ID, ID> whatsChanged(
+            WebRequest request,
+            @RequestHeader(value="If-Modified-Since") Date since,
+            @RequestParam(defaultValue="10") int pageSize, 
+            @RequestParam(required=false) Serializable cursorKey) throws ParseException {
+        final long currentMillis = System.currentTimeMillis();
+        final CursorPage<ID, ID> page = service.whatsChanged(since, pageSize, cursorKey);
+        long lastModified = page.getItems().isEmpty() ? 0L : currentMillis;
+        
+        if (request.checkNotModified(lastModified)) {
+            // shortcut exit - no further processing necessary
+            return null;
+        }
+        
+        return page;
     }
     
     // --------------- Converter methods --------------------------
