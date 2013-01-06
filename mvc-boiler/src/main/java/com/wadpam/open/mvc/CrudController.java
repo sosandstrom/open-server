@@ -56,7 +56,7 @@ public abstract class CrudController<
     
     protected static final Logger LOG = LoggerFactory.getLogger(CrudController.class);
     
-    protected CrudService<J, T, ID> service;
+    protected CrudService<T, ID> service;
     
     @RequestMapping(value="v10", method=RequestMethod.POST, consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public RedirectView createFromForm(
