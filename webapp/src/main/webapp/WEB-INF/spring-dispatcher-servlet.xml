@@ -46,6 +46,8 @@
     
     <bean class="com.wadpam.open.service.SampleService" />
     <bean class="com.wadpam.open.service.ComplexService" />
+    
+    <bean class="com.wadpam.open.service.ExportService" init-method="init" />
 
     <!--           Controllers             -->
 
@@ -55,6 +57,8 @@
     
     <bean class="com.wadpam.open.web.SampleController" />
     <bean class="com.wadpam.open.web.ComplexController" />
+    
+    <bean class="com.wadpam.open.web.ExportController" />
 
     <!--           View stuff             -->
         

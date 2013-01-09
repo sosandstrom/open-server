@@ -12,6 +12,7 @@
         <module>errors</module>
         <module>j2ee</module>
         <module>domain</module>
+        <module>io-core</module>
         <module>jsonp</module>
         <module>mvc-boiler</module>
         <module>push</module>

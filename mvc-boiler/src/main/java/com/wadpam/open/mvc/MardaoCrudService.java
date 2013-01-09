@@ -1,6 +1,7 @@
 package com.wadpam.open.mvc;
 
 import com.wadpam.open.exceptions.RestException;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
@@ -41,6 +42,12 @@ public class MardaoCrudService<
         Object parentKey = dao.getPrimaryKey(parentKeyString);
         dao.delete(parentKey, id);
     }
+
+    @Override
+    public void exportCsv(OutputStream out, Long startDate, Long endDate) {
+        // TODO: filter on dates
+        dao.writeAsCsv(out, getExportColumns(), null, null, false, null, false);
+    }
     
     @Override
     public T get(String parentKeyString, ID id) {
@@ -58,15 +65,20 @@ public class MardaoCrudService<
         
         return entities;
     }
+    
+    protected String[] getExportColumns() {
+        return new String[] {
+            dao.getPrimaryKeyColumnName(),
+            dao.getCreatedDateColumnName(),
+            dao.getCreatedByColumnName(),
+            dao.getUpdatedDateColumnName(),
+            dao.getUpdatedByColumnName()
+        };
+    }
 
     @Override
     public CursorPage<T, ID> getPage(int pageSize, Serializable cursorKey) {
         return dao.queryPage(pageSize, cursorKey);
-    }
-    
-    @Override
-    public ID getSimpleKey(T domain) {
-        return dao.getSimpleKey(domain);
     }
     
     @Override
@@ -75,6 +87,16 @@ public class MardaoCrudService<
         return dao.getKeyString(parentKey);
     }
 
+    @Override
+    public ID getSimpleKey(T domain) {
+        return dao.getSimpleKey(domain);
+    }
+
+    @Override
+    public String getTableName() {
+        return dao.getTableName();
+    }
+    
     /** Override to implement pre-persist validation */
     protected void prePersist(T domain) throws RestException {
     }

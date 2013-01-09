@@ -1,0 +1,55 @@
+package com.wadpam.open.web;
+
+import java.net.URI;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.springframework.web.client.RestTemplate;
+import static org.junit.Assert.*;
+import org.springframework.web.client.HttpClientErrorException;
+
+/**
+ * Integration test for the CRUD controllers.
+ * @author sosandtrom
+ */
+public class ExportITest {
+
+    static final String                  BASE_URL       = "http://localhost:8234/domain/itest/";
+
+    RestTemplate                         template;
+    public ExportITest() {
+    }
+
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+    }
+
+    @AfterClass
+    public static void tearDownClass() throws Exception {
+    }
+
+    @Before
+    public void setUp() {
+        template = new RestTemplate();
+    }
+
+    @After
+    public void tearDown() {
+    }
+
+    @Test
+    public void testExportEmployees() {
+        String actual = template.getForObject(BASE_URL + "export/employees", String.class);
+        System.out.println(actual);
+    }
+    
+    @Test
+    public void testExportAllAsJSON() {
+        String actual = template.getForObject(BASE_URL + "export/all.json", String.class);
+        System.out.println(actual);
+    }
+    
+}

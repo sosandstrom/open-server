@@ -18,7 +18,7 @@
         <spring.security.version>3.1.0.RELEASE</spring.security.version>
         <org.springframework.social.version>1.0.1.RELEASE</org.springframework.social.version>
         <downloadSources>true</downloadSources>
-        <mardao.version>2.1.3</mardao.version>
+        <mardao.version>2.1.4-SNAPSHOT</mardao.version>
         <netbeans.hint.deploy.server>Tomcat</netbeans.hint.deploy.server>
         <java.version>1.6</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -32,6 +32,11 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>domain</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>io-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

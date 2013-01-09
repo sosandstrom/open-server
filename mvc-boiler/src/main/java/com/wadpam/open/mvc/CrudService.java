@@ -1,5 +1,6 @@
 package com.wadpam.open.mvc;
 
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
@@ -16,6 +17,8 @@ public interface CrudService<
     ID create(T domain);
     
     void delete(String parentKeyString, ID id);
+
+    void exportCsv(OutputStream out, Long startDate, Long endDate);
     
     T get(String parentKeyString, ID id);
     
@@ -27,7 +30,10 @@ public interface CrudService<
     
     String getParentKeyString(T domain);
 
+    String getTableName();
+    
     ID update(T domain);
     
     CursorPage<ID, ID> whatsChanged(Date since, int pageSize, Serializable cursorKey);
+
 }
