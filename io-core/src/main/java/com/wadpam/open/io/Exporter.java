@@ -6,8 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Export "tables" using the specified Dao objects.
+ * This Exporter uses an Extractor to pull the data using Daos,
+ * and a Converter to serialize the output to different formats.
  * @author os
+ * @see Extractor to access the data
+ * @see Converter to serialize the output
  */
 public class Exporter<D> {
     
@@ -16,6 +20,20 @@ public class Exporter<D> {
     private Converter<D> converter;
     private Extractor<D> extractor;
     
+    /**
+     * Entry point for export of multiple "tables". Has the following flow:
+     * <ol>
+     * <li>call the extractor's pre-export callback</li>
+     * <li>call the converter's pre-export callback</li>
+     * <li>iterate the Daos invoking the {@link exportDao} method</li>
+     * <li>call the extractor's post-export callback</li>
+     * <li>call the converter's post-export callback</li>
+     * </ol>
+     * @param out the output stream to write to
+     * @param arg user argument, will be passed around
+     * @param daos the DAOs to export
+     * @see #exportDao
+     */
     public void export(OutputStream out, Object arg, D... daos) {
         
         // first, initialize converter
@@ -39,6 +57,22 @@ public class Exporter<D> {
         }
     }
     
+    /**
+     * Entry point for export of single "table". Has the following flow:
+     * <ol>
+     * <li>call the extractor's pre-dao callback</li>
+     * <li>call the converter's pre-dao callback</li>
+     * <li>iterate the Entities invoking the {@link exportEntity} method</li>
+     * <li>call the extractor's post-dao callback</li>
+     * <li>call the converter's post-dao callback</li>
+     * </ol>
+     * @param out the output stream to write to
+     * @param arg user argument, will be passed around
+     * @param preExport returned value from extractor's pre-export callback
+     * @param daoIndex number of output DAOs prior to this one, i.e. starts on 0
+     * @param dao the DAO to export
+     * @see #exportEntity
+     */
     protected void exportDao(OutputStream out, Object arg, Object preExport, int daoIndex, D dao) {
         // prepare converter for dao
         Object preDao = extractor.preDao(arg, preExport, dao);
@@ -69,6 +103,19 @@ public class Exporter<D> {
         }
     }
     
+    /**
+     * Exports one Entity
+     * @param out the output stream to write to
+     * @param arg user argument, will be passed around
+     * @param preExport returned value from extractor's pre-export callback
+     * @param daoIndex number of output DAOs prior to this one, i.e. starts on 0
+     * @param dao the DAO to export
+     * @param preDao returned value from extractor's pre-dao callback
+     * @param columns returned value from {@link Extractor.getColumns}
+     * @param entityIndex number of output Entities prior to this one, i.e. starts on 0
+     * @param entity the Entity to export
+     * @return returned value from {@link Converter.writeValues}
+     */
     protected Object exportEntity(OutputStream out, Object arg, Object preExport, 
             Object preDao, Iterable<String> columns, int daoIndex, D dao, int entityIndex, Object entity) {
         Map<String, Object> values = extractor.getValues(arg, dao, entity);
