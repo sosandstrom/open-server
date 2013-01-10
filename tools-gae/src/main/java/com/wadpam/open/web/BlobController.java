@@ -56,7 +56,7 @@ public class BlobController extends AbstractRestController {
      * @return the download url for each of the uploaded files
      */
     @RestReturn(value=Map.class, entity=Map.class, code={
-            @RestCode(code=200, message="OK", description="File uploaded"),
+            @RestCode(code=200, message="OK", description="File uploaded")
     })
     @RequestMapping(value="upload", method= RequestMethod.POST)
     @ResponseBody
