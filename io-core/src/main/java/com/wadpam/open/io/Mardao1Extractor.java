@@ -1,7 +1,9 @@
 package com.wadpam.open.io;
 
+import com.google.appengine.api.datastore.Key;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Map.Entry;
 import net.sf.mardao.api.dao.Dao;
 import net.sf.mardao.api.dao.DaoImpl;
 
@@ -23,7 +25,19 @@ public class Mardao1Extractor implements Extractor<Dao> {
         for (String col : getColumns(arg, dao)) {
             columns.add(col);
         }
-        return converter.getCsvColumnValues((DaoImpl) dao, columns.toArray(new String[columns.size()]), entity);
+        final Map<String, Object> values = converter.getCsvColumnValues((DaoImpl) dao, columns.toArray(new String[columns.size()]), entity);
+        
+        // replace keys with id / name instead
+        Object v;
+        for (Entry<String, Object> entry : values.entrySet()) {
+            v = entry.getValue();
+            if (null != v && "com.google.appengine.api.datastore.Key".equals(v.getClass().getName())) {
+                Key key = (Key) v;
+                values.put(entry.getKey(), null != key.getName() ? key.getName() : key.getId());
+            }
+        }
+        
+        return values;
     }
 
     @Override

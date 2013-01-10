@@ -90,6 +90,7 @@
             <groupId>net.sf.mardao</groupId>
             <artifactId>mardao-core</artifactId>
             <version>${mardao.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

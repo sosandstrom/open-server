@@ -78,6 +78,7 @@ public class Exporter<D> {
         Object preDao = extractor.preDao(arg, preExport, dao);
         String tableName = extractor.getTableName(arg, dao);
         Iterable<String> columns = extractor.getColumns(arg, dao);
+        LOG.debug("{} has columns {}", tableName, columns);
         Object logPreDao = converter.preDao(out, arg, preExport, preDao, tableName, 
                 columns, daoIndex, dao);
         if (null != logPreDao) {
