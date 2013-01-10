@@ -7,6 +7,7 @@ import com.wadpam.open.domain.DEmployee;
 import com.wadpam.open.domain.DOrganization;
 import com.wadpam.open.io.Converter;
 import com.wadpam.open.io.CsvConverter;
+import com.wadpam.open.io.ExcelConverter;
 import com.wadpam.open.io.Exporter;
 import com.wadpam.open.io.Extractor;
 import com.wadpam.open.io.JsonConverter;
@@ -21,9 +22,10 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class ExportService {
     static final Converter<Dao> CONVERTER_CSV = new CsvConverter<Dao>();
-    static final Extractor<Dao> EXTRACTOR_MARDAO = new Mardao2Extractor();
-    
+    static final Converter<Dao> CONVERTER_EXCEL = new ExcelConverter<Dao>();
     static final Converter<Dao> CONVERTER_JSON = new JsonConverter<Dao>();
+    
+    static final Extractor<Dao> EXTRACTOR_MARDAO = new Mardao2Extractor();
     
     @Autowired
     private DEmployeeDao employeeDao;
@@ -50,7 +52,7 @@ public class ExportService {
     
     public void exportAll(OutputStream out, String contentType) {
         exporter.setConverter("application/json".equals(contentType) ? 
-                CONVERTER_JSON : null);
+                CONVERTER_JSON : CONVERTER_EXCEL);
         exporter.export(out, this, organizationDao, employeeDao);
     }
 

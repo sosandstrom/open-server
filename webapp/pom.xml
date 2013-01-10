@@ -94,6 +94,11 @@
             <artifactId>mardao-gae</artifactId>
             <version>${mardao.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>3.9</version>
+        </dependency>
 
         <!-- These dependencies are here just for enabling logging -->
         <dependency>

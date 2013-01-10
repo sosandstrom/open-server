@@ -1,6 +1,8 @@
 package com.wadpam.open.web;
 
-import java.net.URI;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -8,8 +10,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.web.client.RestTemplate;
-import static org.junit.Assert.*;
-import org.springframework.web.client.HttpClientErrorException;
 
 /**
  * Integration test for the CRUD controllers.
@@ -50,6 +50,16 @@ public class ExportITest {
     public void testExportAllAsJSON() {
         String actual = template.getForObject(BASE_URL + "export/all.json", String.class);
         System.out.println(actual);
+    }
+    
+    @Test
+    public void testExportAllAsXLS() throws IOException {
+        byte[] actual = template.getForObject(BASE_URL + "export/all.xls", byte[].class);
+        File f = File.createTempFile("OpenServer", ".xls");
+        FileOutputStream fos = new FileOutputStream(f);
+        fos.write(actual);
+        fos.close();
+        System.out.println(f.getAbsolutePath());
     }
     
 }
