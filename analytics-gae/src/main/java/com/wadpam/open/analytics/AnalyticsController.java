@@ -66,7 +66,7 @@ public class AnalyticsController extends AbstractRestController {
     @RequestMapping(value="pageview", method= RequestMethod.GET)
     @ResponseBody
     @RestReturn(value=Map.class, entity=Map.class, code={
-            @RestCode(code=200, message="OK", description="Page view forwarded"),
+            @RestCode(code=200, message="OK", description="Page view forwarded")
     })
     public void forwardPageView(HttpServletRequest request,
                                 @PathVariable String domain,
@@ -106,7 +106,7 @@ public class AnalyticsController extends AbstractRestController {
     @RequestMapping(value="event", method= RequestMethod.GET)
     @ResponseBody
     @RestReturn(value=Map.class, entity=Map.class, code={
-            @RestCode(code=200, message="OK", description="Event forwarded"),
+            @RestCode(code=200, message="OK", description="Event forwarded")
     })
     public void forwardEvent(HttpServletRequest request,
                              @PathVariable String domain,
