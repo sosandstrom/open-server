@@ -29,7 +29,15 @@
     <properties>
         <gae.version>1.7.0</gae.version>
         <docrest.version>1.17</docrest.version>
-        <mardao.version>2.1.0</mardao.version>
+        <mardao.version>2.1.4</mardao.version>
+        <spring.version>3.1.1.RELEASE</spring.version>
+        <spring.security.version>3.1.0.RELEASE</spring.security.version>
+        <org.springframework.social.version>1.0.1.RELEASE</org.springframework.social.version>
+        <javadocExecutable>${java.home}/../bin/javadoc</javadocExecutable>
+        <java.version>1.6</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <logging.level>ALL</logging.level>
+        <downloadSources>false</downloadSources>
     </properties>
     
     <build>

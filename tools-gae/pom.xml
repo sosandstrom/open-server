@@ -12,8 +12,6 @@
 
     <!-- Specify hard-coded project properties here -->
     <properties>
-        <downloadSources>false</downloadSources>
-        <spring.version>3.1.1.RELEASE</spring.version>
     </properties>
 
     <build>

@@ -12,16 +12,36 @@
 
     <!-- Specify hard-coded project properties here -->
     <properties>
-        <logging.level>ALL</logging.level>
-        <downloadSources>false</downloadSources>
-        <spring.version>3.1.1.RELEASE</spring.version>
-        <spring.security.version>3.1.0.RELEASE</spring.security.version>
-        <spring-social.version>1.0.1.RELEASE</spring-social.version>
-        <javadocExecutable>${java.home}/../bin/javadoc</javadocExecutable>
     </properties>
 
     <build>
+
         <plugins>
+            <plugin>
+                <groupId>net.sf.mardao</groupId>
+                <artifactId>mardao-maven-plugin</artifactId>
+                <version>${mardao.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-generics</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate-sources</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>generate-daos</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>process-classes</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <basePackage>com.wadpam.open</basePackage>
+                </configuration>
+            </plugin>
+
             <!-- Java compiler version -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -32,6 +52,58 @@
                     <target>1.6</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
+                <executions>
+                    <!-- extra compile step of domain classes before generator processing -->
+                    <execution>
+                        <id>compile-entities</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <verbose>false</verbose>
+                            <fork>true</fork>
+                            <includes>
+                                <include>**/domain/*.java</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>
+                                    ${project.basedir}/target/generated-sources/dao
+                                </source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>add-test-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.basedir}/src/test/groovy
+                                </source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
@@ -62,16 +134,36 @@
                     <verbose>true</verbose>
                 </configuration>
             </plugin>
+
         </plugins>
-        
     </build>
 
     <dependencies>
+
+        <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-api-1.0-sdk</artifactId>
+            <version>${gae.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sf.mardao</groupId>
+            <artifactId>mardao-gae</artifactId>
+            <version>${mardao.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>errors</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>transactions-gae</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>j2ee</artifactId>
@@ -80,17 +172,22 @@
         </dependency>
 
         <dependency>
+            <groupId>com.wadpam.openserver</groupId>
+            <artifactId>jsonp</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
             <version>${spring.version}</version>
         </dependency>
 
-<!--        <dependency>
-            <groupId>com.google.appengine</groupId>
-            <artifactId>appengine-api-1.0-sdk</artifactId>
-            <version>${gae.version}</version>
-            <scope>provided</scope>
-        </dependency>-->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
         
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -117,6 +214,12 @@
             <artifactId>junit</artifactId>
             <version>4.8.2</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.7</version>
         </dependency>
 
     </dependencies>

@@ -22,7 +22,7 @@
 
     <!--           Filters (on web.xml)             -->
 
-    <bean id="domainFilter" class="com.wadpam.open.domain.service.DomainFilter">
+    <bean id="domainFilter" class="com.wadpam.open.web.DomainFilter">
     </bean>
 
     <bean id="jsonpFilter" class="com.wadpam.open.jsonp.JsonpCallbackFilter">

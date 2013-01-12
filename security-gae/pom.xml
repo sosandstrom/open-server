@@ -11,13 +11,6 @@
 
     <!-- Specify hard-coded project properties here -->
     <properties>
-        <logging.level>ALL</logging.level>
-        <downloadSources>false</downloadSources>
-        <spring.version>3.1.1.RELEASE</spring.version>
-        <spring.security.version>3.1.1.RELEASE</spring.security.version>
-        <spring-social.version>1.0.1.RELEASE</spring-social.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <javadocExecutable>${java.home}/../bin/javadoc</javadocExecutable>
     </properties>
 
     <build>

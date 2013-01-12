@@ -1,4 +1,4 @@
-package com.wadpam.open.domain.service;
+package com.wadpam.open.web;
 
 import com.google.appengine.api.NamespaceManager;
 import java.io.IOException;
@@ -10,8 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Changes GAE Namespace to specified domain, where path is /{context}/{domain}/
+ * Changes GAE Namespace to specified domain, where path is /{context}/{domain}/.
+ * This is an older version, please consider using DomainNamespaceFilter instead.
  * @author os
+ * @deprecated
  */
 public class DomainFilter implements Filter {
     static final Logger LOG = LoggerFactory.getLogger(DomainFilter.class);

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:s="http://www.springframework.org/schema/security"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+       http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+    <!-- Example configuration. Include this file or write your own -->
+
+    <!-- Service -->
+    <bean id="domainService" class="com.wadpam.open.service.DomainService" init-method="init">
+        <property name="domainDao" ref="dAppDomainDao" />
+    </bean>
+
+
+    <!-- Aspects -->
+
+
+    <!-- Interceptors -->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/**"/>
+            <bean id="domainInterceptor" class="com.wadpam.open.web.DomainInterceptor">
+                <property name="domainService" ref="domainService"/>
+            </bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+    <!-- Controller -->
+    <bean class="com.wadpam.open.web.DomainController">
+        <property name="domainService" ref="domainService" />
+    </bean>
+
+    <!-- Dao -->
+
+    <bean id="dAppDomainDao"
+          class="com.wadpam.open.dao.DAppDomainDaoBean">
+    </bean>
+
+
+</beans>

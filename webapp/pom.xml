@@ -14,17 +14,10 @@
     <properties>
         <gae.application.version>lab</gae.application.version>
         <gae.application.id>open-user</gae.application.id>
-        <spring.version>3.1.1.RELEASE</spring.version>
-        <spring.security.version>3.1.0.RELEASE</spring.security.version>
-        <org.springframework.social.version>1.0.1.RELEASE</org.springframework.social.version>
-        <downloadSources>true</downloadSources>
-        <mardao.version>2.1.4-SNAPSHOT</mardao.version>
         <netbeans.hint.deploy.server>Tomcat</netbeans.hint.deploy.server>
-        <java.version>1.6</java.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <itest.include>**/*ITest.java</itest.include>
         <surefire.default.skip>true</surefire.default.skip>
-        <javadocExecutable>${java.home}/../bin/javadoc</javadocExecutable>
+        <downloadSources>true</downloadSources>
         <logging.level>ALL</logging.level>
     </properties>
 
