@@ -60,6 +60,7 @@ public abstract class BaseConverter {
         if (null == from || null == to) {
             return;
         }
+        convert(from, (AbstractCreatedUpdatedEntity) to);
 
         to.setId(toLong(from.getId()));
     }

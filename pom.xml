@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.wadpam.openserver</groupId>
     <artifactId>parent</artifactId>
-    <version>6-SNAPSHOT</version>
+    <version>7-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Open-Server parent</name>
 
@@ -12,7 +12,9 @@
         <module>errors</module>
         <module>j2ee</module>
         <module>domain</module>
+        <module>io-core</module>
         <module>jsonp</module>
+        <module>mvc-boiler</module>
         <module>push</module>
         <module>transactions-gae</module>
         <module>security-gae</module>
@@ -29,6 +31,24 @@
         <docrest.version>1.17</docrest.version>
         <mardao.version>2.1.0</mardao.version>
     </properties>
+    
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Java compiler version -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>2.3.2</version>
+                    <configuration>
+                        <source>1.6</source>
+                        <target>1.6</target>
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
     
     <developers>
         <developer>

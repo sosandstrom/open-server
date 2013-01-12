@@ -36,7 +36,7 @@ public class UUIDController extends AbstractRestController {
      * @return a UUID type 4
      */
     @RestReturn(value=Map.class, entity=Map.class, code={
-            @RestCode(code=200, message="OK", description="UUID generated"),
+            @RestCode(code=200, message="OK", description="UUID generated")
     })
     @RequestMapping(value="uuid", method= RequestMethod.GET)
     @ResponseBody
