@@ -37,7 +37,7 @@ import static org.junit.Assert.*;
  * @author mattiaslevin
  */
 public abstract class AbstractRestTempleIntegrationTest {
-    static final Logger LOG = LoggerFactory.getLogger(AbstractRestTempleIntegrationTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractRestTempleIntegrationTest.class);
 
 
     // Spring rest template

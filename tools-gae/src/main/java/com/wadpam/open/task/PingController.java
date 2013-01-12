@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- *
+ * A ping controller for that create a GAE task every X ms and send to it self.
+ * This is useful to ensure that GAE instances are always running and not powered
+ * down.
  * @author os
  */
 @Controller
