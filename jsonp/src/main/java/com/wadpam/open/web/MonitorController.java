@@ -18,7 +18,7 @@ import org.springframework.web.client.RestTemplate;
  */
 @Controller
 @RequestMapping(value={"monitor", "{domain}/monitor"})
-public class MonitorController {
+public class MonitorController extends AbstractRestController {
     static final Logger LOG = LoggerFactory.getLogger(MonitorController.class);
     
     static final String PREFIX = "Current IP Address: ";

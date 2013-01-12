@@ -29,7 +29,7 @@ public class BadRequestException extends RestException {
                                String developerMessage,
                                String moreInfo,
                                String message) {
-        super(code, developerMessage, moreInfo, HttpStatus.BAD_REQUEST.value(), message);
+        super(code, developerMessage, moreInfo, HttpStatus.BAD_REQUEST, message);
     }
 
 }

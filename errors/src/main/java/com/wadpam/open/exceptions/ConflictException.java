@@ -9,7 +9,16 @@ import org.springframework.http.HttpStatus;
 public class ConflictException extends RestException {
 
     /**
-     * Create a conflice exception.
+     * Create a conflict exception.
+     * @param code unique error code that can be used for localization in the app
+     * @param message error message
+     */
+    public ConflictException(int code, String message) {
+        this(code, null,null, message);
+    }
+
+    /**
+     * Create a conflict exception.
      * @param code unique error code that can be used for localization in the app
      * @param developerMessage developer message
      * @param moreInfo typically a url where more info can be found
@@ -19,7 +28,7 @@ public class ConflictException extends RestException {
             String developerMessage,
             String moreInfo,
             String message) {
-        super(code, developerMessage, moreInfo, HttpStatus.CONFLICT.value(), message);
+        super(code, developerMessage, moreInfo, HttpStatus.CONFLICT, message);
     }
 
 }

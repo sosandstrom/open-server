@@ -132,7 +132,7 @@ public class AppAdminController {
         // Get current user
         if (null == getCurrentUserDetails()) {
             LOG.debug("Trying to create an admin that is not logged in:{}", getCurrentUserEmail());
-            throw new RestException(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.value(), "Admin not logged in");
+            throw new RestException(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED, "Admin not logged in");
         }
 
         String detailsUrl = uriBuilder.path("/backoffice/admin").build().toUriString();
@@ -296,7 +296,7 @@ public class AppAdminController {
                 break;
             default:
                 LOG.error("Trying to set account status to state not supported:{}", status);
-                throw new RestException(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.value(), "Account status not supported");
+                throw new RestException(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST, "Account status not supported");
         }
 
         final DAppAdmin body = appService.updateAdminAccountStatus(email, accountStatus);

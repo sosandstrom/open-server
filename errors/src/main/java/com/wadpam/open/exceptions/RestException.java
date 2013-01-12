@@ -1,5 +1,7 @@
 package com.wadpam.open.exceptions;
 
+import org.springframework.http.HttpStatus;
+
 /**
  * Base class for all REST exceptions
  * @author sosandstrom
@@ -8,14 +10,15 @@ public class RestException extends RuntimeException {
     private int code;
     private String developerMessage;
     private String moreInfo;
-    private int status;
+    private HttpStatus status;
 
 
-    public RestException(int code, int status, String message) {
+    public RestException(int code, HttpStatus status, String message) {
         this(code, null, null, status, message);
     }
 
-    public RestException(int code, String developerMessage, String moreInfo, int status, String message) {
+    public RestException(int code, String developerMessage, String moreInfo,
+                         HttpStatus status, String message) {
         super(message);
         this.code = code;
         this.developerMessage = developerMessage;
@@ -39,11 +42,11 @@ public class RestException extends RuntimeException {
         this.developerMessage = developerMessage;
     }
 
-    public int getStatus() {
+    public HttpStatus getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(HttpStatus status) {
         this.status = status;
     }
 

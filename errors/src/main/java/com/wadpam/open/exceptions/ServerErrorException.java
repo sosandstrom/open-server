@@ -29,7 +29,7 @@ public class ServerErrorException extends RestException {
                                 String developerMessage,
                                 String moreInfo,
                                 String message) {
-        super(code, developerMessage, moreInfo, HttpStatus.INTERNAL_SERVER_ERROR.value(), message);
+        super(code, developerMessage, moreInfo, HttpStatus.INTERNAL_SERVER_ERROR, message);
     }
 
 }

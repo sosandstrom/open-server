@@ -62,7 +62,7 @@ public class RestJsonExceptionResolver extends AbstractHandlerExceptionResolver
                 if (null != re.getDeveloperMessage()) {
                     error.setDeveloperMessage(re.getDeveloperMessage());
                 }
-                error.setStatus(re.getStatus());
+                error.setStatus(re.getStatus().value());
                 error.setMoreInfo(re.getMoreInfo());
             }
             else {

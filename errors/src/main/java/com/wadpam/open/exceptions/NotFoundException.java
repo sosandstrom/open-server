@@ -29,7 +29,7 @@ public class NotFoundException extends RestException {
             String developerMessage,
             String moreInfo,
             String message) {
-        super(code, developerMessage, moreInfo, HttpStatus.NOT_FOUND.value(), message);
+        super(code, developerMessage, moreInfo, HttpStatus.NOT_FOUND, message);
     }
 
 }

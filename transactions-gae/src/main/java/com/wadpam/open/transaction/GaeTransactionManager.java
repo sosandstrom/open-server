@@ -18,9 +18,8 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * An Spring transaction manager implementing the transaction strategy for GAE.
  * @author mattiaslevin
  */
-public class GaeTransacationManager extends AbstractPlatformTransactionManager {
-
-    static final Logger LOG = LoggerFactory.getLogger(GaeTransacationManager.class);
+public class GaeTransactionManager extends AbstractPlatformTransactionManager {
+    static final Logger LOG = LoggerFactory.getLogger(GaeTransactionManager.class);
 
 
     @Override

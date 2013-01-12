@@ -1,4 +1,4 @@
-package com.wadpam.open.transaction;
+package com.wadpam.open.service;
 
 import com.google.appengine.api.NamespaceManager;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -8,32 +8,25 @@ import org.springframework.core.Ordered;
 
 /**
  * Class for implementing setting a fixed GAE name space.
- * Can be useful when making datastore queries accross domais.
+ * Can be useful when making datastore queries across domains.
  * @author mattiaslevin
  */
 public class GaeFixedNamespaceExecutor implements Ordered {
-
     static final Logger LOG = LoggerFactory.getLogger(GaeFixedNamespaceExecutor.class);
 
-    static final String DEFAULT_FIXED_NAMESPACE = "defaultFixedNamespace";
+    static final String DEFAULT_FIXED_NAMESPACE = "defaultNamespace";
 
     private int order = 30;
-
     private String namespace = DEFAULT_FIXED_NAMESPACE;
 
 
     // Run a method in a fixed namespace
-    public Object doFixedNamespace(ProceedingJoinPoint pjp, FixedNamespace annotatedNamespace) throws Throwable {
-
-        String newNamespace = annotatedNamespace.value();
-        if (null == annotatedNamespace || annotatedNamespace.value().isEmpty())
-            newNamespace = this.namespace;
-
-        LOG.debug("Use a fixed namespace:{}", newNamespace);
+    public Object doFixedNamespaceOperation(ProceedingJoinPoint pjp) throws Throwable {
+        LOG.debug("Use a fixed namespace:{}", namespace);
 
         // Preserve current namespace:
         final String currentNamespace = NamespaceManager.get();
-        NamespaceManager.set(newNamespace);
+        NamespaceManager.set(namespace);
 
         Object result;
         try {

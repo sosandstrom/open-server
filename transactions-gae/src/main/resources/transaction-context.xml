@@ -37,7 +37,7 @@
 
     <tx:annotation-driven transaction-manager="transactionManager" order="200"/>
 
-    <bean id="transactionManager" class="com.wadpam.open.transaction.GaeTransacationManager">
+    <bean id="transactionManager" class="com.wadpam.open.transaction.GaeTransactionManager">
         <property name="transactionSynchronization" value="2" />
     </bean>
 

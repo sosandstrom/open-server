@@ -14,10 +14,10 @@ import org.slf4j.LoggerFactory;
  * @author os
  */
 public class DomainFilter implements Filter {
+    static final Logger LOG = LoggerFactory.getLogger(DomainFilter.class);
+
     public static final String PARAM_DOMAIN = "dn";
     public static final String KEY_PREFIX_NAMESPACE = "du.ns.";
-    
-    static final Logger LOG = LoggerFactory.getLogger(DomainFilter.class);
 
 //    private static final Pattern _ADMIN_PATTERN = Pattern.compile("\\A/([^/]+)/_admin/namespace/([^/]+)/");
     private static final Pattern CONTEXT_PATTERN = Pattern.compile("\\A/([^/]+)/([^/]+)");

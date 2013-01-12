@@ -85,23 +85,12 @@ public abstract class AbstractRestController {
 
     // Dedicated exception handlers
 
-    @ExceptionHandler(BadRequestException.class)
-    @ResponseBody
-    public void handleBadRequest(HttpServletResponse response, BadRequestException e) {
-        doHandle(response, e, HttpStatus.BAD_REQUEST);
-    }
-    
-    @ExceptionHandler(NotFoundException.class)
-    @ResponseBody
-    public void handleNotFound(HttpServletResponse response, NotFoundException e) {
-        doHandle(response, e, HttpStatus.NOT_FOUND);
-    }
-
     @ExceptionHandler(RestException.class)
     @ResponseBody
-    public void handleRestError(HttpServletResponse response, RestException e) {
-        doHandle(response, e, HttpStatus.INTERNAL_SERVER_ERROR);
+    public void handleRestRequest(HttpServletResponse response, RestException e) {
+        doHandle(response, e, e.getStatus());
     }
+
 
     // All other exceptions
     // The exception must be a subclass of Exception or Spring will not handle it here

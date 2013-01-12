@@ -19,14 +19,14 @@
             <aop:aspect id="gaeFixedNamespaceAspect" ref="gaeFixedNamespaceExecutor">
                 <aop:pointcut id="fixedNamespaceMethods"
                               expression="within(com.wadpam.pocketvenue.service.VenueService)
-                              and @annotation(com.wadpam.open.transaction.FixedNamespace)"/>
+                              and @annotation(com.wadpam.open.service.FixedNamespace)"/>
                 <aop:around pointcut-ref="fixedNamespaceMethods" method="doFixedNamespaceOperation" />
             </aop:aspect>
         </aop:config>
 
     -->
 
-    <bean id="gaeFixedNamespaceExecutor" class="com.wadpam.open.transaction.GaeFixedNamespaceExecutor">
+    <bean id="gaeFixedNamespaceExecutor" class="com.wadpam.open.service.GaeFixedNamespaceExecutor">
         <property name="order" value="30"/>
         <property name="namespace" value="backoffice"/>
     </bean>

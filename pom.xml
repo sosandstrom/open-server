@@ -21,6 +21,7 @@
         <module>analytics</module>
         <module>analytics-gae</module>
         <module>tools-gae</module>
+        <module>test</module>
     </modules>
     
     <properties>
