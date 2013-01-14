@@ -71,7 +71,7 @@
         <dependency>
             <groupId>net.sf.mardao</groupId>
             <artifactId>mardao-api</artifactId>
-            <version>1.40-SNAPSHOT</version>
+            <version>1.40</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
