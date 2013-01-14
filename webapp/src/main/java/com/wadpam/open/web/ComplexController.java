@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping(value="{domain}/complex")
 public class ComplexController extends CrudController<JComplex,
-        DComplex, Long>{
+        DComplex, Long, ComplexService>{
     
     @Autowired
     private DSampleDao sampleDao;

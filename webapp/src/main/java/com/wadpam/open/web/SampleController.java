@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping(value="{domain}/sample")
 public class SampleController extends CrudController<JSample,
-        DSample, Long>{
+        DSample, Long, SampleService>{
 
     @Override
     public JSample convertDomain(DSample from) {
