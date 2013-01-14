@@ -23,11 +23,9 @@ import net.sf.mardao.core.domain.AbstractLongEntity;
 import net.sf.mardao.core.geo.DLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,11 +41,11 @@ import org.springframework.web.servlet.view.RedirectView;
  *
  * @author os
  */
-@Controller
 public abstract class CrudController<
         J extends JBaseObject, 
         T extends Object, 
-        ID extends Serializable> {
+        ID extends Serializable,
+        S extends CrudService<T, ID>> {
     
     public static final String NAME_X_REQUESTED_WITH = "X-Requested-With";
     public static final String VALUE_X_REQUESTED_WITH_AJAX = "XMLHttpRequest";
@@ -58,7 +56,7 @@ public abstract class CrudController<
     
     protected static final Logger LOG = LoggerFactory.getLogger(CrudController.class);
     
-    protected CrudService<T, ID> service;
+    protected S service;
     
     @RequestMapping(value="v10", method=RequestMethod.POST, consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public RedirectView createFromForm(
@@ -179,8 +177,6 @@ public abstract class CrudController<
     /**
      * Queries for non-deleted entities. If not found or soft-deleted, it will be excluded from the response.
      * @param id array of ids to retrieve
-     * @param pageSize default is 10
-     * @param cursorKey null to get first page
      * @return a Collection of non-deleted J objects
      */
     @RestReturn(value=List.class, code={
@@ -196,6 +192,25 @@ public abstract class CrudController<
         return body;
     }
 
+    /**
+     * Queries for a (next) page of entities
+     * @param pageSize default is 10
+     * @param cursorKey null to get first page
+     * @return a page of entities
+     */
+    @RestReturn(value=JCursorPage.class, code={
+        @RestCode(code=200, description="A CursorPage with JSON entities", message="OK")})
+    @RequestMapping(value="v10", method= RequestMethod.GET)
+    @ResponseBody
+    public JCursorPage<J> getPage(
+            @RequestParam(defaultValue="10") int pageSize, 
+            @RequestParam(required=false) Serializable cursorKey) {
+        final CursorPage<T, ID> page = service.getPage(pageSize, cursorKey);
+        final JCursorPage body = convertPage(page);
+
+        return body;
+    }
+    
     @RequestMapping(value="v10/{id}", method=RequestMethod.POST, consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public RedirectView updateFromForm(
             HttpServletRequest request,

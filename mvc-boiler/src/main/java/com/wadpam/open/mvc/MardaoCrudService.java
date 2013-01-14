@@ -16,11 +16,12 @@ import org.slf4j.LoggerFactory;
  */
 public class MardaoCrudService<
         T extends Object, 
-        ID extends Serializable> implements CrudService<T, ID> {
+        ID extends Serializable,
+        D extends Dao<T, ID>> implements CrudService<T, ID> {
     
     protected static final Logger LOG = LoggerFactory.getLogger(MardaoCrudService.class);
     
-    protected Dao<T, ID> dao;
+    protected D dao;
     
     @Override
     public ID create(T domain) {
