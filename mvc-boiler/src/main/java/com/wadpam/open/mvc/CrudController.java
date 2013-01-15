@@ -1,5 +1,6 @@
 package com.wadpam.open.mvc;
 
+import com.sun.net.httpserver.Headers;
 import com.wadpam.docrest.domain.RestCode;
 import com.wadpam.docrest.domain.RestReturn;
 import com.wadpam.open.exceptions.NotFoundException;
@@ -13,6 +14,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -23,6 +25,7 @@ import net.sf.mardao.core.domain.AbstractLongEntity;
 import net.sf.mardao.core.geo.DLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -58,48 +61,91 @@ public abstract class CrudController<
     
     protected S service;
     
-    @RequestMapping(value="v10", method=RequestMethod.POST, consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @RequestMapping(value="v10", method=RequestMethod.POST, 
+            consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public RedirectView createFromForm(
             HttpServletRequest request,
             HttpServletResponse response,
             @PathVariable String domain,
-            @RequestHeader(value=NAME_X_REQUESTED_WITH, required=false) String xRequestedWith,
             @ModelAttribute J jEntity) {
-        LOG.debug(jEntity.toString());
         
-        T d = convertJson(jEntity);
+        final String path = createForLocation(request, jEntity);
+        return new RedirectView(path, true);
+    }
+    
+    @RequestMapping(value="v10", method=RequestMethod.GET, 
+            params={"_method=POST"},
+            headers={"X-Requested-With=XMLHttpRequest"},
+            consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity createFromJsonp(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable String domain,
+            @ModelAttribute J jEntity) {
+        final String path = createForLocation(request, jEntity);
+        final HttpHeaders headers = new HttpHeaders();
+        headers.set("Location", path);
+        return new ResponseEntity(headers, HttpStatus.CREATED);
+    }
+    
+    @RequestMapping(value="v10", method=RequestMethod.POST, 
+            consumes=MediaType.APPLICATION_JSON_VALUE)
+    public RedirectView createFromJson(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable String domain,
+            @RequestBody J jEntity) {
+        final String path = createForLocation(request, jEntity);
+        return new RedirectView(path, true);
+    }
+    
+    @RequestMapping(value="v10", method=RequestMethod.POST, 
+            params={"_expects=200"},
+            consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @ResponseBody
+    public J createFromFormWithContent(HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable String domain,
+            @ModelAttribute J jEntity) {
+        return createForObject(request, jEntity);
+    }
+    
+    @RequestMapping(value="v10", method=RequestMethod.POST, 
+            params={"_expects=200"},
+            consumes=MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public J createFromJsonWithContent(HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable String domain,
+            @RequestBody J jEntity) {
+        return createForObject(request, jEntity);
+    }
+    
+    protected T create(J body) {
+        LOG.debug(body.toString());
+        
+        T d = convertJson(body);
         service.create(d);
+        return d;
+    }
+    
+    protected J createForObject(HttpServletRequest request, J body) {
+        T d = create(body);
+        return convertWithInner(request, d);
+    }
+    
+    protected String createForLocation(HttpServletRequest request, J body) {
+        T d = create(body);
         
-        final StringBuffer path = new StringBuffer("v10/");
+        final StringBuffer path = new StringBuffer(request.getRequestURI());
+        path.append('/');
         path.append(service.getSimpleKey(d));
         final String parentKeyString = service.getParentKeyString(d);
         if (null != parentKeyString) {
             path.append("?parentKeyString=");
             path.append(parentKeyString);
         }
-        return new RedirectView(path.toString(), true);
-    }
-    
-    @RequestMapping(value="v10", method=RequestMethod.GET, 
-            params={"_method=POST"},
-            consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public RedirectView createFromJsonp(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            @PathVariable String domain,
-            @RequestHeader(value=NAME_X_REQUESTED_WITH, required=false) String xRequestedWith,
-            @ModelAttribute J jEntity) {
-        return createFromForm(request, response, domain, xRequestedWith, jEntity);
-    }
-    
-    @RequestMapping(value="v10", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE)
-    public RedirectView createFromJson(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            @PathVariable String domain,
-            @RequestHeader(value=NAME_X_REQUESTED_WITH, required=false) String xRequestedWith,
-            @RequestBody J jEntity) {
-        return createFromForm(request, response, domain, xRequestedWith, jEntity);
+        return path.toString();
     }
     
     @RequestMapping(value="v10/{id}", method=RequestMethod.DELETE)
@@ -152,7 +198,6 @@ public abstract class CrudController<
         
         service.exportCsv(out, startDate, endDate);
     }
-
     
     @RequestMapping(value="v10/{id}", method=RequestMethod.GET)
     @ResponseBody
@@ -169,7 +214,14 @@ public abstract class CrudController<
         if (null == d) {
             throw new NotFoundException(ERR_GET_NOT_FOUND, request.getQueryString());
         }
-        J body = convertDomain(d);
+        
+        // default for GET is to include inner objects if any
+        if (null != getInnerParameterNames()) {
+            for (String name : getInnerParameterNames()) {
+                request.setAttribute(name, Boolean.TRUE);
+            }
+        }
+        J body = convertWithInner(request, d);
         
         return body;
     }
@@ -294,6 +346,12 @@ public abstract class CrudController<
     
     // --------------- Converter methods --------------------------
     
+    /** This implementation does nothing, please override */
+    public J addInnerObjects(HttpServletRequest request, J jEntity) {
+        // do nothing
+        return jEntity;
+    }
+
     public abstract J convertDomain(T from);
     public abstract T convertJson(J from);
     
@@ -307,7 +365,12 @@ public abstract class CrudController<
         to.setUpdatedBy(from.getUpdatedBy());
         to.setUpdatedDate(toLong(from.getUpdatedDate()));
     }
-
+    
+    protected J convertWithInner(HttpServletRequest request, T from) {
+        final J to = convertDomain(from);
+        return addInnerObjects(request, to);
+    }
+    
     public static void convertLongEntity(AbstractLongEntity from, JBaseObject to) {
         if (null == from || null == to) {
             return;
@@ -373,6 +436,9 @@ public abstract class CrudController<
         return to;
     }
 
+    protected Collection<String> getInnerParameterNames() {
+        return Collections.EMPTY_LIST;
+    }
 
     public static Long toLong(Date from) {
         if (null == from) {

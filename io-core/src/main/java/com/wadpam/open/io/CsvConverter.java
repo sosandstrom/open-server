@@ -1,7 +1,9 @@
 package com.wadpam.open.io;
 
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,7 +40,10 @@ public class CsvConverter<D> implements Converter<D> {
     @Override
     public Object preDao(OutputStream out, Object arg, Object preExport, Object preDao, 
             String tableName, Iterable<String> columns, int daoIndex, D dao) {
-        pw.set(new PrintWriter(out));
+        try {
+            pw.set(new PrintWriter(new OutputStreamWriter(out, "UTF-8")));
+        }
+        catch (UnsupportedEncodingException willNeverHappen) {}
         final HashMap<String, Object> headers = new HashMap<String, Object>();
         for (String col : columns) {
             headers.put(col, col);
