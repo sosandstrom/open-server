@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.wadpam.openserver</groupId>
     <artifactId>parent</artifactId>
-    <version>8-SNAPSHOT</version>
+    <version>8</version>
     <packaging>pom</packaging>
     <name>Open-Server parent</name>
 
