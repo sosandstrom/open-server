@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public class CsvConverter<D> implements Converter<D> {
     
-    private final ThreadLocal<PrintWriter> pw = new ThreadLocal<PrintWriter>();
+    protected final ThreadLocal<PrintWriter> pw = new ThreadLocal<PrintWriter>();
 
     public static String escapeCsv(Object s) {
         if (null == s) {

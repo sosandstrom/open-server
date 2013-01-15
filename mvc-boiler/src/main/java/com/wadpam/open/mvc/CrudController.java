@@ -45,7 +45,7 @@ import org.springframework.web.servlet.view.RedirectView;
  * @author os
  */
 public abstract class CrudController<
-        J extends JBaseObject, 
+        J extends Object, 
         T extends Object, 
         ID extends Serializable,
         S extends CrudService<T, ID>> {
@@ -273,11 +273,6 @@ public abstract class CrudController<
             @ModelAttribute J jEntity) {
         LOG.debug(jEntity.toString());
 
-        // patch id in body?
-        if (null == jEntity.getId()) {
-            jEntity.setId(id.toString());
-        }
-        
         T d = convertJson(jEntity);
         service.update(d);
         
