@@ -1,6 +1,5 @@
 package com.wadpam.open.mvc;
 
-import com.sun.net.httpserver.Headers;
 import com.wadpam.docrest.domain.RestCode;
 import com.wadpam.docrest.domain.RestReturn;
 import com.wadpam.open.exceptions.NotFoundException;
@@ -29,6 +28,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -66,10 +66,10 @@ public abstract class CrudController<
     public RedirectView createFromForm(
             HttpServletRequest request,
             HttpServletResponse response,
-            @PathVariable String domain,
+            Model model,
             @ModelAttribute J jEntity) {
         
-        final String path = createForLocation(request, jEntity);
+        final String path = createForLocation(request, model, jEntity);
         return new RedirectView(path, true);
     }
     
@@ -81,8 +81,9 @@ public abstract class CrudController<
             HttpServletRequest request,
             HttpServletResponse response,
             @PathVariable String domain,
+            Model model,
             @ModelAttribute J jEntity) {
-        final String path = createForLocation(request, jEntity);
+        final String path = createForLocation(request, model, jEntity);
         final HttpHeaders headers = new HttpHeaders();
         headers.set("Location", path);
         return new ResponseEntity(headers, HttpStatus.CREATED);
@@ -94,8 +95,9 @@ public abstract class CrudController<
             HttpServletRequest request,
             HttpServletResponse response,
             @PathVariable String domain,
+            Model model,
             @RequestBody J jEntity) {
-        final String path = createForLocation(request, jEntity);
+        final String path = createForLocation(request, model, jEntity);
         return new RedirectView(path, true);
     }
     
@@ -106,8 +108,9 @@ public abstract class CrudController<
     public J createFromFormWithContent(HttpServletRequest request,
             HttpServletResponse response,
             @PathVariable String domain,
+            Model model,
             @ModelAttribute J jEntity) {
-        return createForObject(request, jEntity);
+        return createForObject(request, model, jEntity);
     }
     
     @RequestMapping(value="v10", method=RequestMethod.POST, 
@@ -117,10 +120,16 @@ public abstract class CrudController<
     public J createFromJsonWithContent(HttpServletRequest request,
             HttpServletResponse response,
             @PathVariable String domain,
+            Model model,
             @RequestBody J jEntity) {
-        return createForObject(request, jEntity);
+        return createForObject(request, model, jEntity);
     }
     
+    /**
+     * If you want to populate the request body, override populateRequestBody() method.
+     * @param body the request body to create
+     * @return 
+     */
     protected T create(J body) {
         LOG.debug(body.toString());
         
@@ -129,13 +138,26 @@ public abstract class CrudController<
         return d;
     }
     
-    protected J createForObject(HttpServletRequest request, J body) {
-        T d = create(body);
+    protected J createForObject(HttpServletRequest request, 
+            Model model, J body) {
+        J amendedBody = populateRequestBody(request, model, body);
+        T d = create(amendedBody);
+        
+        // default for GET is to include inner objects if any
+        // should be included for createForObject too
+        if (null != getInnerParameterNames()) {
+            for (String name : getInnerParameterNames()) {
+                request.setAttribute(name, Boolean.TRUE);
+            }
+        }
+        
         return convertWithInner(request, d);
     }
     
-    protected String createForLocation(HttpServletRequest request, J body) {
-        T d = create(body);
+    protected String createForLocation(HttpServletRequest request, 
+            Model model, J body) {
+        J amendedBody = populateRequestBody(request, model, body);
+        T d = create(amendedBody);
         
         final StringBuffer path = new StringBuffer(request.getRequestURI());
         path.append('/');
@@ -145,6 +167,7 @@ public abstract class CrudController<
             path.append("?parentKeyString=");
             path.append(parentKeyString);
         }
+        LOG.debug("Location for created entity is {}", path.toString());
         return path.toString();
     }
     
@@ -255,6 +278,9 @@ public abstract class CrudController<
     @RequestMapping(value="v10", method= RequestMethod.GET)
     @ResponseBody
     public JCursorPage<J> getPage(
+            HttpServletRequest request,
+            @RequestParam(required=false) String appString0,
+            @RequestParam(required=false) Long appLong0,
             @RequestParam(defaultValue="10") int pageSize, 
             @RequestParam(required=false) Serializable cursorKey) {
         final CursorPage<T, ID> page = service.getPage(pageSize, cursorKey);
@@ -270,10 +296,26 @@ public abstract class CrudController<
             @PathVariable String domain,
             @PathVariable ID id,
             @RequestHeader(value=NAME_X_REQUESTED_WITH, required=false) String xRequestedWith,
+            Model model,
             @ModelAttribute J jEntity) {
+        return updateForLocation(request, response, 
+                domain, id, 
+                xRequestedWith, 
+                model, 
+                jEntity);
+    }
+    
+    protected RedirectView updateForLocation(HttpServletRequest request,
+            HttpServletResponse response,
+            String domain,
+            ID id,
+            String xRequestedWith,
+            Model model,
+            J jEntity) {
         LOG.debug(jEntity.toString());
 
-        T d = convertJson(jEntity);
+        J amendedBody = populateRequestBody(request, model, jEntity);
+        T d = convertJson(amendedBody);
         service.update(d);
         
         final StringBuffer path = new StringBuffer("v10/");
@@ -295,8 +337,12 @@ public abstract class CrudController<
             @PathVariable String domain,
             @PathVariable ID id,
             @RequestHeader(value=NAME_X_REQUESTED_WITH, required=false) String xRequestedWith,
+            Model model,
             @ModelAttribute J jEntity) {
-        return updateFromForm(request, response, domain, id, xRequestedWith, jEntity);
+        return updateForLocation(request, response, 
+                domain, id, 
+                xRequestedWith, 
+                model, jEntity);
     }
     
     @RequestMapping(value="v10/{id}", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE)
@@ -306,8 +352,10 @@ public abstract class CrudController<
             @PathVariable String domain,
             @PathVariable ID id,
             @RequestHeader(value=NAME_X_REQUESTED_WITH, required=false) String xRequestedWith,
+            Model model,
             @RequestBody J jEntity) {
-        return updateFromForm(request, response, domain, id, xRequestedWith, jEntity);
+        return updateForLocation(request, response, domain, id, xRequestedWith, 
+                model, jEntity);
     }
     
     /**
@@ -337,6 +385,22 @@ public abstract class CrudController<
         }
         
         return page;
+    }
+    
+    // --------------- @ModelAttribute methods --------------------------
+    
+    /**
+     * Override to populate body with values from request and model.
+     * This implementation does nothing.
+     * @param request the servlet request
+     * @param model the model with @ModelAttribute objects
+     * @param body the request body to populate
+     * @return the amended request body
+     */
+    protected J populateRequestBody(HttpServletRequest request,
+            Model model,
+            J body) {
+        return body;
     }
     
     // --------------- Converter methods --------------------------
