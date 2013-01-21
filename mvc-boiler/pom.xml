@@ -12,7 +12,6 @@
 
     <!-- Specify hard-coded project properties here -->
     <properties>
-        <mardao.version>2.1.3</mardao.version>
     </properties>
 
     <build>
