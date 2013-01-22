@@ -16,7 +16,47 @@ and some convenient, generic methods:
 
 * Get Page of items - `GET {basePath}/v10[?pageSize=10][&cursorKey={cursorKey}]`
 * Get specified, existing items - `GET {basePath}/v10?id={id0}[&id={idN}]`
-* Get ids for changed items - `GET {basePath}/v10[?pageSize=10][&cursorKey={cursorKey}]` with a If-Modified-Since: {timestampString} HTTP header
+* Get ids for changed items - `GET {basePath}/v10[?pageSize=10][&cursorKey={cursorKey}]` with a `If-Modified-Since: {timestampString}` HTTP header
+
+    @Controller
+    @RequestMapping("{domain}/category")
+    public class CategoryController extends CrudController< 
+            JCategory, 
+            DmCategory, 
+            Long, 
+            CategoryService> {
+
+        @Override
+        public JCategory convertDomain(DmCategory from) {
+            if (from == null) {
+                return null;
+            }
+            JCategory to = new JCategory();
+            Converter.convertLong(from, to);
+
+            to.setDescription(from.getDescription());
+            to.setName(from.getName());
+            to.setType(from.getType());
+            return to;
+        }
+
+        @Override
+        public DmCategory convertJson(JCategory from) {
+            if (from == null) {
+                return null;
+            }
+            DmCategory to = new DmCategory();
+            Converter.convertLong(from, to);
+
+            to.setDescription(from.getDescription());
+            to.setName(from.getName());
+            to.setType(from.getType());
+            return to;
+        }
+
+    }
+
+where the ContactService is injected using @Autowired.
 
 CrudService
 -----------
@@ -53,11 +93,12 @@ The CrudService interface backs the CrudController with service methods.
 MardaoCrudService
 -----------------
 The MardaoCrudService implements the CrudService interface by using a Mardao Dao
-object. You can implement a full REST service with the following few lines:
-    public class CategoryService extends MardaoCrudService<
+object. You can implement a full REST service with the following few lines
+
+    public class CategoryService extends MardaoCrudService< 
             DmCategory, 
             Long, 
-            DmCategoryDao> {
-
+            DmCategoryDao> { 
+            
     }
 where the DmCategoryDao is injected using @Autowired.
