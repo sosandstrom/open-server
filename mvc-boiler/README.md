@@ -25,7 +25,7 @@ and some convenient, generic methods:
             DmCategory, 
             Long, 
             CategoryService> {
-
+            
         @Override
         public JCategory convertDomain(DmCategory from) {
             if (from == null) {
@@ -53,7 +53,7 @@ and some convenient, generic methods:
             to.setType(from.getType());
             return to;
         }
-
+        
     }
 
 where the ContactService is injected using @Autowired.
