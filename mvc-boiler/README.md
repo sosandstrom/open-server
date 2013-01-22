@@ -18,6 +18,8 @@ and some convenient, generic methods:
 * Get specified, existing items - `GET {basePath}/v10?id={id0}[&id={idN}]`
 * Get ids for changed items - `GET {basePath}/v10[?pageSize=10][&cursorKey={cursorKey}]` with a `If-Modified-Since: {timestampString}` HTTP header
 
+Example
+    
     @Controller
     @RequestMapping("{domain}/category")
     public class CategoryController extends CrudController< 
@@ -25,7 +27,7 @@ and some convenient, generic methods:
             DmCategory, 
             Long, 
             CategoryService> {
-            
+        
         @Override
         public JCategory convertDomain(DmCategory from) {
             if (from == null) {
