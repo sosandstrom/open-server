@@ -24,6 +24,7 @@ import net.sf.mardao.core.domain.AbstractLongEntity;
 import net.sf.mardao.core.geo.DLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -59,6 +60,7 @@ public abstract class CrudController<
     
     protected static final Logger LOG = LoggerFactory.getLogger(CrudController.class);
     
+    @Autowired
     protected S service;
     
     @RequestMapping(value="v10", method=RequestMethod.POST, 
