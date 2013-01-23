@@ -1,5 +1,6 @@
 package com.wadpam.open.web;
 
+import com.wadpam.docrest.domain.RestReturn;
 import com.wadpam.open.dao.DSampleDao;
 import com.wadpam.open.domain.DComplex;
 import com.wadpam.open.json.JComplex;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  *
  * @author os
  */
+@RestReturn(value=JComplex.class)
 @Controller
 @RequestMapping(value="{domain}/complex")
 public class ComplexController extends CrudController<JComplex,

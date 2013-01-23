@@ -9,6 +9,7 @@ import com.wadpam.open.json.JLocation;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.net.URI;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,9 +61,20 @@ public abstract class CrudController<
     
     protected static final Logger LOG = LoggerFactory.getLogger(CrudController.class);
     
-    @Autowired
     protected S service;
     
+    /**
+     * Creates an Entity from the form-encoded body, 
+     * and redirects to the created Entity.
+     * @param request
+     * @param response
+     * @param model
+     * @param jEntity The form-encoded body will be bound to this parameter
+     * @return a redirect to the {@link get()} method
+     */
+    @RestReturn(value=URI.class, code={
+        @RestCode(code=302, description="Entity created", message="Redirect")
+    })
     @RequestMapping(value="v10", method=RequestMethod.POST, 
             consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public RedirectView createFromForm(
@@ -75,6 +87,18 @@ public abstract class CrudController<
         return new RedirectView(path, true);
     }
     
+    /**
+     * Creates an Entity from the request parameters.
+     * Responds with a 201 Created (no content) and the Location header.
+     * @param request
+     * @param response
+     * @param model
+     * @param jEntity The request parameters will be bound to this object
+     * @return a 201 Created with Location header to the {@link get()} method
+     */
+    @RestReturn(value=URI.class, code={
+        @RestCode(code=201, description="Entity created", message="Created")
+    })
     @RequestMapping(value="v10", method=RequestMethod.GET, 
             params={"_method=POST"},
             headers={"X-Requested-With=XMLHttpRequest"},
@@ -91,6 +115,18 @@ public abstract class CrudController<
         return new ResponseEntity(headers, HttpStatus.CREATED);
     }
     
+    /**
+     * Creates an Entity from the JSON body, 
+     * and redirects to the created Entity.
+     * @param request
+     * @param response
+     * @param model
+     * @param jEntity The JSON body will be bound to this parameter
+     * @return a redirect to the {@link get()} method
+     */
+    @RestReturn(value=URI.class, code={
+        @RestCode(code=302, description="Entity created", message="Redirect")
+    })
     @RequestMapping(value="v10", method=RequestMethod.POST, 
             consumes=MediaType.APPLICATION_JSON_VALUE)
     public RedirectView createFromJson(
@@ -103,6 +139,17 @@ public abstract class CrudController<
         return new RedirectView(path, true);
     }
     
+    /**
+     * Creates an Entity from the form-encoded body, 
+     * and redirects to the created Entity.
+     * @param domain the path-variable domain
+     * @param _expects must be set to 200
+     * @param jEntity The form-encoded body will be bound to this object
+     * @return 200 and the created entity
+     */
+    @RestReturn(value=Object.class, code={
+        @RestCode(code=200, description="Entity created", message="OK")
+    })
     @RequestMapping(value="v10", method=RequestMethod.POST, 
             params={"_expects=200"},
             consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -110,6 +157,7 @@ public abstract class CrudController<
     public J createFromFormWithContent(HttpServletRequest request,
             HttpServletResponse response,
             @PathVariable String domain,
+            @RequestParam(value="_expects") Integer _expects,
             Model model,
             @ModelAttribute J jEntity) {
         return createForObject(request, model, jEntity);

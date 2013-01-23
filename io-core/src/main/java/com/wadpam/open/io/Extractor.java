@@ -1,6 +1,7 @@
 package com.wadpam.open.io;
 
 import java.util.Map;
+import net.sf.mardao.core.dao.Dao;
 
 /**
  *
@@ -10,6 +11,8 @@ public interface Extractor<D> {
     
     Iterable<String> getColumns(Object arg, D dao);
 
+    Map<String,String> getHeaderNames(Object arg, D dao);    
+    
     Map<String, Object> getValues(Object arg, D dao, Object entity);
     
     String getTableName(Object arg, D dao);

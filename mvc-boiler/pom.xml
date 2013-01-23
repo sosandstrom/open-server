@@ -36,25 +36,15 @@
                     <wtpversion>2.0</wtpversion>
                 </configuration>
             </plugin>
+            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.8</version>
-                <configuration>
-                    <author>false</author>
-                    <doclet>com.wadpam.docrest.DocRestDoclet</doclet>
-                    <docletArtifact>
-                        <groupId>com.wadpam</groupId>
-                        <artifactId>docrest-doclet</artifactId>
-                        <version>${docrest.version}</version>
-                    </docletArtifact>
-                    <encoding>UTF-8</encoding>
-                    <javadocExecutable>${javadocExecutable}</javadocExecutable>
-                    <sourcepath>src/main/java</sourcepath>
-                    <useStandardDocletOptions>false</useStandardDocletOptions>
-                    <verbose>true</verbose>
-                </configuration>
             </plugin>
         </plugins>
         

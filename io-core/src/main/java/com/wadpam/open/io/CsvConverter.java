@@ -39,16 +39,18 @@ public class CsvConverter<D> implements Converter<D> {
 
     @Override
     public Object preDao(OutputStream out, Object arg, Object preExport, Object preDao, 
-            String tableName, Iterable<String> columns, int daoIndex, D dao) {
+            String tableName, Iterable<String> columns, Map<String, String> headers, int daoIndex, D dao) {
         try {
             pw.set(new PrintWriter(new OutputStreamWriter(out, "UTF-8")));
         }
         catch (UnsupportedEncodingException willNeverHappen) {}
-        final HashMap<String, Object> headers = new HashMap<String, Object>();
+        final HashMap<String, Object> headerValues = new HashMap<String, Object>();
+        String headerName;
         for (String col : columns) {
-            headers.put(col, col);
+            headerName = headers.get(col);
+            headerValues.put(col, headerName != null ? headerName : col);
         }
-        return writeValues(out, arg, preExport, preDao, columns, -1, dao, -1, null, headers);
+        return writeValues(out, arg, preExport, preDao, columns, -1, dao, -1, null, headerValues);
     }
 
     @Override

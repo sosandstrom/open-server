@@ -1,6 +1,8 @@
 package com.wadpam.open.io;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import net.sf.mardao.core.dao.Dao;
 
@@ -9,6 +11,8 @@ import net.sf.mardao.core.dao.Dao;
  * @author os
  */
 public class Mardao2Extractor implements Extractor<Dao> {
+    
+    Map<String, Map<String, String>> daoHeaders = new HashMap<String, Map<String, String>>();
 
     @Override
     public Iterable<String> getColumns(Object arg, Dao dao) {
@@ -21,6 +25,16 @@ public class Mardao2Extractor implements Extractor<Dao> {
         }
         
         return columns;
+    }
+    
+    @Override
+    public Map<String,String> getHeaderNames(Object arg, Dao dao) {
+        final Map<String, String> map = daoHeaders.get(dao.getTableName());
+        return null != map ? map : Collections.EMPTY_MAP;
+    }
+    
+    public void setHeaderNames(Map<String, String> headerNames, Dao dao) {
+        daoHeaders.put(dao.getTableName(), headerNames);
     }
 
     @Override

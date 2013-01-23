@@ -54,7 +54,9 @@ public class ExcelConverter<D> implements Converter<D>{
     }
 
     @Override
-    public Object preDao(OutputStream out, Object arg, Object preExport, Object preDao, String tableName, Iterable<String> columns, int daoIndex, D dao) {
+    public Object preDao(OutputStream out, Object arg, Object preExport, Object preDao, 
+            String tableName, Iterable<String> columns, Map<String, String> headers, 
+            int daoIndex, D dao) {
         perDao = null == workbook;
         if (perDao) {
             workbook = new HSSFWorkbook();
@@ -64,10 +66,12 @@ public class ExcelConverter<D> implements Converter<D>{
         sheet = workbook.createSheet(safeSheetName);
         
         final Row header = sheet.createRow(0);
+        String headerName;
         int i = 0;
         for (String col : columns) {
             Cell th = header.createCell(i);
-            th.setCellValue(col);
+            headerName = headers.get(col);
+            th.setCellValue(null != headerName ? headerName : col);
             th.setCellStyle(boldStyle);
             i++;
         }

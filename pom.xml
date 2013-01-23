@@ -28,7 +28,7 @@
     
     <properties>
         <gae.version>1.7.0</gae.version>
-        <docrest.version>1.17</docrest.version>
+        <docrest.version>1.21</docrest.version>
         <mardao.version>2.1.5-SNAPSHOT</mardao.version>
         <spring.version>3.1.1.RELEASE</spring.version>
         <spring.security.version>3.1.0.RELEASE</spring.security.version>
@@ -54,6 +54,43 @@
                         <encoding>${project.build.sourceEncoding}</encoding>
                     </configuration>
                 </plugin>
+                
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>2.1.1</version>
+                    <executions>
+                        <execution>
+                            <id>bundle-sources</id>
+                            <phase>package</phase>
+                            <goals>
+                                <!-- produce source artifact for main project sources -->
+                                <goal>jar-no-fork</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>2.9</version>
+                    <executions>
+                        <execution>
+                            <id>resource-bundles</id>
+                            <phase>package</phase>
+                            <goals>
+                                <!-- produce source artifact for main project sources -->
+                                <goal>resource-bundle</goal>
+                            </goals>
+                            <configuration>
+                                <detectOfflineLinks>false</detectOfflineLinks>
+                            </configuration>
+                        </execution>
+
+                    </executions>
+                </plugin>
+                
             </plugins>
         </pluginManagement>
     </build>
