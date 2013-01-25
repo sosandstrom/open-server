@@ -55,10 +55,14 @@ Example
             to.setType(from.getType());
             return to;
         }
-        
+
+        @Autowired
+        public void setCategoryService(CategoryService categoryService) {
+            this.service = categoryService;
+        }
     }
 
-where the ContactService is injected using @Autowired.
+where the CategoryService is injected using @Autowired.
 
 CrudService
 -----------
@@ -101,6 +105,10 @@ object. You can implement a full REST service with the following few lines
             DmCategory, 
             Long, 
             DmCategoryDao> { 
-            
+
+        @Autowired
+        public void setDmCategoryDao(DmCategoryDao dmCategoryDao) {
+            this.dao = dmCategoryDao;
+        }
     }
 where the DmCategoryDao is injected using @Autowired.
