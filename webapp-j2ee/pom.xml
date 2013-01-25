@@ -1,0 +1,406 @@
+ 
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.wadpam.openserver</groupId>
+        <artifactId>parent</artifactId>
+        <version>9-SNAPSHOT</version>
+    </parent>
+    <artifactId>webapp-j2ee</artifactId>
+    <packaging>war</packaging>
+    <name>Open-Server J2EE webapp</name>
+
+    <!-- Specify hard-coded project properties here -->
+    <properties>
+        <netbeans.hint.deploy.server>Tomcat</netbeans.hint.deploy.server>
+        <itest.include>**/*ITest.java</itest.include>
+        <surefire.default.skip>true</surefire.default.skip>
+        <downloadSources>true</downloadSources>
+        <logging.level>ALL</logging.level>
+        
+        <!-- Database properties -->
+        <dao.driver.classname>com.mysql.jdbc.Driver</dao.driver.classname>
+        <dao.connection.dbname>openserver_itest</dao.connection.dbname>
+        <dao.connection.url>jdbc:mysql://localhost/${dao.connection.dbname}</dao.connection.url>
+        <dao.connection.username>openserver</dao.connection.username>
+        <dao.connection.password>openserver</dao.connection.password>
+        <dao.connection.validationQuery>select 1</dao.connection.validationQuery>
+    </properties>
+
+    <dependencies>
+<!--        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>domain</artifactId>
+            <version>${project.version}</version>
+        </dependency>-->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>io-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>jsonp</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mvc-boiler</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>users</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>j2ee</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.5</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sf.mardao</groupId>
+            <artifactId>mardao-core</artifactId>
+            <version>${mardao.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.mardao</groupId>
+            <artifactId>mardao-mysql</artifactId>
+            <version>${mardao.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>3.9</version>
+        </dependency>
+
+        <!-- These dependencies are here just for enabling logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.6.1</version>
+            <scope>runtime</scope>
+        </dependency>
+        <!-- this is for Jetty and ITests -->
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+                
+        <!-- for javadoc -->
+        <dependency>
+            <groupId>com.wadpam</groupId>
+            <artifactId>docrest-api</artifactId>
+            <version>${docrest.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.8.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.easymock</groupId>
+            <artifactId>easymock</artifactId>
+            <version>2.5.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.easymock</groupId>
+            <artifactId>easymockclassextension</artifactId>
+            <version>2.5.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <!-- base set of resources-->
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+            </resource>
+
+            <!-- filter some files-->
+            <resource>
+                <directory>${project.basedir}/src/main/filtered</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+                <executions>
+                    <!-- extra compile step of domain classes before mardao generator processing -->
+                    <execution>
+                        <id>compile-entities</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <verbose>false</verbose>
+                            <fork>true</fork>
+                            <includes>
+                                <include>**/domain/*.java</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <plugin>
+                <groupId>net.sf.mardao</groupId>
+                <artifactId>mardao-maven-plugin</artifactId>
+                <version>${mardao.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-generics</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate-sources</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>generate-daos</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>process-classes</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <basePackage>com.wadpam.open</basePackage>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>
+                                    ${project.basedir}/target/generated-sources/dao
+                                </source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0-alpha-2</version>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>write-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <outputFile>
+                                ${project.build.outputDirectory}/application.properties
+                            </outputFile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>       
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <webResources>
+                        <resource>
+                            <directory>src/main/webapp</directory>
+                            <filtering>true</filtering>
+                            <includes>
+                                <include>**/appengine-web.xml</include>
+                            </includes>
+                        </resource>
+                    </webResources>
+                    <archive>
+                        <manifestEntries>
+                            <project-version>${project.version}</project-version>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+            
+            <plugin>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>7.6.0.v20120127</version>
+                <configuration>
+                    <stopKey>webapp-j2ee</stopKey>
+                    <stopPort>9999</stopPort>
+                    <contextPath>/</contextPath>
+                    <systemProperties>
+                        <systemProperty>
+                          <name>jetty.port</name>
+                          <value>8234</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <name>catalina.home</name>
+                            <value>${project.build.directory}</value>
+                        </systemProperty>
+                     </systemProperties>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <forkMode>pertest</forkMode>
+                    <argLine>-Xms256m -Xmx512m</argLine>
+                    <testFailureIgnore>false</testFailureIgnore>
+                    <skip>${surefire.default.skip}</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>surefire-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <skip>false</skip>
+                            <excludes>
+                                <exclude>**/*ITest.java</exclude>
+                            </excludes>
+                            <systemPropertyVariables>
+                                <catalina.home>${project.basedir}/target/test</catalina.home>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </execution>
+
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-eclipse-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <wtpversion>2.0</wtpversion>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+       
+    </build>
+
+    <profiles>
+        <profile>
+            <id>itest</id>
+            <properties>
+                <spring.profiles.active>itest</spring.profiles.active>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.mortbay.jetty</groupId>
+                        <artifactId>jetty-maven-plugin</artifactId>
+                        
+                        <executions>
+                            <execution>
+                                <id>start-jetty</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                    <goal>start</goal>
+                                </goals>
+                                <configuration>
+                                    <scanIntervalSeconds>0</scanIntervalSeconds>
+                                    <daemon>true</daemon>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>stop-gae</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>surefire-itest</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>false</skip>
+                                    <includes>
+                                        <include>${itest.include}</include>
+                                    </includes>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+
+</project>

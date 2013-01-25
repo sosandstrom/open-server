@@ -24,12 +24,13 @@
         <module>analytics-gae</module>
         <module>tools-gae</module>
         <module>test</module>
+        <module>webapp-j2ee</module>
     </modules>
     
     <properties>
         <gae.version>1.7.0</gae.version>
         <docrest.version>1.21</docrest.version>
-        <mardao.version>2.1.5</mardao.version>
+        <mardao.version>2.1.6-SNAPSHOT</mardao.version>
         <spring.version>3.1.1.RELEASE</spring.version>
         <spring.security.version>3.1.0.RELEASE</spring.security.version>
         <org.springframework.social.version>1.0.1.RELEASE</org.springframework.social.version>
