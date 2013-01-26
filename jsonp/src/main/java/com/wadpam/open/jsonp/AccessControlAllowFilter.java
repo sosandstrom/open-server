@@ -29,8 +29,8 @@ public class AccessControlAllowFilter implements Filter {
         // populate response 
         final String accessControlRequestMethod = request.getHeader("Access-Control-Request-Method");
         if (null != accessControlRequestMethod) {
-            response.setHeader("Access-Control-Allow-Methods", accessControlRequestMethod);
-            LOG.debug("Access-Control-Allow-Methods: {}", accessControlRequestMethod);
+            response.setHeader("Access-Control-Allow-Methods", "DELETE, GET, OPTIONS, POST, PUT"); //accessControlRequestMethod);
+            LOG.debug("Access-Control-Allow-Methods: {}", "DELETE, GET, OPTIONS, POST, PUT"); //accessControlRequestMethod);
         }
         
         final String accessControlRequestHeaders = request.getHeader("Access-Control-Request-Headers");

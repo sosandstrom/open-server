@@ -5,11 +5,13 @@ package com.google.appengine.api;
  * @author os
  */
 public class NamespaceManager {
+    private static final ThreadLocal<String> NAMESPACE = new ThreadLocal<String>();
+    
     public static String get() {
-        return null;
+        return NAMESPACE.get();
     }
     
     public static void set(String namespace) {
-        // DO NOTHING HERE
+        NAMESPACE.set(namespace);
     }
 }

@@ -2,6 +2,8 @@ package com.wadpam.open.io;
 
 import com.google.appengine.api.datastore.Key;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import net.sf.mardao.api.dao.Dao;
@@ -12,6 +14,8 @@ import net.sf.mardao.api.dao.DaoImpl;
  * @author os
  */
 public class Mardao1Extractor implements Extractor<Dao> {
+
+    Map<String, Map<String, String>> daoHeaders = new HashMap<String, Map<String, String>>();
 
     @Override
     public Iterable<String> getColumns(Object arg, Dao dao) {
@@ -38,6 +42,16 @@ public class Mardao1Extractor implements Extractor<Dao> {
         }
         
         return values;
+    }
+
+    @Override
+    public Map<String,String> getHeaderNames(Object arg, Dao dao) {
+        final Map<String, String> map = daoHeaders.get(dao.getTableName());
+        return null != map ? map : Collections.EMPTY_MAP;
+    }
+    
+    public void setHeaderNames(Map<String, String> headerNames, net.sf.mardao.core.dao.Dao dao) {
+        daoHeaders.put(dao.getTableName(), headerNames);
     }
 
     @Override

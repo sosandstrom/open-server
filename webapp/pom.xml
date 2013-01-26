@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.wadpam.openserver</groupId>
         <artifactId>parent</artifactId>
-        <version>7-SNAPSHOT</version>
+        <version>9-SNAPSHOT</version>
     </parent>
     <artifactId>webapp</artifactId>
     <packaging>war</packaging>
@@ -346,25 +346,6 @@
                 <version>2.7</version>
                 <configuration>
                     <skip>true</skip>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.8</version>
-                <configuration>
-                    <author>false</author>
-                    <doclet>com.wadpam.docrest.DocRestDoclet</doclet>
-                    <docletArtifact>
-                        <groupId>com.wadpam</groupId>
-                        <artifactId>docrest-doclet</artifactId>
-                        <version>${docrest.version}</version>
-                    </docletArtifact>
-                    <encoding>UTF-8</encoding>
-                    <javadocExecutable>${javadocExecutable}</javadocExecutable>
-                    <sourcepath>src/main/java</sourcepath>
-                    <useStandardDocletOptions>false</useStandardDocletOptions>
-                    <verbose>true</verbose>
                 </configuration>
             </plugin>
         </plugins>

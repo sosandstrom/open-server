@@ -15,7 +15,8 @@ public interface Converter<D> {
             D[] daos);
 
     Object preDao(OutputStream out, Object arg, Object preExport, Object preDao, 
-            String tableName, Iterable<String> columns, int daoIndex, D dao);
+            String tableName, Iterable<String> columns, Map<String, String> headers, 
+            int daoIndex, D dao);
 
     Object postDao(OutputStream out, Object arg, Object preExport, Object preDao, Object postDao, D dao);
 

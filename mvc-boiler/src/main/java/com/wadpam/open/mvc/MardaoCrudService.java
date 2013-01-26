@@ -6,9 +6,12 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import net.sf.mardao.core.CursorPage;
+import net.sf.mardao.core.Filter;
 import net.sf.mardao.core.dao.Dao;
+import net.sf.mardao.core.dao.DaoImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -16,11 +19,12 @@ import org.slf4j.LoggerFactory;
  */
 public class MardaoCrudService<
         T extends Object, 
-        ID extends Serializable> implements CrudService<T, ID> {
+        ID extends Serializable,
+        D extends Dao<T, ID>> implements CrudService<T, ID> {
     
     protected static final Logger LOG = LoggerFactory.getLogger(MardaoCrudService.class);
     
-    protected Dao<T, ID> dao;
+    protected D dao;
     
     @Override
     public ID create(T domain) {
@@ -46,7 +50,7 @@ public class MardaoCrudService<
     @Override
     public void exportCsv(OutputStream out, Long startDate, Long endDate) {
         // TODO: filter on dates
-        dao.writeAsCsv(out, getExportColumns(), null, null, false, null, false);
+        dao.writeAsCsv(out, getExportColumns(), (DaoImpl) dao, null, null, false, null, false);
     }
     
     @Override
@@ -75,6 +79,10 @@ public class MardaoCrudService<
             dao.getUpdatedByColumnName()
         };
     }
+    
+    public String getKeyString(Object key) {
+        return dao.getKeyString(key);
+    }
 
     @Override
     public CursorPage<T, ID> getPage(int pageSize, Serializable cursorKey) {
@@ -85,6 +93,10 @@ public class MardaoCrudService<
     public String getParentKeyString(T domain) {
         final Object parentKey = dao.getParentKey(domain);
         return dao.getKeyString(parentKey);
+    }
+    
+    public Object getPrimaryKey(T domain) {
+        return dao.getPrimaryKey(domain);
     }
 
     @Override
@@ -99,6 +111,11 @@ public class MardaoCrudService<
     
     /** Override to implement pre-persist validation */
     protected void prePersist(T domain) throws RestException {
+    }
+    
+    @Autowired
+    public void setDao(D dao) {
+        this.dao = dao;
     }
     
     @Override
@@ -118,5 +135,11 @@ public class MardaoCrudService<
     public CursorPage<ID, ID> whatsChanged(Date since, int pageSize, Serializable cursorKey) {
         // TODO: include deletes from Audit table
         return dao.whatsChanged(since, pageSize, cursorKey);
+    }
+    
+    public CursorPage<ID, ID> whatsChanged(Object parentKey, Date since, 
+            int pageSize, Serializable cursorKey, Filter... filters) {
+        // TODO: include deletes from Audit table
+        return dao.whatsChanged(parentKey, since, pageSize, cursorKey, filters);
     }
 }
