@@ -37,6 +37,17 @@ public class GoogleAnalyticsTrackerBuilder {
     }
 
     /**
+     * Create a tracker configuration with a name and tracking code.
+     * @param name name
+     * @param trackingCode tracking code
+     * @return tracker builder
+     */
+    public GoogleAnalyticsTrackerBuilder withNameAndTrackingCode(String name, String trackingCode) {
+        trackerConfiguration = new TrackerConfiguration(name, trackingCode);
+        return this;
+    }
+
+    /**
      * Create a tracker configuration from a tracking code.
      * @param trackingCode tracking code
      * @return tracker builder
@@ -60,7 +71,7 @@ public class GoogleAnalyticsTrackerBuilder {
      * Create a device with iPhone (iOS5) characteristics.
      * @return tracker builder
      */
-    public GoogleAnalyticsTrackerBuilder withDefaultiPhoneDevice() {
+    public GoogleAnalyticsTrackerBuilder withiPhoneDevice() {
         this.device = Device.defaultiPhoneDevice();
         return this;
     }
@@ -69,7 +80,7 @@ public class GoogleAnalyticsTrackerBuilder {
      * Create a device with iPad (iOS5) characteristics.
      * @return tracker builder
      */
-    public GoogleAnalyticsTrackerBuilder withDefaultiPadDevice() {
+    public GoogleAnalyticsTrackerBuilder withiPadDevice() {
         this.device = Device.defaultiPadDevice();
         return this;
     }
@@ -79,7 +90,7 @@ public class GoogleAnalyticsTrackerBuilder {
      * @param request incoming request
      * @return tracker builder
      */
-    public GoogleAnalyticsTrackerBuilder withRequest(HttpServletRequest request) {
+    public GoogleAnalyticsTrackerBuilder withDeviceFromRequest(HttpServletRequest request) {
         this.device = Device.defaultDevice(request);
         return this;
     }
@@ -99,7 +110,7 @@ public class GoogleAnalyticsTrackerBuilder {
      * @param visitorId visitor id
      * @return tracker builder
      */
-    public GoogleAnalyticsTrackerBuilder withVisitor(int visitorId) {
+    public GoogleAnalyticsTrackerBuilder withVisitorId(int visitorId) {
         long now = System.currentTimeMillis() / 1000L;
         this.visitor = new Visitor(visitorId, now, now, 1);
         return this;
