@@ -31,8 +31,8 @@ public class Visitor {
      * @param visits the number of visits
      * @return a new visitor
      */
-    public static Visitor visitorWithNewSession(int visitorId, long timestampFirst, long timestampPrevious, int visits) {
-        return new Visitor(visitorId, timestampFirst, timestampPrevious, visits, new Session());
+    public Visitor(int visitorId, long timestampFirst, long timestampPrevious, int visits) {
+        this(visitorId, timestampFirst, timestampPrevious, visits, new Session());
     }
 
 

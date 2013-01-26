@@ -1,7 +1,6 @@
 package com.wadpam.open;
 
 
-import com.wadpam.open.analytics.OpenAnalyticsTracker;
 import com.wadpam.open.analytics.google.*;
 import org.junit.After;
 import org.junit.Before;
@@ -20,22 +19,21 @@ import static org.junit.Assert.assertTrue;
  * @author mattiaslevin
  */
 public class AnalyticsTest {
-
     static final Logger LOG = LoggerFactory.getLogger(AnalyticsTest.class);
 
-    private Profile profile;
+    private TrackerConfiguration trackerConfig;
     private Device deviceData = new Device();
     private Visitor visitorData;
 
-    private GAOpenAnalyticsTracker tracker;
+    private GoogleAnalyticsTracker tracker;
 
     public AnalyticsTest() {
 
         // Create profile
-        profile = Profile.getInstance("test-profile", "UA-35889513-2");
+        trackerConfig = new TrackerConfiguration("test-profile", "UA-35889513-2");
 
         // Set visitor
-        this.visitorData = Visitor.visitorWithNewSession(999, now() - 50000, now() - 4000, 10);
+        visitorData = new Visitor(999, now() - 50000, now() - 4000, 10);
 
         // Set device data
         deviceData.setEncoding("UTF-8");
@@ -50,7 +48,11 @@ public class AnalyticsTest {
     @Before
     public void setup() {
         visitorData.startNewSession();
-        tracker = this.profile.getTracker(this.visitorData, this.deviceData);
+        tracker = new GoogleAnalyticsTrackerBuilder()
+                .withTrackingConfiguration(trackerConfig)
+                .withVisitor(visitorData)
+                .withDevice(deviceData)
+                .build();
         tracker.setDebug(true);
     }
 

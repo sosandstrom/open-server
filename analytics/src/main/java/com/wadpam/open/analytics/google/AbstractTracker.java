@@ -1,15 +1,14 @@
-package com.wadpam.open.analytics;
+package com.wadpam.open.analytics.google;
 
-import com.wadpam.open.analytics.google.CustomVariable;
+import com.wadpam.open.analytics.Tracker;
 
 import java.util.List;
 
 /**
- * Interface the different tracker implementations should implement.
+ * Abstract base class for analytics trackers, e.g Google Analytics and Piwik.
  * @author mattiaslevin
  */
-public abstract class OpenAnalyticsTracker {
-
+public abstract class AbstractTracker implements Tracker {
 
     /** Track a page view without setting referrer */
     public void trackPageView(String pageURL, String pageTitle, String hostName) {
@@ -25,6 +24,7 @@ public abstract class OpenAnalyticsTracker {
      * @param referrerSite optional. The referrer site
      * @param customVariables optional. List of custom variables
      */
+    @Override
     public abstract void trackPageView(String pageURL,
                                        String pageTitle,
                                        String hostName,
@@ -51,10 +51,12 @@ public abstract class OpenAnalyticsTracker {
      * @param value optional. The value
      * @param customVariables optional. custom variables
      */
+    @Override
     public abstract void trackEvent(String category,
                                     String action,
                                     String label,
                                     Integer value,
                                     List<CustomVariable> customVariables);
+
 
 }

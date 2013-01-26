@@ -33,13 +33,13 @@ public class AnalyticsController extends AbstractRestController {
     private Map<String, String> domainTrackerIdMapping = new HashMap<String, String>();
 
     /**
-     * A GAE task for sending and event to Google Analytics.
+     * A GAE task for sending an event to Google Analytics.
      */
     @RequestMapping(value="task", method= RequestMethod.GET)
     @ResponseBody
     public void sendEventTask(HttpServletRequest request,
-                              @RequestParam(required = true) String url,
-                              @RequestParam(required = false) String userAgent) {
+                              @RequestParam String url,
+                              @RequestParam(required=false) String userAgent) {
         LOG.debug("GAE sent event task");
 
         // TODO incomplete implementation
@@ -47,9 +47,9 @@ public class AnalyticsController extends AbstractRestController {
         // Decode
 
         // Forward
-        EventDispatcher dispatcher = new SynchronousEventDispatcher("host", "remote", userAgent);
+        EventDispatcher dispatcher = new SynchronousEventDispatcher();
         try {
-            dispatcher.dispatch(new URI(url));
+            dispatcher.dispatch(Device.defaultiPhoneDevice(), new URI(url)); // TODO not device
         } catch (URISyntaxException e) {
             LOG.error("Not possible to convert url to uri with reason:{}", e.getMessage());
             // No need to throw exception, no one is listening to the result
@@ -82,11 +82,12 @@ public class AnalyticsController extends AbstractRestController {
             trackerName = "default";
         }
 
-        Profile profile = Profile.getInstance(trackerName, trackerId);
-
-        Visitor visitor = Visitor.visitorWithNewSession(userId, now(), now(), 1);
-        Device device = Device.defaultDevice(request);
-        OpenAnalyticsTracker tracker = profile.getTracker(visitor, device);
+        TrackerConfiguration trackerConfig = new TrackerConfiguration(trackerName, trackerId);
+        GoogleAnalyticsTracker tracker = new GoogleAnalyticsTrackerBuilder()
+                .withTrackingConfiguration(trackerConfig)
+                .withVisitorId(userId)
+                .withDeviceFromRequest(request)
+                .build();
 
         tracker.trackPageView(pageUrl, title, request.getRemoteHost());
     }
@@ -124,11 +125,12 @@ public class AnalyticsController extends AbstractRestController {
             trackerName = "default";
         }
 
-        Profile profile = Profile.getInstance(trackerName, trackerId);
-
-        Visitor visitor = Visitor.visitorWithNewSession(userId, now(), now(), 1);
-        Device device = Device.defaultDevice(request);
-        OpenAnalyticsTracker tracker = profile.getTracker(visitor, device);
+        TrackerConfiguration trackerConfig = new TrackerConfiguration(trackerName, trackerId);
+        GoogleAnalyticsTracker tracker = new GoogleAnalyticsTrackerBuilder()
+                .withTrackingConfiguration(trackerConfig)
+                .withVisitorId(userId)
+                .withDeviceFromRequest(request)
+                .build();
 
         tracker.trackEvent(category, action, label, value, null);
     }

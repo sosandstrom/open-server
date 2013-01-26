@@ -2,7 +2,7 @@ package com.wadpam.open.web;
 
 import com.wadpam.docrest.domain.RestCode;
 import com.wadpam.docrest.domain.RestReturn;
-import com.wadpam.open.analytics.OpenAnalyticsTracker;
+import com.wadpam.open.analytics.Tracker;
 import com.wadpam.open.analytics.google.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A Controller that can be used by app to indicate that they are alive/started/running.
@@ -70,29 +71,28 @@ public class IsAliveController extends AbstractRestController {
     public void isAlive(HttpServletRequest request,
                         @PathVariable String domain,
                         @ModelAttribute String trackingCode,
-                        @RequestParam(required = false) String id,
-                        @RequestParam(required = false) String hour) {
+                        @RequestParam(required=false) String id,
+                        @RequestParam(required=false) String hour) {
         LOG.debug("Log is alive message from:{} with tacking code:{}", id, trackingCode);
 
-        // Create device
-        Device device = Device.defaultDevice(request);
-        // Create visitor
-        long now = new Date().getTime() / 1000;
-        Visitor visitor = Visitor.visitorWithNewSession(id.hashCode(), now, now, 1);
 
-        // Create profile
-        Profile profile = null;
+        // Create tracking configuration
+        TrackerConfiguration trackerConfig = null;
         if (null != trackingCode) {
-            profile = Profile.getInstance("IsAliveTracker", trackingCode);
+            trackerConfig = new TrackerConfiguration("IsAliveTracker", trackingCode);
         } else if (null != this.trackingCode) {
-            profile = Profile.getInstance("IsAliveTracker", this.trackingCode);
+            trackerConfig = new TrackerConfiguration("IsAliveTracker", this.trackingCode);
         }  else {
             LOG.info("No tracker configured, is alive message will not be sent to any tracker");
             return;
         }
 
-        // Create tracker
-        OpenAnalyticsTracker tracker = profile.getTracker(visitor, device);
+        // Build tracker
+        Tracker tracker = new GoogleAnalyticsTrackerBuilder()
+                .withTrackingConfiguration(trackerConfig)
+                .withVisitorId(id.hashCode())
+                .withDeviceFromRequest(request)
+                .build();
 
         // Custom variables
         List<CustomVariable> customVariables = null;

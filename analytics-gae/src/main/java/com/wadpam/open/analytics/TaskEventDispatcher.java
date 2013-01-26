@@ -3,6 +3,7 @@ package com.wadpam.open.analytics;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
+import com.wadpam.open.analytics.google.Device;
 import com.wadpam.open.analytics.google.EventDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,18 +17,13 @@ import java.net.URLEncoder;
  * An event dispatcher using GAE tasks.
  * @author mattiaslevin
  */
-public class TaskEventDispatcher extends EventDispatcher {
+public class TaskEventDispatcher implements EventDispatcher {
     static final Logger LOG = LoggerFactory.getLogger(TaskEventDispatcher.class);
 
 
-    // Constructor
-    public TaskEventDispatcher(String host, String remoteAddress, String userAgent) {
-        super(host, remoteAddress, userAgent);
-    }
-
-
     // Dispatch the event using GAE task queue
-    public boolean dispatch(URI uri) {
+    @Override
+    public boolean dispatch(Device device, URI uri) {
         LOG.debug("Dispatch the event using GAE task queue");
 
         // URL encode the uri

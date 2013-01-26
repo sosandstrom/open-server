@@ -12,19 +12,13 @@ import java.util.*;
  * Build a GA url compatible with the version 5.3.7 format.
  * @author mattiaslevin
  */
-public class URLBuilderV5_3_8 extends AbstractURLBuilder {
-
+public class URLBuilderV5_3_8 implements URLBuilder {
     private static final Logger LOG = LoggerFactory.getLogger(URLBuilderV5_3_8.class);
 
     private Random random = new Random();
 
     private static final String BASE_URL = "http://www.google-analytics.com/__utm.gif";
 
-
-    // Constructor
-    public URLBuilderV5_3_8(TrackerConfiguration trackerConfiguration, Visitor visitor, Device device) {
-        super(trackerConfiguration, visitor, device);
-    }
 
     // Get version
     @Override
@@ -35,7 +29,7 @@ public class URLBuilderV5_3_8 extends AbstractURLBuilder {
 
     // Build URL
     @Override
-    public String buildURL(Page data) {
+    public String buildURL(TrackerConfiguration trackerConfig, Visitor visitor, Device device, Page data) {
         LOG.debug("Build url for version:{}", this.getFormatVersion());
 
         Map<String, String> params = new LinkedHashMap<String, String>();
@@ -121,38 +115,38 @@ public class URLBuilderV5_3_8 extends AbstractURLBuilder {
         }
 
         // Encoding
-        if (null != this.device.getEncoding()) {
-            params.put("utmcs", this.device.getEncoding());
+        if (null != device.getEncoding()) {
+            params.put("utmcs", device.getEncoding());
         } else {
             params.put("utmcs", "-");
         }
 
         // Screen resolution
-        if (null != this.device.getScreenResolution()) {
-            params.put("utmsr", this.device.getScreenResolution());
+        if (null != device.getScreenResolution()) {
+            params.put("utmsr", device.getScreenResolution());
         }
 
         // View port
-        if (null != this.device.getViewPortResolution()) {
-            params.put("utmvp", this.device.getViewPortResolution());
+        if (null != device.getViewPortResolution()) {
+            params.put("utmvp", device.getViewPortResolution());
         }
 
         // color depth
-        if (null != this.device.getColorDepth()) {
-            params.put("utmsc", this.device.getColorDepth());
+        if (null != device.getColorDepth()) {
+            params.put("utmsc", device.getColorDepth());
         }
 
         // Language
-        if (null != this.device.getUserLanguage()) {
-            params.put("utmul", this.device.getUserLanguage());
+        if (null != device.getUserLanguage()) {
+            params.put("utmul", device.getUserLanguage());
         }
 
         // Java enabled (always set to true)
         params.put("utmje", "1");
 
         // Flash version
-        if(null != this.device.getFlashVersion()) {
-            params.put("utmfl", urlEncode(this.device.getFlashVersion()));
+        if(null != device.getFlashVersion()) {
+            params.put("utmfl", urlEncode(device.getFlashVersion()));
         }
 
         // Page views
@@ -179,15 +173,15 @@ public class URLBuilderV5_3_8 extends AbstractURLBuilder {
         }
 
         // Tracking id
-        params.put("utmac", configuration.getTrackingId());
+        params.put("utmac", trackerConfig.getTrackingId());
 
         // Cookie
         int hostnameHash = hostnameHash(data.getHostName());
-        int visitorId = this.visitor.getVisitorId();
-        long timestampFirst = this.visitor.getTimestampFirst();
-        long timestampPrevious = this.visitor.getTimestampPrevious();
-        int visits = this.visitor.getVisits();
-        long sessionStart = this.visitor.getSession().getSessionStart();
+        int visitorId = visitor.getVisitorId();
+        long timestampFirst = visitor.getTimestampFirst();
+        long timestampPrevious = visitor.getTimestampPrevious();
+        int visits = visitor.getVisits();
+        long sessionStart = visitor.getSession().getSessionStart();
 
         // utmccn=(organic)|utmcsr=google|utmctr=snotwuh|utmcmd=organic
         StringBuilder cookieSB = new StringBuilder();
