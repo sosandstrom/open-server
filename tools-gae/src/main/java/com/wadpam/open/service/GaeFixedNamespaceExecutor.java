@@ -14,7 +14,7 @@ import org.springframework.core.Ordered;
 public class GaeFixedNamespaceExecutor implements Ordered {
     static final Logger LOG = LoggerFactory.getLogger(GaeFixedNamespaceExecutor.class);
 
-    static final String DEFAULT_FIXED_NAMESPACE = "defaultNamespace";
+    static final String DEFAULT_FIXED_NAMESPACE = null;
 
     private int order = 30;
     private String namespace = DEFAULT_FIXED_NAMESPACE;

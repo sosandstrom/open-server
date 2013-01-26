@@ -36,8 +36,8 @@ public class DomainInterceptor extends HandlerInterceptorAdapter {
     // Paths
     private static final String PATH_AH = "/_ah/";
     private static final Pattern PATH_MONITOR = Pattern.compile("\\A/api/([^/]+)/monitor");
-    private static final Pattern PATH_ADMIN = Pattern.compile("\\A/api/(_admin|_worker)");
 
+    private static final Pattern PATH_ADMIN = Pattern.compile("\\A/api/(_admin|_worker)");
     private static final Pattern PATH_DOMAIN_ADMIN = Pattern.compile("\\A/api/([^/]+)/(_admin|_worker)");
 
     private static final Pattern PATH_DOMAIN = Pattern.compile("\\A/api/([^/]+)");
@@ -52,6 +52,7 @@ public class DomainInterceptor extends HandlerInterceptorAdapter {
             throws Exception {
 
         final String uri = request.getRequestURI();
+        LOG.debug("Authenticate uri:{}", uri);
 
         // Skip GAE admin paths
         // Security is handled in web xml and by GAE

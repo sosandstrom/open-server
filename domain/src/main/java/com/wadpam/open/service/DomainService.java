@@ -32,6 +32,7 @@ public class DomainService {
     // Create a new domain
     @Idempotent
     @Transactional
+    @FixedNamespace
     public DAppDomain createDomain(String domain, String username, String password,
                                    String description, String toEmail, String trackingCode) {
 
@@ -63,6 +64,7 @@ public class DomainService {
     // Update existing domain
     @Idempotent
     @Transactional
+    @FixedNamespace
     public DAppDomain updateDomain(String domain, String username, String password,
                                    String description, String toEmail, String trackingCode) {
 
@@ -91,8 +93,8 @@ public class DomainService {
     }
 
     // Get domain details
+    @FixedNamespace
     public DAppDomain getDomain(String domain) {
-
         DAppDomain dAppDomain = domainDao.findByPrimaryKey(domain);
         return dAppDomain;
     }
@@ -100,6 +102,7 @@ public class DomainService {
     // Delete domain
     @Idempotent
     @Transactional
+    @FixedNamespace
     public DAppDomain deleteDomain(String domain) {
 
         // Check that the domain exists

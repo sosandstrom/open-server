@@ -45,7 +45,7 @@ public class DomainController extends AbstractRestController {
             @RestCode(code=302, message="OK", description="Redirect to the newly created domain"),
             @RestCode(code=409, message="NOK", description="Domain already exists")
     })
-    @RequestMapping(value="_admin/domain", method= RequestMethod.POST)
+    @RequestMapping(value="{default}/_admin/domain", method= RequestMethod.POST)
     public RedirectView createDomain(HttpServletRequest request,
                                 HttpServletResponse response,
                                 UriComponentsBuilder uriBuilder,
@@ -78,7 +78,7 @@ public class DomainController extends AbstractRestController {
             @RestCode(code=302, message="OK", description="Redirect to the newly updated domain"),
             @RestCode(code=404, message="NOK", description="Domain not found")
     })
-    @RequestMapping(value="_admin/domain/{domain}", method= RequestMethod.POST)
+    @RequestMapping(value="{default}/_admin/domain/{domain}", method= RequestMethod.POST)
     public RedirectView updateDomain(HttpServletRequest request,
                                      HttpServletResponse response,
                                      UriComponentsBuilder uriBuilder,
@@ -97,7 +97,6 @@ public class DomainController extends AbstractRestController {
                 buildAndExpand(dAppDomain.getAppDomain()).toUriString());
     }
 
-
     /**
      * Get domain details.
      * @param domain the domain name
@@ -107,7 +106,7 @@ public class DomainController extends AbstractRestController {
             @RestCode(code=200, message="OK", description="Domain found"),
             @RestCode(code=404, message="NOK", description="Domain not found")
     })
-    @RequestMapping(value="_admin/domain/{domain}", method= RequestMethod.GET)
+    @RequestMapping(value="{default}/_admin/domain/{domain}", method= RequestMethod.GET)
     @ResponseBody
     public JAppDomain getDomain(HttpServletRequest request,
                                   HttpServletResponse response,
@@ -123,7 +122,6 @@ public class DomainController extends AbstractRestController {
         return CONVERTER.convert(dAppDomain);
     }
 
-
     /**
      * Delete a domain.
      * @param domain the domain name
@@ -133,7 +131,7 @@ public class DomainController extends AbstractRestController {
             @RestCode(code=200, message="OK", description="Domain found"),
             @RestCode(code=404, message="OK", description="Domain not found")
     })
-    @RequestMapping(value="_admin/domain/{domain}", method= RequestMethod.DELETE)
+    @RequestMapping(value="{default}/_admin/domain/{domain}", method= RequestMethod.DELETE)
     public void deleteDomain(HttpServletRequest request,
                                    HttpServletResponse response,
                                    UriComponentsBuilder uriBuilder,

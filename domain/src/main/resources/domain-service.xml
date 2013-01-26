@@ -23,7 +23,18 @@
 
 
     <!-- Aspects -->
+    <bean id="gaeFixedNamespaceExecutor" class="com.wadpam.open.service.GaeFixedNamespaceExecutor">
+        <property name="order" value="100"/>
+    </bean>
 
+    <aop:config>
+        <aop:aspect id="gaeFixedNamespaceAspect" ref="gaeFixedNamespaceExecutor">
+            <aop:pointcut id="fixedNamespaceMethods"
+                          expression="within(com.wadpam.open.service.DomainService)
+                              and @annotation(com.wadpam.open.service.FixedNamespace)"/>
+            <aop:around pointcut-ref="fixedNamespaceMethods" method="doFixedNamespaceOperation" />
+        </aop:aspect>
+    </aop:config>
 
     <!-- Interceptors -->
     <mvc:interceptors>
