@@ -17,14 +17,24 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author os
  */
-public class MardaoCrudService<
-        T extends Object, 
+public abstract class MardaoCrudService<
+        T extends Object,
         ID extends Serializable,
         D extends Dao<T, ID>> implements CrudService<T, ID> {
     
     protected static final Logger LOG = LoggerFactory.getLogger(MardaoCrudService.class);
     
     protected D dao;
+
+    @Override
+    public T createDomain() {
+        try {
+            return (T) ((DaoImpl) dao).createDomain();
+        } catch (InstantiationException ex) {
+        } catch (IllegalAccessException ex) {
+        }
+        return null;
+    }
     
     @Override
     public ID create(T domain) {

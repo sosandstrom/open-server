@@ -14,6 +14,8 @@ public interface CrudService<
         T extends Object, 
         ID extends Serializable> {
     
+    T createDomain();
+    
     ID create(T domain);
     
     void delete(String parentKeyString, ID id);
