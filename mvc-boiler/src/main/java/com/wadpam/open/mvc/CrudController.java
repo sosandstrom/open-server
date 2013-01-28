@@ -167,7 +167,7 @@ public abstract class CrudController<
             @RequestParam(value="_expects") Integer _expects,
             Model model,
             @ModelAttribute J jEntity) {
-        return createForObject(request, domain, model, jEntity);
+        return createForObject(request, response, domain, model, jEntity);
     }
     
     @RequestMapping(value="v10", method=RequestMethod.POST, 
@@ -179,7 +179,7 @@ public abstract class CrudController<
             @PathVariable String domain,
             Model model,
             @RequestBody J jEntity) {
-        return createForObject(request, domain, model, jEntity);
+        return createForObject(request, response, domain, model, jEntity);
     }
     
     /**
@@ -197,9 +197,11 @@ public abstract class CrudController<
         return d;
     }
     
-    protected J createForObject(HttpServletRequest request, 
+    protected J createForObject(HttpServletRequest request,
+            HttpServletResponse response,
             String domain,
-            Model model, J body) {
+            Model model, 
+            J body) {
         J amendedBody = populateRequestBody(request, model, body);
         T d = create(request, domain, amendedBody);
         
@@ -211,7 +213,7 @@ public abstract class CrudController<
             }
         }
         
-        return convertWithInner(request, d);
+        return convertWithInner(request, response, domain, model, d);
     }
     
     protected String createForLocation(HttpServletRequest request, 
@@ -293,7 +295,8 @@ public abstract class CrudController<
             HttpServletResponse response,
             @PathVariable String domain,
             @PathVariable ID id,
-            @RequestParam(required=false) String parentKeyString
+            @RequestParam(required=false) String parentKeyString,
+            Model model
             ) {
         LOG.debug("GET {}/{}", parentKeyString, id);
         
@@ -309,7 +312,7 @@ public abstract class CrudController<
                 request.setAttribute(name, Boolean.TRUE);
             }
         }
-        J body = convertWithInner(request, d);
+        J body = convertWithInner(request,response, domain, model, d);
         postService(request, domain, CrudListener.GET, body, id, d);
         
         return body;
@@ -483,7 +486,11 @@ public abstract class CrudController<
     // --------------- Converter methods --------------------------
     
     /** This implementation does nothing, please override */
-    public J addInnerObjects(HttpServletRequest request, J jEntity) {
+    public J addInnerObjects(HttpServletRequest request, 
+            HttpServletResponse response,
+            String domain,
+            Model model,
+            J jEntity) {
         // do nothing
         return jEntity;
     }
@@ -533,9 +540,10 @@ public abstract class CrudController<
         to.setUpdatedDate(toLong(from.getUpdatedDate()));
     }
     
-    protected J convertWithInner(HttpServletRequest request, T from) {
+    protected J convertWithInner(HttpServletRequest request, HttpServletResponse response,
+            String domain, Model model, T from) {
         final J to = convertDomain(from);
-        return addInnerObjects(request, to);
+        return addInnerObjects(request, response, domain, model, to);
     }
     
     public static void convertLongEntity(AbstractLongEntity from, JBaseObject to) {
