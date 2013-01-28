@@ -193,7 +193,7 @@ public abstract class CrudController<
         T d = convertJson(body);
         preService(request, domain, CrudListener.CREATE, body, d, null);
         ID id = service.create(d);
-        postService(request, domain, CrudListener.CREATE, body, d, id, id);
+        postService(request, domain, CrudListener.CREATE, body, id, d);
         return d;
     }
     
@@ -244,7 +244,7 @@ public abstract class CrudController<
         
         preService(request, domain, CrudListener.DELETE, null, null, id);
         service.delete(parentKeyString, id);
-        postService(request, domain, CrudListener.DELETE, null, null, id, null);
+        postService(request, domain, CrudListener.DELETE, null, id, null);
         
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
@@ -310,7 +310,7 @@ public abstract class CrudController<
             }
         }
         J body = convertWithInner(request, d);
-        postService(request, domain, CrudListener.GET, body, d, id, d);
+        postService(request, domain, CrudListener.GET, body, id, d);
         
         return body;
     }
@@ -354,7 +354,7 @@ public abstract class CrudController<
         preService(request, domain, CrudListener.GET_PAGE, null, null, cursorKey);
         final CursorPage<T, ID> page = service.getPage(pageSize, cursorKey);
         final JCursorPage body = convertPage(page);
-        postService(request, domain, CrudListener.GET_PAGE, null, null, cursorKey, body);
+        postService(request, domain, CrudListener.GET_PAGE, null, cursorKey, body);
 
         return body;
     }
@@ -388,7 +388,7 @@ public abstract class CrudController<
         T d = convertJson(amendedBody);
         preService(request, domain, CrudListener.UPDATE, jEntity, d, id);
         service.update(d);
-        postService(request, domain, CrudListener.UPDATE, jEntity, d, id, id);
+        postService(request, domain, CrudListener.UPDATE, jEntity, id, d);
         
         final StringBuffer path = new StringBuffer("v10/");
         path.append(service.getSimpleKey(d));
@@ -459,7 +459,7 @@ public abstract class CrudController<
             return null;
         }
         
-        postService(request, domain, CrudListener.WHAT_CHANGED, null, null, cursorKey, page);
+        postService(request, domain, CrudListener.WHAT_CHANGED, null, cursorKey, page);
         
         return page;
     }
@@ -685,7 +685,7 @@ public abstract class CrudController<
     }
     
     protected void postService(HttpServletRequest request, String namespace,
-            int operation, Object json, Object domain, Serializable id, Object serviceResponse) {
+            int operation, Object json, Serializable id, Object serviceResponse) {
         for (CrudListener l : listeners) {
             l.postService(this, service, request, namespace, 
                     operation, json, id, serviceResponse);
