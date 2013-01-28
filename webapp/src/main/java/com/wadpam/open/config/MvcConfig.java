@@ -34,7 +34,6 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  */
 @EnableWebMvc
 @Configuration
-@Import(value={ProfileConfig.class})
 @ImportResource("classpath:/spring-dao.xml")
 public class MvcConfig extends WebMvcConfigurerAdapter {
 

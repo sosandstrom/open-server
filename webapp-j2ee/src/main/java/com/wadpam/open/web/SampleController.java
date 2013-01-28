@@ -17,32 +17,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class SampleController extends CrudController<JSample,
         DSample, Long, SampleService>{
 
+    public SampleController() {
+        super(JSample.class);
+    }
+    
     @Override
-    public JSample convertDomain(DSample from) {
-        if (null == from) {
-            return null;
-        }
-
-        JSample to = new JSample();
+    public void convertDomain(DSample from, JSample to) {
         convertLongEntity(from, to);
         
         to.setName(from.getName());
-        
-        return to;
     }
 
     @Override
-    public DSample convertJson(JSample from) {
-        if (null == from) {
-            return null;
-        }
-
-        DSample to = new DSample();
+    public void convertJson(JSample from, DSample to) {
         convertJLong(from, to);
         
         to.setName(from.getName());
-        
-        return to;
     }
     
     @Autowired
