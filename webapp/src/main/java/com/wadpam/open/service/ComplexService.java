@@ -10,6 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author os
  */
 public class ComplexService extends MardaoCrudService<DComplex, Long, GeneratedDComplexDao> {
+
+    public ComplexService() {
+        super(DComplex.class);
+    }
     
     @Autowired
     public void setDComplexDao(GeneratedDComplexDao dComplexDao) {

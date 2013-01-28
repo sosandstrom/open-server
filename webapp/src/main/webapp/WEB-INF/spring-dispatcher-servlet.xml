@@ -39,15 +39,20 @@
     
 	<mvc:default-servlet-handler />
 
+    <!--           Dao Overrides             -->
+    
+    <bean id="doUserDao" class="com.wadpam.open.dao.DoUserDaoBean" />
+    
     <!--           Services             -->
 
-    <import resource="classpath:/open-user-service.xml" />
     <import resource="classpath:/spring-dao.xml" />
     
     <bean class="com.wadpam.open.service.SampleService" />
     <bean class="com.wadpam.open.service.ComplexService" />
     
     <bean class="com.wadpam.open.service.ExportService" init-method="init" />
+    
+    <bean id="openUserService" class="com.wadpam.open.user.service.OpenUserService" />
 
     <!--           Controllers             -->
 
@@ -59,6 +64,8 @@
     <bean class="com.wadpam.open.web.ComplexController" />
     
     <bean class="com.wadpam.open.web.ExportController" />
+    
+    <bean class="com.wadpam.open.web.DoUserController" />
 
     <!--           View stuff             -->
         

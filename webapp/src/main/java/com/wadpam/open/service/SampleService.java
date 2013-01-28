@@ -10,6 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author os
  */
 public class SampleService extends MardaoCrudService<DSample, Long, GeneratedDSampleDao> {
+
+    public SampleService() {
+        super(DSample.class);
+    }
     
     @Autowired
     public void setDSampleDao(GeneratedDSampleDao dSampleDao) {
