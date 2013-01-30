@@ -16,7 +16,8 @@ import net.sf.mardao.core.domain.AbstractLongEntity;
  * @author sosandstrom
  */
 @Entity
-@Table(uniqueConstraints={@UniqueConstraint(columnNames={"username"})})
+@Table(uniqueConstraints={@UniqueConstraint(columnNames={"username"}),
+    @UniqueConstraint(columnNames={"email"})})
 public class DOpenUser extends AbstractLongEntity {
 
     @Basic
@@ -26,11 +27,17 @@ public class DOpenUser extends AbstractLongEntity {
     private String email;
     
     @Basic
-    private String username;
+    private String profileLink;
     
     @Basic
     private Collection<String> roles;
 
+    @Basic
+    private String thumbnailUrl;
+    
+    @Basic
+    private String username;
+    
     public String getDisplayName() {
         return displayName;
     }
@@ -61,6 +68,22 @@ public class DOpenUser extends AbstractLongEntity {
 
     public void setRoles(Collection<String> roles) {
         this.roles = roles;
+    }
+
+    public String getProfileLink() {
+        return profileLink;
+    }
+
+    public void setProfileLink(String profileLink) {
+        this.profileLink = profileLink;
+    }
+
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
+    }
+
+    public void setThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
     }
     
     

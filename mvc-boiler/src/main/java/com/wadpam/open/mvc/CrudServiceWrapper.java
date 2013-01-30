@@ -16,10 +16,13 @@ import net.sf.mardao.core.CursorPage;
  */
 public class CrudServiceWrapper<T extends Object, ID extends Serializable, E extends T> implements CrudService<E, ID> {
     
-    protected final CrudService<T, ID> delegate;
+    protected CrudService<T, ID> delegate;
 
     public CrudServiceWrapper(CrudService<T, ID> delegate) {
         this.delegate = delegate;
+    }
+
+    public CrudServiceWrapper() {
     }
     
     @Override
@@ -80,6 +83,10 @@ public class CrudServiceWrapper<T extends Object, ID extends Serializable, E ext
     @Override
     public CursorPage<ID, ID> whatsChanged(Date since, int pageSize, Serializable cursorKey) {
         return delegate.whatsChanged(since, pageSize, cursorKey);
+    }
+
+    public void setDelegate(CrudService<T, ID> delegate) {
+        this.delegate = delegate;
     }
 
 }

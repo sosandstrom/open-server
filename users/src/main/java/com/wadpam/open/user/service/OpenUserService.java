@@ -14,4 +14,8 @@ public class OpenUserService extends MardaoCrudService<DOpenUser, Long, DOpenUse
     public void setDOpenUserDao(DOpenUserDao dOpenUserDao) {
         this.dao = dOpenUserDao;
     }
+
+    public DOpenUser getByEmail(String email) {
+        return dao.findByEmail(email);
+    }
 }
