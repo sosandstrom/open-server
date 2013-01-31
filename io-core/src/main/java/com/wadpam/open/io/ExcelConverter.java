@@ -24,8 +24,8 @@ public class ExcelConverter<D> implements Converter<D>{
     private static CreationHelper createHelper;
     private Sheet sheet;
     private boolean perDao;
-    private static CellStyle dateStyle;
-    private static CellStyle boldStyle;
+    private CellStyle dateStyle;
+    private CellStyle boldStyle;
     
     protected Workbook createWorkbook() {
         workbook = new HSSFWorkbook();
@@ -102,7 +102,7 @@ public class ExcelConverter<D> implements Converter<D>{
         return r;
     }
     
-    protected static void setCellValue(Cell cell, Object value) {
+    protected void setCellValue(Cell cell, Object value) {
         if (null == value) {
             return;
         }
@@ -138,4 +138,5 @@ public class ExcelConverter<D> implements Converter<D>{
             throw new RuntimeException("flushing workbook", ex);
         }
     }
+
 }
