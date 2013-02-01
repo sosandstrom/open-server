@@ -157,24 +157,26 @@
             <artifactId>errors</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.wadpam.openserver</groupId>
+            <artifactId>jsonp</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mvc-boiler</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>transactions-gae</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>j2ee</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.wadpam.openserver</groupId>
-            <artifactId>jsonp</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>

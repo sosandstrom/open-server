@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.domain.AbstractCreatedUpdatedEntity;
 import net.sf.mardao.core.domain.AbstractLongEntity;
+import net.sf.mardao.core.domain.AbstractStringEntity;
 import net.sf.mardao.core.geo.DLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -556,6 +557,16 @@ public abstract class CrudController<
         to.setId(toString(from.getId()));
     }
 
+    public static void convertStringEntity(AbstractStringEntity from, JBaseObject to) {
+        if (null == from || null == to) {
+            return;
+        }
+
+        convertCreatedUpdatedEntity((AbstractCreatedUpdatedEntity) from, to);
+        
+        to.setId(from.getId());
+    }
+
     public static void convertJCreatedUpdated(JBaseObject from, AbstractCreatedUpdatedEntity to) {
         if (null == from || null == to) {
             return;
@@ -574,6 +585,15 @@ public abstract class CrudController<
         convertJCreatedUpdated(from, to);
 
         to.setId(toLong(from.getId()));
+    }
+
+    public static void convertJString(JBaseObject from, AbstractStringEntity to) {
+        if (null == from || null == to) {
+            return;
+        }
+        convertJCreatedUpdated(from, to);
+
+        to.setId(from.getId());
     }
 
     // Convert iterable
