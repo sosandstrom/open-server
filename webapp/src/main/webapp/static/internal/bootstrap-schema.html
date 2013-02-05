@@ -1,0 +1,65 @@
+<html>
+    <head>
+        <title>Loading...</title>
+        <!-- Bootstrap -->
+        <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <style>
+            body {
+                padding-top: 60px; /* When using the navbar-top-fixed */
+            }
+        </style>
+    </head>
+    <body>
+        <div class="navbar navbar-fixed-top navbar-inverse">
+            <div class="navbar-inner">
+                <div class="container">				
+                    <a id="tableName" class="brand" href="#">Loading schema...</a>
+                    <ul class="nav">
+                        <li class="active"><a href="#all-entities" data-toggle="tab">All</a></li>
+                        <li ><a href="#create-entity" data-toggle="tab">Create</a></li>
+                    </ul>
+                </div>	
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="tabbable">
+
+                <div class="tab-content">
+                    <div id="all-entities" class="tab-pane active">
+                        <table>
+                            <thead>
+                                <tr id="allHead"></tr>
+                            </thead>
+                            <tbody id="allBody">
+                            </tbody>
+                        </table>
+                        <button id="allLoadMore" class="btn" onclick="crudLoadMore();" >Load more...</button>
+                    </div>
+
+                    <div id="create-entity" class="tab-pane">
+                        <form id="createForm">
+                            <fieldset id="createFieldset">
+
+
+                            </fieldset>
+                        </form>
+                        <button class="btn btn-primary" id="createButton" onclick="crudCreateEntity();" >Create</button>
+                    </div>
+                </div>
+            </div><!-- tabbable -->
+        </div><!-- container -->
+
+        <!--<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>-->
+        <script type="text/javascript" src="/js/jquery-1.7.1.min.js"></script>
+
+        <script src="/js/bootstrap.min.js"></script>
+        <script src="/js/crudAPI.js"></script>
+        <script type="text/javascript">
+
+            $(function() { 
+                crudLoadSchema();
+            });
+        </script>
+    </body>
+</html>

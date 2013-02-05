@@ -5,6 +5,8 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
+import java.util.TreeMap;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.Filter;
 import net.sf.mardao.core.dao.Dao;
@@ -152,6 +154,16 @@ public abstract class MardaoCrudService<
     }
 
     @Override
+    public String getPrimaryKeyColumnName() {
+        return dao.getPrimaryKeyColumnName();
+    }
+
+    @Override
+    public Class getPrimaryKeyColumnClass() {
+        return dao.getColumnClass(dao.getPrimaryKeyColumnName());
+    }
+
+    @Override
     public ID getSimpleKey(T domain) {
         return dao.getSimpleKey(domain);
     }
@@ -159,6 +171,17 @@ public abstract class MardaoCrudService<
     @Override
     public String getTableName() {
         return dao.getTableName();
+    }
+
+    @Override
+    public Map<String, Class> getTypeMap() {
+        final TreeMap<String, Class> map = new TreeMap<String, Class>();
+        
+        for (String col : dao.getColumnNames()) {
+            map.put(col, dao.getColumnClass(col));
+        }
+        
+        return map;
     }
     
     /** Override to implement pre-persist validation */
