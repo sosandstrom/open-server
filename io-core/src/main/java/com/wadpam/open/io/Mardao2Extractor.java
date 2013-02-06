@@ -68,8 +68,8 @@ public class Mardao2Extractor implements Extractor<Dao> {
     }
 
     @Override
-    public Iterable queryIterable(Object arg, Dao dao) {
-        return dao.queryAll();
+    public Iterable queryIterable(Object arg, Dao dao, int offset, int limit) {
+        return dao.queryChunk(offset, limit, null, null, null, false, null, false);
     }
     
 }

@@ -74,6 +74,13 @@ public class Exporter<D> {
      * @see #exportEntity
      */
     protected void exportDao(OutputStream out, Object arg, Object preExport, int daoIndex, D dao) {
+        exportDaoImpl(out, arg, preExport, daoIndex, dao, 0, -1);
+    }
+    
+    /**
+     * The implementation of the export of a Dao.
+     */
+    protected void exportDaoImpl(OutputStream out, Object arg, Object preExport, int daoIndex, D dao, int offset, int limit) {
         // prepare converter for dao
         Object preDao = extractor.preDao(arg, preExport, dao);
         String tableName = extractor.getTableName(arg, dao);
@@ -87,7 +94,7 @@ public class Exporter<D> {
         }
 
         int entityIndex = 0;
-        Iterable entities = extractor.queryIterable(arg, dao);
+        Iterable entities = extractor.queryIterable(arg, dao, offset, limit);
         Object log;
         for (Object entity : entities) {
             log = exportEntity(out, arg, preExport, preDao, columns, daoIndex, dao, 
