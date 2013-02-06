@@ -24,6 +24,7 @@ import org.springframework.http.converter.json.MappingJacksonHttpMessageConverte
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.view.InternalResourceView;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
@@ -72,9 +73,9 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/**")
                 .addResourceLocations("/static/")
-                .addResourceLocations("classpath:/static/");
+                .addResourceLocations("classpath:/static");
     }
-    
+
     // -------------- Controllers ----------------------
     
     @Override
@@ -135,7 +136,7 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
         final InternalResourceViewResolver bean = new InternalResourceViewResolver();
         bean.setViewClass(InternalResourceView.class);
         bean.setOrder(999);
-        bean.setPrefix("/protected/backoffice/");
+        bean.setPrefix("/internal/");
         bean.setSuffix("");
         return bean;
     }

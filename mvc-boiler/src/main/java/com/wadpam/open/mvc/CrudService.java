@@ -4,6 +4,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import net.sf.mardao.core.CursorPage;
 
 /**
@@ -32,7 +33,13 @@ public interface CrudService<
     
     String getParentKeyString(T domain);
 
+    String getPrimaryKeyColumnName();
+    
+    Class getPrimaryKeyColumnClass();
+    
     String getTableName();
+    
+    Map<String, Class> getTypeMap();
     
     ID update(T domain);
     

@@ -17,11 +17,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.domain.AbstractCreatedUpdatedEntity;
 import net.sf.mardao.core.domain.AbstractLongEntity;
+import net.sf.mardao.core.domain.AbstractStringEntity;
 import net.sf.mardao.core.geo.DLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -318,6 +322,11 @@ public abstract class CrudController<
         return body;
     }
     
+    @RequestMapping(value="v10/manager.html", method={RequestMethod.GET, RequestMethod.POST})
+    public String getBootstrap() {
+        return "bootstrap-schema.html";
+    }
+    
     /**
      * Queries for non-deleted entities. If not found or soft-deleted, it will be excluded from the response.
      * @param id array of ids to retrieve
@@ -360,6 +369,40 @@ public abstract class CrudController<
         postService(request, domain, CrudListener.GET_PAGE, null, cursorKey, body);
 
         return body;
+    }
+    
+    @RequestMapping(value="v10/schema", method= RequestMethod.GET)
+    @ResponseBody
+    public Map<String, Object> getSchema() {
+        final TreeMap<String, Object> body = new TreeMap<String, Object>();
+        body.put("tableName", service.getTableName());
+        body.put("primaryKeyName", service.getPrimaryKeyColumnName());
+        body.put("primaryKeyType", getType(service.getPrimaryKeyColumnName(), service.getPrimaryKeyColumnClass()));
+        final TreeMap<String, String> columns = new TreeMap<String, String>();
+        body.put("columns", columns);
+        
+        Class value;
+        for (Entry<String, Class> entry : service.getTypeMap().entrySet()) {
+            columns.put(entry.getKey(), getType(entry.getKey(), entry.getValue()));
+        }
+        
+        return body;
+    }
+    
+    public static String getType(String key, Class value) {
+        if (Long.class.equals(value) ||
+                Integer.class.equals(value) ||
+                Short.class.equals(value) ||
+                Byte.class.equals(value)) {
+            return "number";
+        }
+        else if (String.class.equals(value)) {
+            return "email".equals(key) ? "email" : "text";
+        }
+        else if (Boolean.class.equals(value)) {
+            return "boolean";
+        }
+        return value.getSimpleName();
     }
     
     @RequestMapping(value="v10/{id}", method=RequestMethod.POST, consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -556,6 +599,16 @@ public abstract class CrudController<
         to.setId(toString(from.getId()));
     }
 
+    public static void convertStringEntity(AbstractStringEntity from, JBaseObject to) {
+        if (null == from || null == to) {
+            return;
+        }
+
+        convertCreatedUpdatedEntity((AbstractCreatedUpdatedEntity) from, to);
+        
+        to.setId(from.getId());
+    }
+
     public static void convertJCreatedUpdated(JBaseObject from, AbstractCreatedUpdatedEntity to) {
         if (null == from || null == to) {
             return;
@@ -574,6 +627,15 @@ public abstract class CrudController<
         convertJCreatedUpdated(from, to);
 
         to.setId(toLong(from.getId()));
+    }
+
+    public static void convertJString(JBaseObject from, AbstractStringEntity to) {
+        if (null == from || null == to) {
+            return;
+        }
+        convertJCreatedUpdated(from, to);
+
+        to.setId(from.getId());
     }
 
     // Convert iterable

@@ -1,22 +1,18 @@
 package com.wadpam.open.domain;
 
 import com.google.appengine.api.datastore.Email;
-import net.sf.mardao.core.domain.AbstractCreatedUpdatedEntity;
 
 import javax.persistence.Basic;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import net.sf.mardao.core.domain.AbstractStringEntity;
 
 /**
  * Domain object containing domain/app properties.
  * @author mattiaslevin
  */
 @Entity
-public class DAppDomain extends AbstractCreatedUpdatedEntity {
-
-    /** The domain name */
-    @Id
-    private String appDomain;
+public class DAppDomain extends AbstractStringEntity {
 
     /** Short description of the domain */
     @Basic
@@ -50,7 +46,7 @@ public class DAppDomain extends AbstractCreatedUpdatedEntity {
     @Override
     public String toString() {
         return String.format("Domain:%s, description:%s, tracking code:%s",
-                appDomain, description, analyticsTrackingCode);
+                getId(), description, analyticsTrackingCode);
     }
 
 
@@ -77,14 +73,6 @@ public class DAppDomain extends AbstractCreatedUpdatedEntity {
 
     public void setAppArg2(String appArg2) {
         this.appArg2 = appArg2;
-    }
-
-    public String getAppDomain() {
-        return appDomain;
-    }
-
-    public void setAppDomain(String appDomain) {
-        this.appDomain = appDomain;
     }
 
     public String getUsername() {

@@ -9,6 +9,7 @@ import com.wadpam.open.mvc.CrudController;
 import com.wadpam.open.user.domain.DOpenUser;
 import com.wadpam.open.user.json.JOpenUser;
 import com.wadpam.open.user.service.OpenUserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -55,4 +56,8 @@ public class OpenUserController extends CrudController<JOpenUser, DOpenUser, Lon
         to.setUsername(from.getUsername());
     }
 
+    @Autowired
+    public void setOpenUserService(OpenUserService openUserService) {
+        this.service = openUserService;
+    }
 }

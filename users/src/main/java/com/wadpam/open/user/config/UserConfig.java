@@ -21,12 +21,12 @@ import org.springframework.context.annotation.Configuration;
 public class UserConfig {
 
     @Bean
-    public CrudController openUserController() {
+    public OpenUserController openUserController() {
         return new OpenUserController();
     }
     
     @Bean
-    public CrudService openUserService() {
+    public OpenUserService openUserService() {
         return new OpenUserService();
     }
     

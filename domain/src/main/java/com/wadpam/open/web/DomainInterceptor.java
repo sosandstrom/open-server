@@ -11,8 +11,15 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.security.NoSuchAlgorithmException;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A basic domain interceptor responsible for performing basic authentication
@@ -41,7 +48,11 @@ public class DomainInterceptor extends HandlerInterceptorAdapter {
     private static final Pattern PATH_DOMAIN_ADMIN = Pattern.compile("\\A/api/([^/]+)/(_admin|_worker)");
 
     private static final Pattern PATH_DOMAIN = Pattern.compile("\\A/api/([^/]+)");
+    
+    private final ArrayList<Entry<Pattern, Set<String>>> WHITELISTED_METHODS = 
+            new ArrayList<Entry<Pattern, Set<String>>>();
 
+    @Autowired
     private DomainService domainService;
 
     private static final Base64 B64 = new Base64();
@@ -84,7 +95,7 @@ public class DomainInterceptor extends HandlerInterceptorAdapter {
         if (m.find()) {
             // Get the domain from the path, mandatory
             domain = m.group(1);
-            dAppDomain = domainService.getDomain(domain);
+            dAppDomain = domainService.get(null, domain);
             request.setAttribute(ATTR_NAME_DOMAIN, dAppDomain);
             return true;
         }
@@ -95,13 +106,19 @@ public class DomainInterceptor extends HandlerInterceptorAdapter {
         if (m.find()) {
             // Get the domain from the path, mandatory
             domain = m.group(1);
-            dAppDomain = domainService.getDomain(domain);
+            dAppDomain = domainService.get(null, domain);
             if (null == dAppDomain) {
                 LOG.info("Domain:{} does not exist", domain);
                 throw new AuthenticationFailedException(ERR_DOMAIN_NOT_FOUND,
                         String.format("Authentication failed,, domain:%s does not exist", domain));
             }
             request.setAttribute(ATTR_NAME_DOMAIN, dAppDomain);
+            
+            // is this request white-listed?
+            boolean whitelisted = isWhitelistedMethod(uri, request.getMethod());
+            if (whitelisted) {
+                return true;
+            }
 
             // Authenticate using basic authentication
 
@@ -159,5 +176,29 @@ public class DomainInterceptor extends HandlerInterceptorAdapter {
     // Setters and getters
     public void setDomainService(DomainService domainService) {
         this.domainService = domainService;
+    }
+
+    protected boolean isWhitelistedMethod(String requestURI, String method) {
+        Matcher matcher;
+        for (Entry<Pattern, Set<String>> entry : WHITELISTED_METHODS) {
+            matcher = entry.getKey().matcher(requestURI);
+            if (matcher.find()) {
+                boolean returnValue = entry.getValue().contains(method);
+                LOG.debug("{} whitelisted URI {} {}", new Object[] {
+                    returnValue, method, entry.getKey()});
+                return returnValue;
+            }
+        }
+        return false;
+    }
+    
+    public void setWhitelistedMethods(Collection<Entry<String, Collection<String>>> whitelistedMethods) {
+        WHITELISTED_METHODS.clear();
+        SimpleImmutableEntry<Pattern, Set<String>> sie;
+        for (Entry<String, Collection<String>> entry : whitelistedMethods) {
+            sie = new SimpleImmutableEntry<Pattern, Set<String>>(
+                    Pattern.compile(entry.getKey()), new TreeSet<String>(entry.getValue()));
+            WHITELISTED_METHODS.add(sie);
+        }
     }
 }

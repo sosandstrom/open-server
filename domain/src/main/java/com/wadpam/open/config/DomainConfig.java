@@ -37,11 +37,13 @@ public class DomainConfig {
         bean.setDomainService(domainService());
         return bean;
     }
-    
-    @Bean
-    public DomainInterceptor domainInterceptor() {
-        DomainInterceptor bean = new DomainInterceptor();
-        bean.setDomainService(domainService());
-        return bean;
-    }
+
+    // interceptors must be factorized in the Config with the
+    // addInterceptors() override.
+//    @Bean
+//    public DomainInterceptor domainInterceptor() {
+//        DomainInterceptor bean = new DomainInterceptor();
+//        bean.setDomainService(domainService());
+//        return bean;
+//    }
 }

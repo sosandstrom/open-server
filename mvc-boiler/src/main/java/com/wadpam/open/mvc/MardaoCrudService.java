@@ -5,6 +5,8 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
+import java.util.TreeMap;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.Filter;
 import net.sf.mardao.core.dao.Dao;
@@ -36,48 +38,84 @@ public abstract class MardaoCrudService<
         return null;
     }
     
+    protected void preDao() {
+    }
+    
+    protected void postDao() {
+    }
+    
+    
     @Override
     public ID create(T domain) {
         if (null == domain) {
             return null;
         }
         
+        preDao();
         prePersist(domain);
-        
-        final ID id = dao.persist(domain);
-        
-        LOG.debug("Created {}", domain);
-        
-        return id;
+        try {
+            final ID id = dao.persist(domain);
+
+            LOG.debug("Created {}", domain);
+
+            return id;
+        }
+        finally {
+            postDao();
+        }
     }
     
     @Override
     public void delete(String parentKeyString, ID id) {
-        Object parentKey = dao.getPrimaryKey(parentKeyString);
-        dao.delete(parentKey, id);
+        preDao();
+        try {
+            Object parentKey = dao.getPrimaryKey(parentKeyString);
+            dao.delete(parentKey, id);
+        }
+        finally {
+            postDao();
+        }
     }
 
     @Override
     public void exportCsv(OutputStream out, Long startDate, Long endDate) {
-        // TODO: filter on dates
-        dao.writeAsCsv(out, getExportColumns(), (DaoImpl) dao, null, null, false, null, false);
+        preDao();
+        try {
+            // TODO: filter on dates
+            dao.writeAsCsv(out, getExportColumns(), (DaoImpl) dao, null, null, false, null, false);
+        }
+        finally {
+            postDao();
+        }
     }
     
     @Override
     public T get(String parentKeyString, ID id) {
-        Object parentKey = dao.getPrimaryKey(parentKeyString);
-        T domain = dao.findByPrimaryKey(parentKey, id);
-        LOG.debug("GET {}/{}/{} returns {}", new Object[] {
-            dao.getTableName(), parentKey, id, domain});
-        
-        return domain;
+        preDao();
+        try {
+            Object parentKey = dao.getPrimaryKey(parentKeyString);
+            T domain = dao.findByPrimaryKey(parentKey, id);
+            LOG.debug("GET {}/{}/{} returns {}", new Object[] {
+                dao.getTableName(), parentKey, id, domain});
+
+            return domain;
+        }
+        finally {
+            postDao();
+        }
     }
     
     @Override
     public Iterable<T> getByPrimaryKeys(Collection<ID> ids) {
-        final Iterable<T> entities = dao.queryByPrimaryKeys(null, ids);
-        
-        return entities;
+        preDao();
+        try {
+            final Iterable<T> entities = dao.queryByPrimaryKeys(null, ids);
+
+            return entities;
+        }
+        finally {
+            postDao();
+        }
     }
     
     protected String[] getExportColumns() {
@@ -96,7 +134,13 @@ public abstract class MardaoCrudService<
 
     @Override
     public CursorPage<T, ID> getPage(int pageSize, Serializable cursorKey) {
-        return dao.queryPage(pageSize, cursorKey);
+        preDao();
+        try {
+            return dao.queryPage(pageSize, cursorKey);
+        }
+        finally {
+            postDao();
+        }
     }
     
     @Override
@@ -110,6 +154,16 @@ public abstract class MardaoCrudService<
     }
 
     @Override
+    public String getPrimaryKeyColumnName() {
+        return dao.getPrimaryKeyColumnName();
+    }
+
+    @Override
+    public Class getPrimaryKeyColumnClass() {
+        return dao.getColumnClass(dao.getPrimaryKeyColumnName());
+    }
+
+    @Override
     public ID getSimpleKey(T domain) {
         return dao.getSimpleKey(domain);
     }
@@ -117,6 +171,17 @@ public abstract class MardaoCrudService<
     @Override
     public String getTableName() {
         return dao.getTableName();
+    }
+
+    @Override
+    public Map<String, Class> getTypeMap() {
+        final TreeMap<String, Class> map = new TreeMap<String, Class>();
+        
+        for (String col : dao.getColumnNames()) {
+            map.put(col, dao.getColumnClass(col));
+        }
+        
+        return map;
     }
     
     /** Override to implement pre-persist validation */
@@ -130,26 +195,44 @@ public abstract class MardaoCrudService<
     
     @Override
     public ID update(T domain) {
-        LOG.debug("Update {}", domain);
-        final ID id = dao.getSimpleKey(domain);
-        if (null == domain || null == id) {
-            throw new IllegalArgumentException("ID cannot be null updating " + dao.getTableName());
+        preDao();
+        try {
+            LOG.debug("Update {}", domain);
+            final ID id = dao.getSimpleKey(domain);
+            if (null == domain || null == id) {
+                throw new IllegalArgumentException("ID cannot be null updating " + dao.getTableName());
+            }
+
+            dao.update(domain);
+
+            return id;
         }
-        
-        dao.update(domain);
-        
-        return id;
+        finally {
+            postDao();
+        }
     }
     
     @Override
     public CursorPage<ID, ID> whatsChanged(Date since, int pageSize, Serializable cursorKey) {
-        // TODO: include deletes from Audit table
-        return dao.whatsChanged(since, pageSize, cursorKey);
+        preDao();
+        try {
+            // TODO: include deletes from Audit table
+            return dao.whatsChanged(since, pageSize, cursorKey);
+        }
+        finally {
+            postDao();
+        }
     }
     
     public CursorPage<ID, ID> whatsChanged(Object parentKey, Date since, 
             int pageSize, Serializable cursorKey, Filter... filters) {
-        // TODO: include deletes from Audit table
-        return dao.whatsChanged(parentKey, since, pageSize, cursorKey, filters);
+        preDao();
+        try {
+            // TODO: include deletes from Audit table
+            return dao.whatsChanged(parentKey, since, pageSize, cursorKey, filters);
+        }
+        finally {
+            postDao();
+        }
     }
 }

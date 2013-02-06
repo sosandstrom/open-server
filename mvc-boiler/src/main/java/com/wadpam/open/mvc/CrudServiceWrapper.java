@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import net.sf.mardao.core.CursorPage;
 
 /**
@@ -76,6 +77,11 @@ public class CrudServiceWrapper<T extends Object, ID extends Serializable, E ext
     }
 
     @Override
+    public Map<String, Class> getTypeMap() {
+        return delegate.getTypeMap();
+    }
+    
+    @Override
     public ID update(E domain) {
         return delegate.update(domain);
     }
@@ -87,6 +93,16 @@ public class CrudServiceWrapper<T extends Object, ID extends Serializable, E ext
 
     public void setDelegate(CrudService<T, ID> delegate) {
         this.delegate = delegate;
+    }
+
+    @Override
+    public String getPrimaryKeyColumnName() {
+        return delegate.getPrimaryKeyColumnName();
+    }
+
+    @Override
+    public Class getPrimaryKeyColumnClass() {
+        return delegate.getPrimaryKeyColumnClass();
     }
 
 }

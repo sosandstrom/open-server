@@ -8,9 +8,6 @@ import com.wadpam.open.json.JBaseObject;
  */
 public class JAppDomain extends JBaseObject {
 
-    /** The domain name */
-    private String domain;
-
     /** The username name used in basic authentication */
     private String username;
 
@@ -64,14 +61,6 @@ public class JAppDomain extends JBaseObject {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getDomain() {
-        return domain;
-    }
-
-    public void setDomain(String domain) {
-        this.domain = domain;
     }
 
     public String getEmail() {
