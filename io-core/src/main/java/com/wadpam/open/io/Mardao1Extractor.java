@@ -83,5 +83,5 @@ public class Mardao1Extractor implements Extractor<Dao> {
     public Iterable queryIterable(Object arg, Dao dao, int offset, int limit) {
         return dao.xmlFindAll();
     }
-    
+
 }

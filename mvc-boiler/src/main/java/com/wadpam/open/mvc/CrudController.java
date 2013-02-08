@@ -402,6 +402,9 @@ public abstract class CrudController<
         else if (Boolean.class.equals(value)) {
             return "boolean";
         }
+        else if (Date.class.equals(value)) {
+            return "date";
+        }
         return value.getSimpleName();
     }
     

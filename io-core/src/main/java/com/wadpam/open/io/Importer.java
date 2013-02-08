@@ -28,7 +28,6 @@ public class Importer extends ValidationHandlerAdapter {
     public static final List<String> COLUMNS = Arrays.asList(COLUMN_DAOCLASSNAME, COLUMN_FILEKEY);
     
     private ValidationHandler chunkingHandler;
-    private Map<String, ValidationHandler> handlerMap;
     
     public Importer() {
         // valid columns are the two above only
@@ -64,7 +63,6 @@ public class Importer extends ValidationHandlerAdapter {
     public <D extends Object> void importMaster(InputStream masterIn, 
             Map<String, ValidationHandler> handlerMap, ValidationHandler chunkingHandler) throws UnsupportedEncodingException, IOException, Exception {
         this.chunkingHandler = chunkingHandler;
-        this.handlerMap = handlerMap;
         JUploadFeedback feedback = new JUploadFeedback();
         
         validateMerge(feedback, masterIn, 0, -1, this, true, true);

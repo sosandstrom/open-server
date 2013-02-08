@@ -1,9 +1,11 @@
 package com.wadpam.open.io;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.dao.Dao;
 
 /**

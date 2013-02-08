@@ -18,7 +18,7 @@ import net.sf.mardao.core.domain.AbstractCreatedUpdatedEntity;
 public abstract class ChunkingHandler extends ValidationHandlerAdapter {
     
     protected final int chunkSize;
-    private final Map<String, ValidationHandler> handlerMap;
+    protected final Map<String, ValidationHandler> handlerMap;
 
     public ChunkingHandler(Map<String, ValidationHandler> handlerMap, int chunkSize) {
         this.handlerMap = handlerMap;

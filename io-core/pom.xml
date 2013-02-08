@@ -77,7 +77,7 @@
         <dependency>
             <groupId>net.sf.mardao</groupId>
             <artifactId>mardao-core</artifactId>
-            <version>2.1.7-SNAPSHOT</version>
+            <version>2.1.8-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

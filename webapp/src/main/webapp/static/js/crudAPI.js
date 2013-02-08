@@ -18,13 +18,14 @@ function crudLoadSchema() {
         }
         
         $.map(data.columns, function(item, key) {
-            $("#allHead").append("<th>" + key + "</th>");
+            if (!crudIsAuditField(key)) {
+                $("#allHead").append("<th>" + key + "</th>");
+            }
             
             // Create
-            $("#createFieldset").append("<label for='create_" + key + "'>" + key + "</label>" +
-                "<input id='create_" + key + "' name='" + key + "' type='" + item + "' /><br/>");
-            if ("createdBy" == key || "updatedBy" == key || "createdDate" == key || "updatedDate" == key) {
-                $("#create_" + key).attr("disabled", "disabled");
+            if (!crudIsAuditField(key)) {
+                $("#createFieldset").append("<label for='create_" + key + "'>" + key + "</label>" +
+                    "<input id='create_" + key + "' name='" + key + "' type='" + item + "' /><br/>");
             }
         });
     })
@@ -46,13 +47,11 @@ function crudCreateEntity() {
     
     // map properties
     $.map(schema.columns, function(item, key) {
-        val = $("#create_" + key).val();
-        console.log("   inspecting " + key + " with value " + val);
-        if ("createdBy" == key || "updatedBy" == key || "createdDate" == key || "updatedDate" == key) {
+        if (crudIsAuditField(key)) {
             // do not map
         }
         else {
-            body[key] = val;
+            body[key] = $("#create_" + key).val();
         }
     });
     
@@ -71,11 +70,30 @@ function crudAddEntity(item, index, schema) {
     $("#allBody").append("<tr id='all_" + primaryKey + "' ><td>" +
         primaryKey + "</td></tr>");
     var value;
+    var title = "";
     $.map(schema.columns, function(clazz, key) {
         value = item[key];
-        console.log("   adding td for " + value);
-        $("#all_" + primaryKey).append("<td>" + value + "</td>");
+        if ("date" == clazz) {
+            value = crudFormatMillis(value);
+        }
+        if (crudIsAuditField(key)) {
+            title = title + key + " " + value + ", ";
+        }
+        else {
+            $("#all_" + primaryKey).append("<td>" + value + "</td>");
+        }
     });
+    $("#all_" + primaryKey).attr('title', title);
+}
+
+function crudFormatMillis(millis) {
+    var d = new Date(millis);
+//    return d.toUTCString();
+    return d.toLocaleString();
+}
+
+function crudIsAuditField(key) {
+   return "createdBy" == key || "createdDate" == key || "updatedBy" == key || "updatedDate" == key; 
 }
 
 function crudLoadMore() {
