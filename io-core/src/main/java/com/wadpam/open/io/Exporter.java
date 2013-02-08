@@ -100,7 +100,7 @@ public class Exporter<D> {
         int returned = 0;
         int actualSize;
         do {
-            pageSize = Math.min(100, limit-returned);
+            pageSize = Math.min(50, limit-returned);
             actualSize = 0;
             Iterable entities = extractor.queryIterable(arg, dao, offset+returned, pageSize);
             for (Object entity : entities) {
