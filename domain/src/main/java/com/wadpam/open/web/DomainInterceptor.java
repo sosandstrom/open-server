@@ -32,9 +32,10 @@ public class DomainInterceptor extends HandlerInterceptorAdapter {
     private static final int ERR_DOMAIN_NOT_FOUND = 10000;
     private static final int ERR_AUTHENTICATION_FAILED = 10001;
 
-
     // Name and attribute injected in the request
     private static final String ATTR_NAME_DOMAIN = "_domain";
+    private static final String ATTR_NAME_TRACKING_CODE = "_trackingCode";
+    private static final String ATTR_NAME_EMAIL = "_email";
 
     // Basic authentication
     private static final String BASIC_AUTH_PARAM_NAME = "jBasic";
@@ -97,6 +98,12 @@ public class DomainInterceptor extends HandlerInterceptorAdapter {
             domain = m.group(1);
             dAppDomain = domainService.get(null, domain);
             request.setAttribute(ATTR_NAME_DOMAIN, dAppDomain);
+            if (null != dAppDomain) {
+                // Set the tracking code and email, do not like to have the aAppDomain dependency
+                // down in the controller
+                request.setAttribute(ATTR_NAME_TRACKING_CODE, dAppDomain.getAnalyticsTrackingCode());
+                request.setAttribute(ATTR_NAME_EMAIL, dAppDomain.getEmail().getEmail());
+            }
             return true;
         }
 
@@ -113,7 +120,11 @@ public class DomainInterceptor extends HandlerInterceptorAdapter {
                         String.format("Authentication failed,, domain:%s does not exist", domain));
             }
             request.setAttribute(ATTR_NAME_DOMAIN, dAppDomain);
-            
+            // Set the tracking code and email, do not like to have the aAppDomain dependency
+            // down in the controller
+            request.setAttribute(ATTR_NAME_TRACKING_CODE, dAppDomain.getAnalyticsTrackingCode());
+            request.setAttribute(ATTR_NAME_EMAIL, dAppDomain.getEmail().getEmail());
+
             // is this request white-listed?
             boolean whitelisted = isWhitelistedMethod(uri, request.getMethod());
             if (whitelisted) {
