@@ -98,6 +98,18 @@ public class DomainNamespaceFilter implements Filter {
     public void destroy() {
     }
 
+    public static void doInNamespace(String namespace, Runnable runnable) {
+        final String current = NamespaceManager.get();
+        try {
+            NamespaceManager.set(namespace);
+            LOG.debug("------ doInNamespace({}) current {} ------", namespace, current);
+            runnable.run();
+        }
+        finally {
+            NamespaceManager.set(current);
+            LOG.debug("------ doInNamespace({}) restored to {} ------", namespace, current);
+        }
+    }
 
     // Setters and getters
     public static final String getContext() {

@@ -17,15 +17,18 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.domain.AbstractCreatedUpdatedEntity;
 import net.sf.mardao.core.domain.AbstractLongEntity;
+import net.sf.mardao.core.domain.AbstractStringEntity;
 import net.sf.mardao.core.geo.DLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -61,7 +64,14 @@ public abstract class CrudController<
     
     protected static final Logger LOG = LoggerFactory.getLogger(CrudController.class);
     
+    protected final Class jsonClass;
     protected S service;
+    
+    protected final ArrayList<CrudListener> listeners = new ArrayList<CrudListener>();
+    
+    protected CrudController(Class jsonClazz) {
+        this.jsonClass = jsonClazz;
+    }
     
     /**
      * Creates an Entity from the form-encoded body, 
@@ -80,10 +90,11 @@ public abstract class CrudController<
     public RedirectView createFromForm(
             HttpServletRequest request,
             HttpServletResponse response,
+            @PathVariable String domain,
             Model model,
             @ModelAttribute J jEntity) {
         
-        final String path = createForLocation(request, model, jEntity);
+        final String path = createForLocation(request, domain, model, jEntity);
         return new RedirectView(path, true);
     }
     
@@ -109,7 +120,7 @@ public abstract class CrudController<
             @PathVariable String domain,
             Model model,
             @ModelAttribute J jEntity) {
-        final String path = createForLocation(request, model, jEntity);
+        final String path = createForLocation(request, domain, model, jEntity);
         final HttpHeaders headers = new HttpHeaders();
         headers.set("Location", path);
         return new ResponseEntity(headers, HttpStatus.CREATED);
@@ -135,7 +146,7 @@ public abstract class CrudController<
             @PathVariable String domain,
             Model model,
             @RequestBody J jEntity) {
-        final String path = createForLocation(request, model, jEntity);
+        final String path = createForLocation(request, domain, model, jEntity);
         return new RedirectView(path, true);
     }
     
@@ -160,7 +171,7 @@ public abstract class CrudController<
             @RequestParam(value="_expects") Integer _expects,
             Model model,
             @ModelAttribute J jEntity) {
-        return createForObject(request, model, jEntity);
+        return createForObject(request, response, domain, model, jEntity);
     }
     
     @RequestMapping(value="v10", method=RequestMethod.POST, 
@@ -172,7 +183,7 @@ public abstract class CrudController<
             @PathVariable String domain,
             Model model,
             @RequestBody J jEntity) {
-        return createForObject(request, model, jEntity);
+        return createForObject(request, response, domain, model, jEntity);
     }
     
     /**
@@ -180,18 +191,23 @@ public abstract class CrudController<
      * @param body the request body to create
      * @return 
      */
-    protected T create(J body) {
+    protected T create(HttpServletRequest request, String domain, J body) {
         LOG.debug(body.toString());
         
         T d = convertJson(body);
-        service.create(d);
+        preService(request, domain, CrudListener.CREATE, body, d, null);
+        ID id = service.create(d);
+        postService(request, domain, CrudListener.CREATE, body, id, d);
         return d;
     }
     
-    protected J createForObject(HttpServletRequest request, 
-            Model model, J body) {
+    protected J createForObject(HttpServletRequest request,
+            HttpServletResponse response,
+            String domain,
+            Model model, 
+            J body) {
         J amendedBody = populateRequestBody(request, model, body);
-        T d = create(amendedBody);
+        T d = create(request, domain, amendedBody);
         
         // default for GET is to include inner objects if any
         // should be included for createForObject too
@@ -201,13 +217,14 @@ public abstract class CrudController<
             }
         }
         
-        return convertWithInner(request, d);
+        return convertWithInner(request, response, domain, model, d);
     }
     
     protected String createForLocation(HttpServletRequest request, 
+            String domain,
             Model model, J body) {
         J amendedBody = populateRequestBody(request, model, body);
-        T d = create(amendedBody);
+        T d = create(request, domain, amendedBody);
         
         final StringBuffer path = new StringBuffer(request.getRequestURI());
         path.append('/');
@@ -231,7 +248,10 @@ public abstract class CrudController<
             ) {
         LOG.debug("DELETE {}/{}", parentKeyString, id);
         
+        preService(request, domain, CrudListener.DELETE, null, null, id);
         service.delete(parentKeyString, id);
+        postService(request, domain, CrudListener.DELETE, null, id, null);
+        
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
@@ -279,10 +299,12 @@ public abstract class CrudController<
             HttpServletResponse response,
             @PathVariable String domain,
             @PathVariable ID id,
-            @RequestParam(required=false) String parentKeyString
+            @RequestParam(required=false) String parentKeyString,
+            Model model
             ) {
         LOG.debug("GET {}/{}", parentKeyString, id);
         
+        preService(request, domain, CrudListener.GET, null, null, id);
         T d = service.get(parentKeyString, id);
         if (null == d) {
             throw new NotFoundException(ERR_GET_NOT_FOUND, request.getQueryString());
@@ -294,9 +316,15 @@ public abstract class CrudController<
                 request.setAttribute(name, Boolean.TRUE);
             }
         }
-        J body = convertWithInner(request, d);
+        J body = convertWithInner(request,response, domain, model, d);
+        postService(request, domain, CrudListener.GET, body, id, d);
         
         return body;
+    }
+    
+    @RequestMapping(value="v10/manager.html", method={RequestMethod.GET, RequestMethod.POST})
+    public String getBootstrap() {
+        return "bootstrap-schema.html";
     }
     
     /**
@@ -329,14 +357,55 @@ public abstract class CrudController<
     @ResponseBody
     public JCursorPage<J> getPage(
             HttpServletRequest request,
-            @RequestParam(required=false) String appString0,
-            @RequestParam(required=false) Long appLong0,
+            HttpServletResponse response,
+            @PathVariable String domain,
+            Model model,
             @RequestParam(defaultValue="10") int pageSize, 
             @RequestParam(required=false) Serializable cursorKey) {
+        
+        preService(request, domain, CrudListener.GET_PAGE, null, null, cursorKey);
         final CursorPage<T, ID> page = service.getPage(pageSize, cursorKey);
         final JCursorPage body = convertPage(page);
+        postService(request, domain, CrudListener.GET_PAGE, null, cursorKey, body);
 
         return body;
+    }
+    
+    @RequestMapping(value="v10/schema", method= RequestMethod.GET)
+    @ResponseBody
+    public Map<String, Object> getSchema() {
+        final TreeMap<String, Object> body = new TreeMap<String, Object>();
+        body.put("tableName", service.getTableName());
+        body.put("primaryKeyName", service.getPrimaryKeyColumnName());
+        body.put("primaryKeyType", getType(service.getPrimaryKeyColumnName(), service.getPrimaryKeyColumnClass()));
+        final TreeMap<String, String> columns = new TreeMap<String, String>();
+        body.put("columns", columns);
+        
+        Class value;
+        for (Entry<String, Class> entry : service.getTypeMap().entrySet()) {
+            columns.put(entry.getKey(), getType(entry.getKey(), entry.getValue()));
+        }
+        
+        return body;
+    }
+    
+    public static String getType(String key, Class value) {
+        if (Long.class.equals(value) ||
+                Integer.class.equals(value) ||
+                Short.class.equals(value) ||
+                Byte.class.equals(value)) {
+            return "number";
+        }
+        else if (String.class.equals(value)) {
+            return "email".equals(key) ? "email" : "text";
+        }
+        else if (Boolean.class.equals(value)) {
+            return "boolean";
+        }
+        else if (Date.class.equals(value)) {
+            return "date";
+        }
+        return value.getSimpleName();
     }
     
     @RequestMapping(value="v10/{id}", method=RequestMethod.POST, consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -366,7 +435,9 @@ public abstract class CrudController<
 
         J amendedBody = populateRequestBody(request, model, jEntity);
         T d = convertJson(amendedBody);
+        preService(request, domain, CrudListener.UPDATE, jEntity, d, id);
         service.update(d);
+        postService(request, domain, CrudListener.UPDATE, jEntity, id, d);
         
         final StringBuffer path = new StringBuffer("v10/");
         path.append(service.getSimpleKey(d));
@@ -421,18 +492,23 @@ public abstract class CrudController<
     @RequestMapping(value="v10", method= RequestMethod.GET, headers={"If-Modified-Since"})
     @ResponseBody
     public CursorPage<ID, ID> whatsChanged(
-            WebRequest request,
+            HttpServletRequest request,
+            WebRequest webRequest,
+            @PathVariable String domain,
             @RequestHeader(value="If-Modified-Since") Date since,
             @RequestParam(defaultValue="10") int pageSize, 
             @RequestParam(required=false) Serializable cursorKey) throws ParseException {
         final long currentMillis = System.currentTimeMillis();
+        preService(request, domain, CrudListener.WHAT_CHANGED, null, null, cursorKey);
         final CursorPage<ID, ID> page = service.whatsChanged(since, pageSize, cursorKey);
         long lastModified = page.getItems().isEmpty() ? 0L : currentMillis;
         
-        if (request.checkNotModified(lastModified)) {
+        if (webRequest.checkNotModified(lastModified)) {
             // shortcut exit - no further processing necessary
             return null;
         }
+        
+        postService(request, domain, CrudListener.WHAT_CHANGED, null, cursorKey, page);
         
         return page;
     }
@@ -456,13 +532,48 @@ public abstract class CrudController<
     // --------------- Converter methods --------------------------
     
     /** This implementation does nothing, please override */
-    public J addInnerObjects(HttpServletRequest request, J jEntity) {
+    public J addInnerObjects(HttpServletRequest request, 
+            HttpServletResponse response,
+            String domain,
+            Model model,
+            J jEntity) {
         // do nothing
         return jEntity;
     }
 
-    public abstract J convertDomain(T from);
-    public abstract T convertJson(J from);
+    public J convertDomain(T from) {
+        if (null == from) {
+            return null;
+        }
+        J to = createJson();
+        convertDomain(from, to);
+        return to;
+    }
+    
+    public T convertJson(J from) {
+        if (null == from) {
+            return null;
+        }
+        T to = createDomain();
+        convertJson(from, to);
+        return to;
+    }
+
+    public abstract void convertDomain(T from, J to);
+    public abstract void convertJson(J from, T to);
+    
+    public J createJson() {
+        try {
+            return (J) jsonClass.newInstance();
+        } catch (InstantiationException ex) {
+        } catch (IllegalAccessException ex) {
+        }
+        return null;
+    }
+    
+    public T createDomain() {
+        return service.createDomain();
+    }
     
     public static void convertCreatedUpdatedEntity(AbstractCreatedUpdatedEntity from, JBaseObject to) {
         if (null == from || null == to) {
@@ -475,9 +586,10 @@ public abstract class CrudController<
         to.setUpdatedDate(toLong(from.getUpdatedDate()));
     }
     
-    protected J convertWithInner(HttpServletRequest request, T from) {
+    protected J convertWithInner(HttpServletRequest request, HttpServletResponse response,
+            String domain, Model model, T from) {
         final J to = convertDomain(from);
-        return addInnerObjects(request, to);
+        return addInnerObjects(request, response, domain, model, to);
     }
     
     public static void convertLongEntity(AbstractLongEntity from, JBaseObject to) {
@@ -488,6 +600,16 @@ public abstract class CrudController<
         convertCreatedUpdatedEntity((AbstractCreatedUpdatedEntity) from, to);
         
         to.setId(toString(from.getId()));
+    }
+
+    public static void convertStringEntity(AbstractStringEntity from, JBaseObject to) {
+        if (null == from || null == to) {
+            return;
+        }
+
+        convertCreatedUpdatedEntity((AbstractCreatedUpdatedEntity) from, to);
+        
+        to.setId(from.getId());
     }
 
     public static void convertJCreatedUpdated(JBaseObject from, AbstractCreatedUpdatedEntity to) {
@@ -508,6 +630,15 @@ public abstract class CrudController<
         convertJCreatedUpdated(from, to);
 
         to.setId(toLong(from.getId()));
+    }
+
+    public static void convertJString(JBaseObject from, AbstractStringEntity to) {
+        if (null == from || null == to) {
+            return;
+        }
+        convertJCreatedUpdated(from, to);
+
+        to.setId(from.getId());
     }
 
     // Convert iterable
@@ -610,5 +741,28 @@ public abstract class CrudController<
         return to;
     }
     
+    public void addListener(CrudListener listener) {
+        listeners.add(listener);
+    }
     
+    public void removeListener(CrudListener listener) {
+        listeners.remove(listener);
+    }
+    
+    protected void preService(HttpServletRequest request, String namespace,
+            int operation, Object json, Object domain, Serializable id) {
+        for (CrudListener l : listeners) {
+            l.preService(this, service, request, namespace, 
+                    operation, json, domain, id);
+        }
+    }
+    
+    protected void postService(HttpServletRequest request, String namespace,
+            int operation, Object json, Serializable id, Object serviceResponse) {
+        for (CrudListener l : listeners) {
+            l.postService(this, service, request, namespace, 
+                    operation, json, id, serviceResponse);
+        }
+    }
+
 }

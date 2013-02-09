@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.wadpam.openserver</groupId>
         <artifactId>parent</artifactId>
-        <version>9-SNAPSHOT</version>
+        <version>12-SNAPSHOT</version>
     </parent>
     <artifactId>mvc-boiler</artifactId>
     <packaging>jar</packaging>

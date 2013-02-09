@@ -1,9 +1,11 @@
 package com.wadpam.open.io;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.dao.Dao;
 
 /**
@@ -68,8 +70,8 @@ public class Mardao2Extractor implements Extractor<Dao> {
     }
 
     @Override
-    public Iterable queryIterable(Object arg, Dao dao) {
-        return dao.queryAll();
+    public Iterable queryIterable(Object arg, Dao dao, int offset, int limit) {
+        return dao.queryChunk(offset, limit, null, null, null, false, null, false);
     }
     
 }

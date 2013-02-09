@@ -1,0 +1,4 @@
+DaoClassName,FileKey
+com.wadpam.open.dao.DOrganisationDaoBean,/organisations_0.csv
+com.wadpam.open.dao.DUserDaoBean,/users_0.csv
+com.wadpam.open.dao.DUserDaoBean,/users_1.csv

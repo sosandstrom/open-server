@@ -80,8 +80,8 @@ public class Mardao1Extractor implements Extractor<Dao> {
     }
 
     @Override
-    public Iterable queryIterable(Object arg, Dao dao) {
+    public Iterable queryIterable(Object arg, Dao dao, int offset, int limit) {
         return dao.xmlFindAll();
     }
-    
+
 }

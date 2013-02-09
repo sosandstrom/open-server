@@ -23,29 +23,21 @@ public class ComplexController extends CrudController<JComplex,
     @Autowired
     private DSampleDao sampleDao;
 
-    @Override
-    public JComplex convertDomain(DComplex from) {
-        if (null == from) {
-            return null;
-        }
+    public ComplexController() {
+        super(JComplex.class);
+    }
 
-        JComplex to = new JComplex();
+    @Override
+    public void convertDomain(DComplex from, JComplex to) {
         convertLongEntity(from, to);
         
         to.setName(from.getName());
         to.setManagerId(null != from.getManager() ? from.getManager().getId() : null);
         to.setOrganizationId(sampleDao.getSimpleKeyByPrimaryKey(from.getOrganizationKey()));
-        
-        return to;
     }
 
     @Override
-    public DComplex convertJson(JComplex from) {
-        if (null == from) {
-            return null;
-        }
-
-        DComplex to = new DComplex();
+    public void convertJson(JComplex from, DComplex to) {
         convertJLong(from, to);
         
         to.setName(from.getName());
@@ -55,8 +47,6 @@ public class ComplexController extends CrudController<JComplex,
             to.setManager(manager);
         }
         to.setOrganizationKey(sampleDao.getPrimaryKey(null, from.getOrganizationId()));
-        
-        return to;
     }
     
     @Autowired

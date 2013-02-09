@@ -5,33 +5,41 @@
   "http://java.sun.com/dtd/web-app_2_3.dtd">
 
 <web-app>
-    <context-param>
-        <param-name>contextConfigLocation</param-name>
-        <param-value>/WEB-INF/spring-dispatcher-servlet.xml</param-value>
-    </context-param>
+  <!-- Configure ContextLoaderListener to use AnnotationConfigWebApplicationContext
+       instead of the default XmlWebApplicationContext -->
+  <context-param>
+      <param-name>contextClass</param-name>
+      <param-value>
+          org.springframework.web.context.support.AnnotationConfigWebApplicationContext
+      </param-value>
+  </context-param>
 
-    <listener>
-        <listener-class>org.springframework.web.context.ContextLoaderListener
-        </listener-class>
-    </listener>
-    <listener>
+  <!-- Configuration locations must consist of one or more comma- or space-delimited
+       fully-qualified @Configuration classes. Fully-qualified packages may also be
+       specified for component-scanning -->
+  <context-param>
+      <param-name>contextConfigLocation</param-name>
+      <param-value>com.wadpam.open.config.AppConfig</param-value>
+  </context-param>
+
+  <!-- Bootstrap the root application context as usual using ContextLoaderListener -->
+  <listener>
+      <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+<!--    <listener>
         <listener-class>
             org.springframework.web.context.request.RequestContextListener
         </listener-class>
-    </listener>
+    </listener>-->
 
     <filter>
-        <filter-name>domainFilter</filter-name>
+        <filter-name>domainNamespaceFilter</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy
         </filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>domainFilter</filter-name>
+        <filter-name>domainNamespaceFilter</filter-name>
         <url-pattern>/domain/*</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>domainFilter</filter-name>
-        <url-pattern>/authenticate</url-pattern>
     </filter-mapping>
 
     <security-constraint>
@@ -56,6 +64,20 @@
         <servlet-name>spring-dispatcher</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
+      <!-- Configure DispatcherServlet to use AnnotationConfigWebApplicationContext
+           instead of the default XmlWebApplicationContext -->
+      <init-param>
+          <param-name>contextClass</param-name>
+          <param-value>
+              org.springframework.web.context.support.AnnotationConfigWebApplicationContext
+          </param-value>
+      </init-param>
+      <!-- Again, config locations must consist of one or more comma- or space-delimited
+           and fully-qualified @Configuration classes -->
+      <init-param>
+          <param-name>contextConfigLocation</param-name>
+          <param-value>com.wadpam.open.config.MvcConfig</param-value>
+      </init-param>
     </servlet>
 
     <servlet-mapping>

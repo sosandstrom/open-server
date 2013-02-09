@@ -34,7 +34,7 @@ public class Exporter<D> {
      * @param daos the DAOs to export
      * @see #exportDao
      */
-    public void export(OutputStream out, Object arg, D... daos) {
+    public Object export(OutputStream out, Object arg, D... daos) {
         
         // first, initialize converter
         Object preExport = extractor.preExport(arg, daos);
@@ -55,6 +55,7 @@ public class Exporter<D> {
         if (null != logPost) {
             LOG.debug("{}", logPost);
         }
+        return logPost;
     }
     
     /**
@@ -74,6 +75,13 @@ public class Exporter<D> {
      * @see #exportEntity
      */
     protected void exportDao(OutputStream out, Object arg, Object preExport, int daoIndex, D dao) {
+        exportDaoImpl(out, arg, preExport, daoIndex, dao, 0, -1);
+    }
+    
+    /**
+     * The implementation of the export of a Dao.
+     */
+    protected void exportDaoImpl(OutputStream out, Object arg, Object preExport, int daoIndex, D dao, int offset, int limit) {
         // prepare converter for dao
         Object preDao = extractor.preDao(arg, preExport, dao);
         String tableName = extractor.getTableName(arg, dao);
@@ -87,15 +95,24 @@ public class Exporter<D> {
         }
 
         int entityIndex = 0;
-        Iterable entities = extractor.queryIterable(arg, dao);
         Object log;
-        for (Object entity : entities) {
-            log = exportEntity(out, arg, preExport, preDao, columns, daoIndex, dao, 
-                    entityIndex, entity);
-            if (null != log) {
-                entityIndex++;
+        int pageSize;
+        int returned = 0;
+        int actualSize;
+        do {
+            pageSize = Math.min(50, limit-returned);
+            actualSize = 0;
+            Iterable entities = extractor.queryIterable(arg, dao, offset+returned, pageSize);
+            for (Object entity : entities) {
+                log = exportEntity(out, arg, preExport, preDao, columns, daoIndex, dao, 
+                        entityIndex, entity);
+                if (null != log) {
+                    entityIndex++;
+                }
+                returned++;
+                actualSize++;
             }
-        }
+        } while (actualSize == pageSize && returned < limit);
             
         // close converter for dao
         Object postDao = extractor.postDao(arg, preExport, preDao, dao);

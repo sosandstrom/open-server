@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.wadpam.openserver</groupId>
         <artifactId>parent</artifactId>
-        <version>9-SNAPSHOT</version>
+        <version>12-SNAPSHOT</version>
     </parent>
     <artifactId>users</artifactId>
     <packaging>jar</packaging>
@@ -18,7 +18,6 @@
 
     <build>
         <plugins>
-            <!-- Java compiler version -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -28,6 +27,70 @@
                     <target>1.6</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
+                <executions>
+                    <!-- extra compile step of domain classes before mardao generator processing -->
+                    <execution>
+                        <id>compile-entities</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <verbose>false</verbose>
+                            <fork>true</fork>
+                            <includes>
+                                <include>**/domain/*.java</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <plugin>
+                <groupId>net.sf.mardao</groupId>
+                <artifactId>mardao-maven-plugin</artifactId>
+                <version>${mardao.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-generics</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate-sources</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>generate-daos</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>process-classes</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <basePackage>com.wadpam.open.user</basePackage>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>
+                                    ${project.basedir}/target/generated-sources/dao
+                                </source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
@@ -39,34 +102,38 @@
                 </configuration>
             </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.8</version>
-                <configuration>
-                    <author>false</author>
-                    <doclet>com.wadpam.docrest.DocRestDoclet</doclet>
-                    <docletArtifact>
-                        <groupId>com.wadpam</groupId>
-                        <artifactId>docrest-doclet</artifactId>
-                        <version>${docrest.version}</version>
-                    </docletArtifact>
-                    <encoding>UTF-8</encoding>
-                    <javadocExecutable>${javadocExecutable}</javadocExecutable>
-                    <sourcepath>src/main/java</sourcepath>
-                    <useStandardDocletOptions>false</useStandardDocletOptions>
-                    <verbose>true</verbose>
-                </configuration>
-            </plugin>
         </plugins>
         
     </build>
 
     <dependencies>
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>jsonp</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mvc-boiler</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <dependency>
             <groupId>net.sf.mardao</groupId>
             <artifactId>mardao-core</artifactId>
             <version>${mardao.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.mardao</groupId>
+            <artifactId>mardao-gae</artifactId>
+            <version>${mardao.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-api-1.0-sdk</artifactId>
+            <version>${gae.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -104,4 +171,33 @@
 
     </dependencies>
     
+    <profiles>
+
+        <profile>
+            <id>javadoc</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.8</version>
+                        <configuration>
+                            <author>false</author>
+                            <doclet>com.wadpam.docrest.DocRestDoclet</doclet>
+                            <docletArtifact>
+                                <groupId>com.wadpam</groupId>
+                                <artifactId>docrest-doclet</artifactId>
+                                <version>${docrest.version}</version>
+                            </docletArtifact>
+                            <encoding>UTF-8</encoding>
+                            <javadocExecutable>${javadocExecutable}</javadocExecutable>
+                            <useStandardDocletOptions>false</useStandardDocletOptions>
+                            <verbose>true</verbose>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+            
+        </profile>
+    </profiles>
 </project>
