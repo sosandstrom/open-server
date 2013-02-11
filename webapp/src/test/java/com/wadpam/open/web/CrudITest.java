@@ -67,13 +67,13 @@ public class CrudITest {
         final String NAME = "myComplexName";
         JComplex request = new JComplex();
         request.setName(NAME);
-        request.setManagerId(null);
-        request.setOrganizationId(Long.parseLong(org.getId()));
+        request.setManager(null);
+        request.setOrganizationKey(Long.parseLong(org.getId()));
         URI uri = template.postForLocation(BASE_URL + "complex/v10", request);
         
         JComplex actual = template.getForObject(uri, JComplex.class);
         assertNotNull("Complex", actual);
-        assertEquals("Complex organizationId", (Long) Long.parseLong(org.getId()), actual.getOrganizationId());
+        assertEquals("Complex organizationId", (Long) Long.parseLong(org.getId()), actual.getOrganizationKey());
     }
     
     @Test

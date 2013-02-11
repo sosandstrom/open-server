@@ -96,13 +96,15 @@ public class DomainInterceptor extends HandlerInterceptorAdapter {
         if (m.find()) {
             // Get the domain from the path, mandatory
             domain = m.group(1);
-            dAppDomain = domainService.get(null, domain);
-            request.setAttribute(ATTR_NAME_DOMAIN, dAppDomain);
-            if (null != dAppDomain) {
-                // Set the tracking code and email, do not like to have the aAppDomain dependency
-                // down in the controller
-                request.setAttribute(ATTR_NAME_TRACKING_CODE, dAppDomain.getAnalyticsTrackingCode());
-                request.setAttribute(ATTR_NAME_EMAIL, dAppDomain.getEmail().getEmail());
+            if (!DomainNamespaceFilter.DEFAULT_NAME_SPACE_PATH.equals(domain)) {
+                dAppDomain = domainService.get(null, domain);
+                request.setAttribute(ATTR_NAME_DOMAIN, dAppDomain);
+                if (null != dAppDomain) {
+                    // Set the tracking code and email, do not like to have the aAppDomain dependency
+                    // down in the controller
+                    request.setAttribute(ATTR_NAME_TRACKING_CODE, dAppDomain.getAnalyticsTrackingCode());
+                    request.setAttribute(ATTR_NAME_EMAIL, dAppDomain.getEmail().getEmail());
+                }
             }
             return true;
         }

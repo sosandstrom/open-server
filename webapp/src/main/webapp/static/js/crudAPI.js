@@ -68,7 +68,8 @@ function crudCreate(body, successFunction) {
 function crudAddEntity(item, index, schema) {
     var primaryKey = item[schema.primaryKeyName];
     $("#allBody").append("<tr id='all_" + primaryKey + "' ><td>" +
-        primaryKey + "</td></tr>");
+        "<label class='checkbox'><input type='checkbox' id='all_" + primaryKey + "_pk'/>" +
+        primaryKey + "</label></td></tr>");
     var value;
     var title = "";
     $.map(schema.columns, function(clazz, key) {

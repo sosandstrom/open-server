@@ -329,17 +329,17 @@ public abstract class CrudController<
     
     /**
      * Queries for non-deleted entities. If not found or soft-deleted, it will be excluded from the response.
-     * @param id array of ids to retrieve
+     * @param i array of ids to retrieve
      * @return a Collection of non-deleted J objects
      */
     @RestReturn(value=List.class, code={
         @RestCode(code=200, description="A CursorPage with JSON entities", message="OK")})
-    @RequestMapping(value="v10", method={RequestMethod.GET, RequestMethod.POST}, params={"id"})
+    @RequestMapping(value="v10", method={RequestMethod.GET, RequestMethod.POST}, params={"i"})
     @ResponseBody
     public Collection<J> getExisting(
-            @RequestParam ID[] id
+            @RequestParam ID[] i
             ) {
-        final Iterable<T> page = service.getByPrimaryKeys(Arrays.asList(id));
+        final Iterable<T> page = service.getByPrimaryKeys(Arrays.asList(i));
         
         final Collection<J> body = convert(page);
         return body;

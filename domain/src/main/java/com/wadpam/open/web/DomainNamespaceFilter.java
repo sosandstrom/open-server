@@ -23,7 +23,7 @@ public class DomainNamespaceFilter implements Filter {
     static final Logger LOG = LoggerFactory.getLogger(DomainNamespaceFilter.class);
 
     private static final String DEFAULT_NAME_SPACE = null;
-    private static final String DEFAULT_NAME_SPACE_PATH = "default";
+    protected static final String DEFAULT_NAME_SPACE_PATH = "default";
 
     private String defaultNameSpace = DEFAULT_NAME_SPACE;
     private String defaultNameSpacePath = DEFAULT_NAME_SPACE_PATH;

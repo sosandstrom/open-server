@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.http.ResponseEntity;
 
 /**
  * Mange blobs in GAE blobstore.
@@ -51,6 +52,32 @@ public class BlobController extends AbstractRestController {
         return response;
     }
 
+    @RequestMapping(value = "v10", method = RequestMethod.GET, params={"callbackPath"})
+    @ResponseBody
+    public Map<String, String> getUploadUrl(HttpServletRequest request, 
+            @PathVariable String domain,
+            @RequestParam String callbackPath) {
+
+        // include an upload URL
+        String callbackUrl = 
+                null != callbackPath ? callbackPath : String.format("/api/%s/blob/v10", domain);
+        
+        // if the callback URL should contain query parameters, e.g. access_token,
+        // set callbackPath to "#"
+        if ("#".equals(callbackPath)) {
+            final String queryString = request.getQueryString();
+            callbackUrl = String.format("%s?%s", 
+                    request.getRequestURI(), 
+                    null != queryString ? queryString : "");
+        }
+
+        // get uploadUrl from blob service
+        Map<String, String> response = new HashMap<String, String>();
+        response.put("url", blobstoreService.createUploadUrl(callbackUrl));
+
+        return response;
+    }
+    
     /**
      * Upload file to blobstore callback.
      * @return the download url for each of the uploaded files
