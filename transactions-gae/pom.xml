@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.wadpam.openserver</groupId>
         <artifactId>parent</artifactId>
-        <version>12</version>
+        <version>13-SNAPSHOT</version>
     </parent>
     <artifactId>transactions-gae</artifactId>
     <packaging>jar</packaging>
