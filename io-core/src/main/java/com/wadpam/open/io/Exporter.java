@@ -99,9 +99,11 @@ public class Exporter<D> {
         int pageSize;
         int returned = 0;
         int actualSize;
+        final int absLimit = limit < 1 ? Integer.MAX_VALUE : limit;
         do {
-            pageSize = Math.min(50, limit-returned);
+            pageSize = Math.min(50, absLimit-returned);
             actualSize = 0;
+            LOG.debug("----- query {} items from {} with {} returned.", new Object[] {pageSize, tableName, returned});
             Iterable entities = extractor.queryIterable(arg, dao, offset+returned, pageSize);
             for (Object entity : entities) {
                 log = exportEntity(out, arg, preExport, preDao, columns, daoIndex, dao, 
@@ -112,7 +114,7 @@ public class Exporter<D> {
                 returned++;
                 actualSize++;
             }
-        } while (actualSize == pageSize && returned < limit);
+        } while (actualSize == pageSize && returned < absLimit);
             
         // close converter for dao
         Object postDao = extractor.postDao(arg, preExport, preDao, dao);
