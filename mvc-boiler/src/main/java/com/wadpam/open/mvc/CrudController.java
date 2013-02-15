@@ -439,7 +439,7 @@ public abstract class CrudController<
         service.update(d);
         postService(request, domain, CrudListener.UPDATE, jEntity, id, d);
         
-        final StringBuffer path = new StringBuffer("v10/");
+        final StringBuffer path = new StringBuffer();
         path.append(service.getSimpleKey(d));
         final String parentKeyString = service.getParentKeyString(d);
         if (null != parentKeyString) {

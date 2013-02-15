@@ -104,7 +104,8 @@ public class CrudITest {
         
         // update
         request.setName(NAME);
-        template.postForLocation(uri, request);
+        URI updatedUri = template.postForLocation(uri, request);
+        assertEquals(uri, updatedUri);
         
         JSample actual = template.getForObject(uri, JSample.class);
         assertEquals("Updated name", NAME, actual.getName());
