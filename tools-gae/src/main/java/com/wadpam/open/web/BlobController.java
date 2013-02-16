@@ -1,5 +1,6 @@
 package com.wadpam.open.web;
 
+import com.google.appengine.api.NamespaceManager;
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
@@ -17,7 +18,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.springframework.http.ResponseEntity;
+import javax.servlet.ServletException;
 
 /**
  * Mange blobs in GAE blobstore.
@@ -30,7 +31,6 @@ public class BlobController extends AbstractRestController {
     private static final Logger LOG = LoggerFactory.getLogger(BlobController.class);
 
     private BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
-
 
     /**
      * Get an upload url to blobstore.
@@ -135,5 +135,4 @@ public class BlobController extends AbstractRestController {
         BlobKey blobKey = new BlobKey(key);
         blobstoreService.delete(blobKey);
     }
-
 }

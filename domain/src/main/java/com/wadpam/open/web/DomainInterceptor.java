@@ -103,7 +103,9 @@ public class DomainInterceptor extends HandlerInterceptorAdapter {
                     // Set the tracking code and email, do not like to have the aAppDomain dependency
                     // down in the controller
                     request.setAttribute(ATTR_NAME_TRACKING_CODE, dAppDomain.getAnalyticsTrackingCode());
-                    request.setAttribute(ATTR_NAME_EMAIL, dAppDomain.getEmail().getEmail());
+                    if (null != dAppDomain.getEmail()) {
+                        request.setAttribute(ATTR_NAME_EMAIL, dAppDomain.getEmail().getEmail());
+                    }
                 }
             }
             return true;
@@ -125,7 +127,9 @@ public class DomainInterceptor extends HandlerInterceptorAdapter {
             // Set the tracking code and email, do not like to have the aAppDomain dependency
             // down in the controller
             request.setAttribute(ATTR_NAME_TRACKING_CODE, dAppDomain.getAnalyticsTrackingCode());
-            request.setAttribute(ATTR_NAME_EMAIL, dAppDomain.getEmail().getEmail());
+            if (null != dAppDomain.getEmail()) {
+                request.setAttribute(ATTR_NAME_EMAIL, dAppDomain.getEmail().getEmail());
+            }
 
             // is this request white-listed?
             boolean whitelisted = isWhitelistedMethod(uri, request.getMethod());
