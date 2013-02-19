@@ -109,7 +109,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>jsonp</artifactId>
+            <artifactId>json</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

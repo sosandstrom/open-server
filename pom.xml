@@ -13,10 +13,10 @@
         <module>j2ee</module>
         <module>domain</module>
         <module>io-core</module>
+        <module>json</module>
         <module>jsonp</module>
-        <module>jsonp/json-pom.xml.txt</module>
         <module>mvc-boiler</module>
-        <!--<module>push</module>-->
+        <module>push</module>
         <module>transactions-gae</module>
         <module>security-gae</module>
         <module>users</module>

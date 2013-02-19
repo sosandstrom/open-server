@@ -159,7 +159,7 @@
         </dependency>
         <dependency>
             <groupId>com.wadpam.openserver</groupId>
-            <artifactId>jsonp</artifactId>
+            <artifactId>json</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

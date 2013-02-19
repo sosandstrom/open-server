@@ -68,6 +68,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>json</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.wadpam.openserver</groupId>
             <artifactId>j2ee</artifactId>
             <version>${project.version}</version>

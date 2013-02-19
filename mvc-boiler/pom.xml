@@ -53,7 +53,12 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>jsonp</artifactId>
+            <artifactId>errors</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>json</artifactId>
             <version>${project.version}</version>
         </dependency>
         

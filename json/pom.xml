@@ -6,9 +6,9 @@
         <artifactId>parent</artifactId>
         <version>14-SNAPSHOT</version>
     </parent>
-    <artifactId>jsonp-json</artifactId>
+    <artifactId>json</artifactId>
     <packaging>jar</packaging>
-    <name>Open-Server jsonp-JSON</name>
+    <name>Open-Server json</name>
 
     <build>
         <plugins>
@@ -20,20 +20,6 @@
                     <source>1.6</source>
                     <target>1.6</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
-                    <includes>
-                        <include>**/json/J*.java</include>
-                    </includes>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <includes>
-                        <include>**/json/J*</include>
-                    </includes>
                 </configuration>
             </plugin>
         </plugins>
