@@ -69,7 +69,7 @@ public abstract class CrudController<
     
     protected final ArrayList<CrudListener> listeners = new ArrayList<CrudListener>();
     
-    protected CrudController(Class jsonClazz) {
+    protected CrudController(Class<J> jsonClazz) {
         this.jsonClass = jsonClazz;
     }
     
@@ -403,28 +403,12 @@ public abstract class CrudController<
             return "boolean";
         }
         else if (Date.class.equals(value)) {
-            return "date";
+            return "datetime";
         }
         return value.getSimpleName();
     }
     
-    @RequestMapping(value="v10/{id}", method=RequestMethod.POST, consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public RedirectView updateFromForm(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            @PathVariable String domain,
-            @PathVariable ID id,
-            @RequestHeader(value=NAME_X_REQUESTED_WITH, required=false) String xRequestedWith,
-            Model model,
-            @ModelAttribute J jEntity) {
-        return updateForLocation(request, response, 
-                domain, id, 
-                xRequestedWith, 
-                model, 
-                jEntity);
-    }
-    
-    protected RedirectView updateForLocation(HttpServletRequest request,
+    protected T update(HttpServletRequest request,
             HttpServletResponse response,
             String domain,
             ID id,
@@ -439,7 +423,76 @@ public abstract class CrudController<
         service.update(d);
         postService(request, domain, CrudListener.UPDATE, jEntity, id, d);
         
-        final StringBuffer path = new StringBuffer("v10/");
+        return d;
+    }
+    
+    @RequestMapping(value="v10/{id}", method=RequestMethod.POST, consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity updateFromForm(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable String domain,
+            @PathVariable ID id,
+            @RequestHeader(value=NAME_X_REQUESTED_WITH, required=false) String xRequestedWith,
+            Model model,
+            @ModelAttribute J jEntity) {
+        
+        update(request, response, 
+                domain, id, 
+                xRequestedWith, 
+                model, 
+                jEntity);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+    
+    @RequestMapping(value="v10/{id}", method=RequestMethod.GET, 
+            params={"_method=POST"},
+            consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity updateFromJsonp(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable String domain,
+            @PathVariable ID id,
+            @RequestHeader(value=NAME_X_REQUESTED_WITH, required=false) String xRequestedWith,
+            Model model,
+            @ModelAttribute J jEntity) {
+
+        update(request, response, 
+                domain, id, 
+                xRequestedWith, 
+                model, 
+                jEntity);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+    
+    @RequestMapping(value="v10/{id}", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity updateFromJson(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable String domain,
+            @PathVariable ID id,
+            @RequestHeader(value=NAME_X_REQUESTED_WITH, required=false) String xRequestedWith,
+            Model model,
+            @RequestBody J jEntity) {
+        
+        update(request, response, 
+                domain, id, 
+                xRequestedWith, 
+                model, 
+                jEntity);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+    
+    protected RedirectView updateForLocation(HttpServletRequest request,
+            HttpServletResponse response,
+            String domain,
+            ID id,
+            String xRequestedWith,
+            Model model,
+            J jEntity) {
+
+        T d = update(request, response, domain, id, xRequestedWith, model, jEntity);
+        
+        final StringBuffer path = new StringBuffer();
         path.append(service.getSimpleKey(d));
         final String parentKeyString = service.getParentKeyString(d);
         if (null != parentKeyString) {
@@ -449,14 +502,34 @@ public abstract class CrudController<
         return new RedirectView(path.toString(), true);
     }
     
-    @RequestMapping(value="v10/{id}", method=RequestMethod.GET, 
-            params={"_method=POST"},
+    @RequestMapping(value="v10/{id}", method=RequestMethod.POST, 
+            params={"_expects=302"},
             consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public RedirectView updateFromJsonp(
+    public RedirectView updateFromFormForLocation(
             HttpServletRequest request,
             HttpServletResponse response,
             @PathVariable String domain,
             @PathVariable ID id,
+            @RequestParam(value="_expects") Integer _expects,
+            @RequestHeader(value=NAME_X_REQUESTED_WITH, required=false) String xRequestedWith,
+            Model model,
+            @ModelAttribute J jEntity) {
+        return updateForLocation(request, response, 
+                domain, id, 
+                xRequestedWith, 
+                model, 
+                jEntity);
+    }
+    
+    @RequestMapping(value="v10/{id}", method=RequestMethod.GET, 
+            params={"_method=POST", "_expects=302"},
+            consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public RedirectView updateFromJsonpForLocation(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable String domain,
+            @PathVariable ID id,
+            @RequestParam(value="_expects") Integer _expects,
             @RequestHeader(value=NAME_X_REQUESTED_WITH, required=false) String xRequestedWith,
             Model model,
             @ModelAttribute J jEntity) {
@@ -465,13 +538,18 @@ public abstract class CrudController<
                 xRequestedWith, 
                 model, jEntity);
     }
+
     
-    @RequestMapping(value="v10/{id}", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE)
-    public RedirectView updateFromJson(
+    
+    @RequestMapping(value="v10/{id}", method=RequestMethod.POST, 
+            params={"_expects=302"},
+            consumes=MediaType.APPLICATION_JSON_VALUE)
+    public RedirectView updateFromJsonForLocation(
             HttpServletRequest request,
             HttpServletResponse response,
             @PathVariable String domain,
             @PathVariable ID id,
+            @RequestParam(value="_expects") Integer _expects,
             @RequestHeader(value=NAME_X_REQUESTED_WITH, required=false) String xRequestedWith,
             Model model,
             @RequestBody J jEntity) {

@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.wadpam.openserver</groupId>
     <artifactId>parent</artifactId>
-    <version>14-SNAPSHOT</version>
+    <version>15-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Open-Server parent</name>
 
@@ -13,6 +13,7 @@
         <module>j2ee</module>
         <module>domain</module>
         <module>io-core</module>
+        <module>json</module>
         <module>jsonp</module>
         <module>mvc-boiler</module>
         <module>push</module>
