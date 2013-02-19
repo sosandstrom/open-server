@@ -69,7 +69,7 @@ public abstract class CrudController<
     
     protected final ArrayList<CrudListener> listeners = new ArrayList<CrudListener>();
     
-    protected CrudController(Class jsonClazz) {
+    protected CrudController(Class<J> jsonClazz) {
         this.jsonClass = jsonClazz;
     }
     
