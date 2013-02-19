@@ -14,6 +14,7 @@
         <module>domain</module>
         <module>io-core</module>
         <module>jsonp</module>
+        <module>jsonp/json-pom.xml.txt</module>
         <module>mvc-boiler</module>
         <module>push</module>
         <module>transactions-gae</module>
