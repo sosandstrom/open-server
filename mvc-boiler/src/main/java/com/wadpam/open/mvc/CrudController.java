@@ -403,7 +403,7 @@ public abstract class CrudController<
             return "boolean";
         }
         else if (Date.class.equals(value)) {
-            return "date";
+            return "datetime";
         }
         return value.getSimpleName();
     }
