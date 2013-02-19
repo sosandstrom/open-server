@@ -16,7 +16,7 @@
         <module>jsonp</module>
         <module>jsonp/json-pom.xml.txt</module>
         <module>mvc-boiler</module>
-        <module>push</module>
+        <!--<module>push</module>-->
         <module>transactions-gae</module>
         <module>security-gae</module>
         <module>users</module>
