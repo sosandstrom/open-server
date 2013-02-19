@@ -174,6 +174,17 @@ public abstract class CrudController<
         return createForObject(request, response, domain, model, jEntity);
     }
     
+  /**
+     * Creates an Entity from the json-object-encoded body by MediaType.APPLICATION_JSON_VALUE, 
+     * and redirects to the created Entity.
+     * @param domain the path-variable domain
+     * @param _expects must be set to 200
+     * @param jEntity The Request body will be bound to this object
+     * @return 200 and the created entity
+     */
+    @RestReturn(value=Object.class, code={
+        @RestCode(code=200, description="Entity created", message="OK")
+    })
     @RequestMapping(value="v10", method=RequestMethod.POST, 
             params={"_expects=200"},
             consumes=MediaType.APPLICATION_JSON_VALUE)
@@ -238,6 +249,15 @@ public abstract class CrudController<
         return path.toString();
     }
     
+	 /**
+	     *  delete an Entity and return HttpStatus.NO_CONTENT .
+	     * @param domain the path-variable domain
+	     * @param id the path-variable id	 	     
+	     * @return  HttpStatus.NO_CONTENT
+	     */
+    @RestReturn(value=ResponseEntity.class, code={
+        @RestCode(code=204, description="Entity deleted", message="OK")
+    })		 
     @RequestMapping(value="v10/{id}", method=RequestMethod.DELETE)
     public ResponseEntity delete(
             HttpServletRequest request,
@@ -255,6 +275,16 @@ public abstract class CrudController<
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
+	 /**
+	     * deleteFromJsonp  for cross-domain - delete an Entity and return HttpStatus.NO_CONTENT .
+	     * @param domain the path-variable domain
+	     * @param id the path-variable id
+	     * @param _method value must be  "DELETE"	 	 
+	     * @return  HttpStatus.NO_CONTENT
+	     */	
+    @RestReturn(value=ResponseEntity.class, code={
+        @RestCode(code=204, description="Entity deleted", message="OK")
+    })		 
     @RequestMapping(value="v10/{id}", method=RequestMethod.GET,
             params={"_method=DELETE"})
     public ResponseEntity deleteFromJsonp(
@@ -291,7 +321,14 @@ public abstract class CrudController<
         
         service.exportCsv(out, startDate, endDate);
     }
-    
+    /**
+	* get Entity detail 
+	* @param id is path-variable
+	* @return Entity as json object
+	*/
+	@RestReturn(value=Object.class, code={
+        @RestCode(code=200, description="get Entity successfully", message="OK")
+    })
     @RequestMapping(value="v10/{id}", method=RequestMethod.GET)
     @ResponseBody
     public J get(
@@ -425,7 +462,17 @@ public abstract class CrudController<
         
         return d;
     }
-    
+	  /**
+	     * update an Entity from the form-encoded body, 
+	     * and return HttpStatus.NO_CONTENT.
+	     * @param domain the path-variable domain
+	     * @param id the path-variable id
+	     * @param jEntity The form-encoded body will be bound to this object
+	     * @return HttpStatus.NO_CONTENT.
+	     */
+    @RestReturn(value=ResponseEntity.class, code={
+        @RestCode(code=204, description="Entity updated", message="OK")
+    })
     @RequestMapping(value="v10/{id}", method=RequestMethod.POST, consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity updateFromForm(
             HttpServletRequest request,
@@ -444,6 +491,17 @@ public abstract class CrudController<
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
     
+	 /**  updateFromJsonp update entity with cross-domain jsonp	     
+	     * and return HttpStatus.NO_CONTENT.
+	     * @param domain the path-variable domain
+	     * @param id the path-variable id
+              * @param  _method  value must be "POST"
+	     * @param jEntity The form-encoded body will be bound to this object
+	     * @return HttpStatus.NO_CONTENT.
+	     */
+	@RestReturn(value=ResponseEntity.class, code={
+        @RestCode(code=204, description="Entity updated", message="OK")
+    })	 
     @RequestMapping(value="v10/{id}", method=RequestMethod.GET, 
             params={"_method=POST"},
             consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -464,6 +522,16 @@ public abstract class CrudController<
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
     
+	 /**  updateFromJson update entity with MediaType.APPLICATION_JSON_VALUE header
+	     * and return HttpStatus.NO_CONTENT.
+	     * @param domain the path-variable domain
+	     * @param id the path-variable id        
+	     * @param jEntity  RequestBody
+	     * @return HttpStatus.NO_CONTENT.
+	     */
+	@RestReturn(value=ResponseEntity.class, code={
+        @RestCode(code=204, description="Entity updated", message="OK")
+    })
     @RequestMapping(value="v10/{id}", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity updateFromJson(
             HttpServletRequest request,
