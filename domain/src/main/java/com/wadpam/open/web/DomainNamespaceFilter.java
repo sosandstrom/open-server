@@ -94,7 +94,7 @@ public class DomainNamespaceFilter implements Filter {
         finally {
             DOMAIN.set(current);
             NamespaceManager.set(current);
-            LOG.debug("------ doInNamespace({}) restored to {} ------", namespace, current);
+//            LOG.debug("------ doInNamespace({}) restored to {} ------", namespace, current);
         }
     }
     
