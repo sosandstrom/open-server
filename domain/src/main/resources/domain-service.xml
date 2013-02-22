@@ -17,34 +17,11 @@
     <!-- Example configuration. Include this file or write your own -->
 
     <!-- Service -->
-    <bean id="domainService" class="com.wadpam.open.service.DomainService" init-method="init">
+    <bean id="domainService" class="com.wadpam.open.service.DomainService">
         <property name="domainDao" ref="dAppDomainDao" />
     </bean>
 
-
     <!-- Aspects -->
-    <bean id="gaeFixedNamespaceExecutor" class="com.wadpam.open.service.GaeFixedNamespaceExecutor">
-        <property name="order" value="100"/>
-    </bean>
-
-    <aop:config>
-        <aop:aspect id="gaeFixedNamespaceAspect" ref="gaeFixedNamespaceExecutor">
-            <aop:pointcut id="fixedNamespaceMethods"
-                          expression="within(com.wadpam.open.service.DomainService)
-                              and @annotation(com.wadpam.open.service.FixedNamespace)"/>
-            <aop:around pointcut-ref="fixedNamespaceMethods" method="doFixedNamespaceOperation" />
-        </aop:aspect>
-    </aop:config>
-
-    <!-- Interceptors -->
-    <mvc:interceptors>
-        <mvc:interceptor>
-            <mvc:mapping path="/**"/>
-            <bean id="domainInterceptor" class="com.wadpam.open.web.DomainInterceptor">
-                <property name="domainService" ref="domainService"/>
-            </bean>
-        </mvc:interceptor>
-    </mvc:interceptors>
 
     <!-- Controller -->
     <bean class="com.wadpam.open.web.DomainController">
@@ -52,7 +29,6 @@
     </bean>
 
     <!-- Dao -->
-
     <bean id="dAppDomainDao"
           class="com.wadpam.open.dao.DAppDomainDaoBean">
     </bean>

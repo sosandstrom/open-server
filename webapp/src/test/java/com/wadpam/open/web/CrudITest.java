@@ -11,6 +11,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.web.client.RestTemplate;
 import static org.junit.Assert.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 
 /**
@@ -67,13 +69,13 @@ public class CrudITest {
         final String NAME = "myComplexName";
         JComplex request = new JComplex();
         request.setName(NAME);
-        request.setManagerId(null);
-        request.setOrganizationId(Long.parseLong(org.getId()));
+        request.setManager(null);
+        request.setOrganizationKey(Long.parseLong(org.getId()));
         URI uri = template.postForLocation(BASE_URL + "complex/v10", request);
         
         JComplex actual = template.getForObject(uri, JComplex.class);
         assertNotNull("Complex", actual);
-        assertEquals("Complex organizationId", (Long) Long.parseLong(org.getId()), actual.getOrganizationId());
+        assertEquals("Complex organizationId", (Long) Long.parseLong(org.getId()), actual.getOrganizationKey());
     }
     
     @Test
@@ -104,7 +106,26 @@ public class CrudITest {
         
         // update
         request.setName(NAME);
-        template.postForLocation(uri, request);
+        ResponseEntity entity = template.postForEntity(uri, request, JSample.class);
+        assertEquals(HttpStatus.NO_CONTENT, entity.getStatusCode());
+        
+        JSample actual = template.getForObject(uri, JSample.class);
+        assertEquals("Updated name", NAME, actual.getName());
+        assertTrue("UpdatedDate", actual.getCreatedDate() < actual.getUpdatedDate());
+    }
+    
+    @Test
+    public void testUpdateSampleForLocation() {
+        final String NAME = "mySampleName";
+        JSample request = new JSample();
+        request.setName("initialName");
+        URI uri = template.postForLocation(BASE_URL + "sample/v10", request);
+        request = template.getForObject(uri, JSample.class);
+        
+        // update
+        request.setName(NAME);
+        URI updatedUri = template.postForLocation(uri.toString() + "?_expects=302", request);
+        assertEquals(uri, updatedUri);
         
         JSample actual = template.getForObject(uri, JSample.class);
         assertEquals("Updated name", NAME, actual.getName());

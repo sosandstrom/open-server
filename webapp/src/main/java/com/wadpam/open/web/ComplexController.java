@@ -32,8 +32,8 @@ public class ComplexController extends CrudController<JComplex,
         convertLongEntity(from, to);
         
         to.setName(from.getName());
-        to.setManagerId(null != from.getManager() ? from.getManager().getId() : null);
-        to.setOrganizationId(sampleDao.getSimpleKeyByPrimaryKey(from.getOrganizationKey()));
+        to.setManager(null != from.getManager() ? from.getManager().getId() : null);
+        to.setOrganizationKey(sampleDao.getSimpleKeyByPrimaryKey(from.getOrganizationKey()));
     }
 
     @Override
@@ -41,12 +41,12 @@ public class ComplexController extends CrudController<JComplex,
         convertJLong(from, to);
         
         to.setName(from.getName());
-        if (null != from.getManagerId()) {
+        if (null != from.getManager()) {
             DComplex manager = new DComplex();
-            manager.setId(from.getManagerId());
+            manager.setId(from.getManager());
             to.setManager(manager);
         }
-        to.setOrganizationKey(sampleDao.getPrimaryKey(null, from.getOrganizationId()));
+        to.setOrganizationKey(sampleDao.getPrimaryKey(null, from.getOrganizationKey()));
     }
     
     @Autowired

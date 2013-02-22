@@ -6,8 +6,8 @@ package com.wadpam.open.json;
  */
 public class JComplex extends JBaseObject {
     private String name;
-    private Long organizationId;
-    private Long managerId;
+    private Long organizationKey;
+    private Long manager;
 
     public String getName() {
         return name;
@@ -17,21 +17,20 @@ public class JComplex extends JBaseObject {
         this.name = name;
     }
 
-    public Long getOrganizationId() {
-        return organizationId;
+    public Long getOrganizationKey() {
+        return organizationKey;
     }
 
-    public void setOrganizationId(Long organizationId) {
-        this.organizationId = organizationId;
+    public void setOrganizationKey(Long organizationKey) {
+        this.organizationKey = organizationKey;
     }
 
-    public Long getManagerId() {
-        return managerId;
+    public Long getManager() {
+        return manager;
     }
 
-    public void setManagerId(Long managerId) {
-        this.managerId = managerId;
+    public void setManager(Long manager) {
+        this.manager = manager;
     }
-    
-    
+
 }

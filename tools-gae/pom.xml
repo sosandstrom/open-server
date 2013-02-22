@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.wadpam.openserver</groupId>
         <artifactId>parent</artifactId>
-        <version>11-SNAPSHOT</version>
+        <version>15-SNAPSHOT</version>
     </parent>
     <artifactId>tools-gae</artifactId>
     <packaging>jar</packaging>
@@ -57,10 +57,14 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>domain</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>errors</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>analytics</artifactId>

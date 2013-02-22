@@ -1,6 +1,7 @@
 package com.wadpam.open.io;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,10 +19,10 @@ import org.slf4j.LoggerFactory;
 public class ValidationHandlerAdapter implements ValidationHandler {
     protected static final Logger LOG = LoggerFactory.getLogger(ValidationHandlerAdapter.class);
     
-    private Collection<String> validColumns;
-    private Map<String, Integer> requiredColumns;
-    private Map<String, Pattern> regexps;
-    private Map<String, String> fileToDomainMap;
+    private Collection<String> validColumns = Collections.EMPTY_LIST;
+    private Map<String, Integer> requiredColumns = Collections.EMPTY_MAP;
+    private Map<String, Pattern> regexps = Collections.EMPTY_MAP;
+    private Map<String, String> fileToDomainMap = Collections.EMPTY_MAP;
 
     protected final Map<String, Integer> colIndexMap = new HashMap<String, Integer>();
     protected final Map<Integer, String> indexColMap = new HashMap<Integer, String>();

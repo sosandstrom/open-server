@@ -14,13 +14,20 @@ import java.util.Map;
 public class CsvConverter<D> implements Converter<D> {
     
     protected final ThreadLocal<PrintWriter> pw = new ThreadLocal<PrintWriter>();
+    
+    public String convertToString(Object o) {
+        if (null == o) {
+            return null;
+        }
+        return o.toString();
+    }
 
-    public static String escapeCsv(Object s) {
+    public static String escapeCsv(String s) {
         if (null == s) {
             return null;
         }
         // first, escape all double quotes:
-        final String escaped = s.toString().replaceAll("\\\"", "\"\"");
+        final String escaped = s.replaceAll("\\\"", "\"\"");
         // then, qoute the string:
         final String quoted = String.format("\"%s\"", escaped);
         
@@ -76,7 +83,7 @@ public class CsvConverter<D> implements Converter<D> {
                 else {
                     sb.append(',');
                 }
-                sb.append(escapeCsv(values.get(col)));
+                sb.append(escapeCsv(convertToString(values.get(col))));
             }
 
             s = sb.toString();

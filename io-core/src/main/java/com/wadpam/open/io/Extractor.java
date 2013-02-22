@@ -1,7 +1,6 @@
 package com.wadpam.open.io;
 
 import java.util.Map;
-import net.sf.mardao.core.dao.Dao;
 
 /**
  *
@@ -25,6 +24,5 @@ public interface Extractor<D> {
 
     Object preExport(Object arg, D[] daos);
 
-    Iterable queryIterable(Object arg, D dao);
-
+    Iterable queryIterable(Object arg, D dao, int offset, int limit);
 }
