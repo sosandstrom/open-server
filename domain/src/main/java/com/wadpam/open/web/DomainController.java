@@ -6,8 +6,8 @@ import com.wadpam.open.json.JAppDomain;
 import com.wadpam.open.mvc.CrudController;
 import com.wadpam.open.service.DomainService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * Controller for managing domains.

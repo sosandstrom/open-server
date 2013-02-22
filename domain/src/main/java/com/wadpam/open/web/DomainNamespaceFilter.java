@@ -94,7 +94,7 @@ public class DomainNamespaceFilter implements Filter {
         finally {
             DOMAIN.set(current);
             NamespaceManager.set(current);
-            LOG.debug("------ doInNamespace({}) restored to {} ------", namespace, current);
+//            LOG.debug("------ doInNamespace({}) restored to {} ------", namespace, current);
         }
     }
     
@@ -126,7 +126,7 @@ public class DomainNamespaceFilter implements Filter {
     public static void processRequestInNamespace(HttpServletRequest request, Runnable runnable) throws IOException, ServletException {
         final String uri = request.getRequestURI();
         final String domainNamespace = getDomainNamespace(uri);
-        LOG.debug("======= Switching namespace to {}, {} {} ========", 
+        LOG.info("======= Switching namespace to {}, {} {} ========", 
                 new Object[] {domainNamespace, request.getMethod(), uri});
         
         doInNamespace(domainNamespace, runnable);
