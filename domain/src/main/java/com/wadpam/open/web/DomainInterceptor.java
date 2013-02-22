@@ -48,6 +48,7 @@ public abstract class DomainInterceptor extends HandlerInterceptorAdapter {
     private static final Pattern PATH_ADMIN = Pattern.compile("\\A/api/(_admin|_worker)");
     private static final Pattern PATH_DOMAIN_ADMIN = Pattern.compile("\\A/api/([^/]+)/(_admin|_worker)");
 
+    private static final String PATH_DOMAIN_DEFAULT = "/api/default/";
     private static final Pattern PATH_DOMAIN = Pattern.compile("\\A/api/([^/]+)");
     
     private final ArrayList<Entry<Pattern, Set<String>>> WHITELISTED_METHODS = 
@@ -113,6 +114,11 @@ public abstract class DomainInterceptor extends HandlerInterceptorAdapter {
                     }
                 }
             }
+            return true;
+        }
+        
+        // No authentication for default domain (unless _admin above)
+        if (uri.startsWith(PATH_DOMAIN_DEFAULT)) {
             return true;
         }
 
