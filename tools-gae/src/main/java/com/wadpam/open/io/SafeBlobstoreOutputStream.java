@@ -108,9 +108,10 @@ public class SafeBlobstoreOutputStream extends OutputStream {
                 outputStream = Channels.newOutputStream(channel);
                 timeOpened = System.currentTimeMillis();
             }
-            finally {
+            catch (IOException ex) {
                 channel = null;
                 outputStream = null;
+                throw ex;
             }
         }
     }
