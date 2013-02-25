@@ -57,6 +57,9 @@ public abstract class DomainInterceptor extends HandlerInterceptorAdapter {
     @Autowired
     private DomainService domainService;
 
+    /**
+     * @return the authenticated username
+     */
     protected abstract String doAuthenticate(HttpServletRequest request, HttpServletResponse response);
 
     @Override

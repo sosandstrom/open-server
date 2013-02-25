@@ -19,7 +19,6 @@
         <module>push</module>
         <module>transactions-gae</module>
         <module>security-gae</module>
-        <module>users</module>
         <module>webapp</module>
         <module>analytics</module>
         <module>analytics-gae</module>
