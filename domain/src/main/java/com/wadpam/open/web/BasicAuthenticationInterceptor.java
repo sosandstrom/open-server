@@ -33,7 +33,7 @@ public class BasicAuthenticationInterceptor extends DomainInterceptor {
         if (null == authorizationHeader) {
             // Alternative way of getting the basic authentication from a parameter
             // Useful with javascript and jquery and some other platforms
-            authorizationHeader = request.getParameter(BASIC_AUTH_PARAM_NAME);
+            authorizationHeader = String.format("%s%s", BASIC_AUTH_PREFIX, request.getParameter(BASIC_AUTH_PARAM_NAME));
         }
         LOG.debug("Incoming authentication header value:{}", authorizationHeader);
 
