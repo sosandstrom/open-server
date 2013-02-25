@@ -31,11 +31,11 @@ public abstract class DomainInterceptor extends HandlerInterceptorAdapter {
     protected static final int ERR_AUTHENTICATION_FAILED = 10001;
 
     // Name and attribute injected in the request
-    protected static final String ATTR_NAME_DOMAIN = "_domain";
-    protected static final String ATTR_NAME_TRACKING_CODE = "_trackingCode";
-    protected static final String ATTR_NAME_EMAIL = "_email";
+    public static final String ATTR_NAME_DOMAIN = "_domain";
+    public static final String ATTR_NAME_TRACKING_CODE = "_trackingCode";
+    public static final String ATTR_NAME_EMAIL = "_email";
     /** must be same as MardaoPrincipalInterceptor value */
-    protected static final String ATTR_NAME_USERNAME = "_username";
+    public static final String ATTR_NAME_USERNAME = "_username";
 
     public static final String NAME_AUTHORIZATION = "Authorization";
     
