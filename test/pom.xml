@@ -2,7 +2,7 @@
     <parent>
         <artifactId>parent</artifactId>
         <groupId>com.wadpam.openserver</groupId>
-        <version>15</version>
+        <version>16-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
