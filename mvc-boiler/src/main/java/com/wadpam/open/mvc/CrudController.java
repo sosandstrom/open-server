@@ -111,9 +111,7 @@ public abstract class CrudController<
         @RestCode(code=201, description="Entity created", message="Created")
     })
     @RequestMapping(value="v10", method=RequestMethod.GET, 
-            params={"_method=POST"},
-            headers={"X-Requested-With=XMLHttpRequest"},
-            consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+            params={"_method=POST"})
     public ResponseEntity createFromJsonp(
             HttpServletRequest request,
             HttpServletResponse response,
