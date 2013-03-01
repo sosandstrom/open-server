@@ -13,7 +13,7 @@ public class JCursorPage<T extends Object> {
      * The cursor used to return the next page of items
      * The no cursor is returned, end of pagination have been reached
      */
-    private Serializable cursorKey;
+    private String cursorKey;
 
     /**
      * The number of items to return.
@@ -31,11 +31,11 @@ public class JCursorPage<T extends Object> {
 
     // Setters and getters
 
-    public Serializable getCursorKey() {
+    public String getCursorKey() {
         return cursorKey;
     }
 
-    public void setCursorKey(Serializable cursorKey) {
+    public void setCursorKey(String cursorKey) {
         this.cursorKey = cursorKey;
     }
 

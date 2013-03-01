@@ -72,7 +72,7 @@ public class RestJsonExceptionResolver extends AbstractHandlerExceptionResolver
         }
 
         mav.addObject(KEY_ERROR_OBJECT, error);
-        LOG.debug("Resolved exception is", exception);
+//        LOG.debug("Resolved exception is", exception);
         LOG.debug("Returning error object {}", error);
         return mav;
     }

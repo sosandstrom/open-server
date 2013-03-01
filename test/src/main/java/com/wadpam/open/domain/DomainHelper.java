@@ -7,6 +7,7 @@ package com.wadpam.open.domain;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.tools.development.testing.LocalUserServiceTestConfig;
 import com.wadpam.open.json.JAppDomain;
+import java.util.Map;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -22,7 +23,14 @@ public class DomainHelper {
     public static final String BASIC_ITEST_VALUE = "aXRlc3Q6aXRlc3Q=";
     public static final String J_BASIC_ITEST = "Basic " + BASIC_ITEST_VALUE;
 
-    public static JAppDomain upsertITestDomain(final String baseUrl) {
+    public static String getEndpoints(final String BASE_URL) {
+        RestTemplate restTemplate = new RestTemplate();
+        Map<String, String> endpoints = restTemplate.getForObject(BASE_URL + "/api/default/endpoints", 
+                Map.class);
+        return endpoints.get("apiUrl");
+    }
+    
+    public static JAppDomain upsertITestDomain(final String BASE_URL) {
         final LocalServiceTestHelper userServiceHelper = 
             new LocalServiceTestHelper(new LocalUserServiceTestConfig());
         userServiceHelper.setUp();
@@ -32,7 +40,7 @@ public class DomainHelper {
 
         JAppDomain itest = null;
         try {
-            itest = restTemplate.getForObject(baseUrl + DOMAIN_PATH + "/{id}", 
+            itest = restTemplate.getForObject(BASE_URL + DOMAIN_PATH + "/{id}", 
                 JAppDomain.class, DOMAIN_ITEST);
         }
         catch (HttpClientErrorException notFound) {
@@ -42,7 +50,7 @@ public class DomainHelper {
             itest.setDescription("domain for itests");
             itest.setUsername(DOMAIN_ITEST);
             itest.setPassword(DOMAIN_ITEST);
-            restTemplate.postForLocation(baseUrl + DOMAIN_PATH, itest);
+            restTemplate.postForLocation(BASE_URL + DOMAIN_PATH, itest);
         }
         
         userServiceHelper.setEnvIsLoggedIn(false);
