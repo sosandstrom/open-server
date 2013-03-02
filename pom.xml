@@ -11,6 +11,7 @@
     <modules>
         <module>errors</module>
         <module>j2ee</module>
+        <module>security</module>
         <module>domain</module>
         <module>io-core</module>
         <module>json</module>
