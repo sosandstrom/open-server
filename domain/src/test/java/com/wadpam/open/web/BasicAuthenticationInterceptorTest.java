@@ -22,16 +22,16 @@ import org.springframework.mock.web.MockHttpServletRequest;
  *
  * @author sosandstrom
  */
-public class DomainInterceptorTest extends TestCase {
-    static final Logger LOG = LoggerFactory.getLogger(DomainInterceptorTest.class);
+public class BasicAuthenticationInterceptorTest extends TestCase {
+    static final Logger LOG = LoggerFactory.getLogger(BasicAuthenticationInterceptorTest.class);
 
     static final String URI = "/api/domain/resource/v10";
-    DomainInterceptor instance;
+    BasicAuthenticationInterceptor instance;
     
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        instance = new DomainInterceptor();
+        instance = new BasicAuthenticationInterceptor();
         instance.setSecurityDetailsService(new SecurityDetailsService() {
             @Override
             public Object loadUserDetailsByUsername(HttpServletRequest request, 

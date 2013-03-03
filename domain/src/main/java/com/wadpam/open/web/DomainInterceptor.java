@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author mattiaslevin
  * @author sosandstrom
  */
-public class DomainInterceptor extends SecurityInterceptor 
+public abstract class DomainInterceptor extends SecurityInterceptor 
         implements SecurityDetailsService {
 
     // Name and attribute injected in the request
@@ -35,11 +35,7 @@ public class DomainInterceptor extends SecurityInterceptor
     private static final Pattern PATH_DOMAIN_ADMIN = Pattern.compile("\\A/api/([^/]+)/(_admin|_worker)");
 
     private static final String PATH_DOMAIN_DEFAULT = "/api/default/";
-    private static final Pattern PATH_DOMAIN = Pattern.compile("\\A/api/([^/]+)");
     
-    @Autowired
-    private DomainService domainService;
-
     @Override
     protected boolean skipEnvironmentPaths(HttpServletRequest request, HttpServletResponse response, String uri) {
         // Skip auth for admin and worker paths
@@ -69,61 +65,7 @@ public class DomainInterceptor extends SecurityInterceptor
             return true;
         }
 
-        
         return super.skipEnvironmentPaths(request, response, uri);
     }
 
-    @Override
-    protected String getRealmPassword(Object details) {
-        final DAppDomain appDomain = (DAppDomain) details;
-        final String password = appDomain.getPassword();
-        return password;
-    }
-
-    @Override
-    protected String getRealmUsername(String clientUsername, Object details) {
-        final DAppDomain appDomain = (DAppDomain) details;
-        final String realmUsername = appDomain.getUsername();
-        
-        // check that specified username matches the DAppDomain.username
-        if (!clientUsername.equals(realmUsername)) {
-            return null;
-        }
-        
-        return realmUsername;
-    }
-
-    /**
-     * To load the DAppDomain by domain path variable
-     * @param request
-     * @param response
-     * @param uri
-     * @param authValue
-     * @param clientUsername
-     * @return 
-     */
-    @Override
-    public Object loadUserDetailsByUsername(HttpServletRequest request, 
-            HttpServletResponse response, 
-            String uri, 
-            String authValue, 
-            String clientUsername) {
-        DAppDomain appDomain = null;
-        Matcher m = PATH_DOMAIN.matcher(uri);
-        if (m.find()) {
-            final String domain = m.group(1);
-            appDomain = domainService.get(null, domain);
-            if (null == appDomain) {
-                throw new AuthenticationFailedException(-1, domain);
-            }
-            request.setAttribute(ATTR_NAME_DOMAIN, appDomain);
-        }
-        return appDomain;
-    }
-
-    // ---------------------- Setters and getters ------------------------------
-
-    public void setDomainService(DomainService domainService) {
-        this.domainService = domainService;
-    }
 }
