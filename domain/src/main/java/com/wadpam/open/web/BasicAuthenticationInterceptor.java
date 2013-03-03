@@ -6,6 +6,7 @@ package com.wadpam.open.web;
 
 import com.wadpam.open.domain.DAppDomain;
 import com.wadpam.open.exceptions.AuthenticationFailedException;
+import com.wadpam.open.security.SecurityDetailsService;
 import com.wadpam.open.service.DomainService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,11 +18,20 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author sosandstrom
  */
-public class BasicAuthenticationInterceptor extends DomainInterceptor {
+public class BasicAuthenticationInterceptor extends DomainInterceptor
+        implements SecurityDetailsService{
     
     private static final Pattern PATH_DOMAIN = Pattern.compile("\\A/api/([^/]+)");
 
     private DomainService domainService;
+    
+    /**
+     * Default constructor, sets the SecurityDetailsService to this.
+     */
+    public BasicAuthenticationInterceptor() {
+        super();
+        setSecurityDetailsService(this);
+    }
 
     @Override
     protected String getRealmPassword(Object details) {

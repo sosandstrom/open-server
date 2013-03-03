@@ -1,16 +1,11 @@
 package com.wadpam.open.web;
 
-import com.wadpam.open.domain.DAppDomain;
-import com.wadpam.open.exceptions.AuthenticationFailedException;
-import com.wadpam.open.security.SecurityDetailsService;
 import com.wadpam.open.security.SecurityInterceptor;
-import com.wadpam.open.service.DomainService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A domain interceptor responsible for performing authentication
@@ -19,8 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author mattiaslevin
  * @author sosandstrom
  */
-public abstract class DomainInterceptor extends SecurityInterceptor 
-        implements SecurityDetailsService {
+public abstract class DomainInterceptor extends SecurityInterceptor {
 
     // Name and attribute injected in the request
     public static final String ATTR_NAME_DOMAIN = "_domain";
