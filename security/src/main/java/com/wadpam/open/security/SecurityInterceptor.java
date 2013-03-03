@@ -49,22 +49,33 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
     public static final String PATH_AH = "/_ah/";
     
     private String authenticationMechanism = AUTH_TYPE_BASIC;
-    
+    private String realmName = "open-server SecurityInterceptor";
     private SecurityDetailsService securityDetailsService;
     
     // Paths
     private final ArrayList<Entry<Pattern, Set<String>>> WHITELISTED_METHODS = 
             new ArrayList<Entry<Pattern, Set<String>>>();
 
+    /**
+     * Returns the realm username if the client is authenticated.
+     * @param request
+     * @param response
+     * @param uri
+     * @param authValue
+     * @param clientUsername
+     * @param details
+     * @return the realm username if the client is authenticated
+     */
     protected String doAuthenticate(HttpServletRequest request, 
             HttpServletResponse response, 
             String uri, 
             String authValue, 
-            String username, 
+            String clientUsername, 
             Object details) {
-        final String password = getPassword(request, response, uri, authValue);
-        final boolean matches = details.equals(password);
-        return matches ? username : null;
+        final String clientPass = getClientPassword(request, response, uri, authValue);
+        final String realmPass = getRealmPassword(details);
+        final boolean matches = realmPass.equals(clientPass);
+        return matches ? getRealmUsername(clientUsername, details) : null;
     }
 
     /**
@@ -128,6 +139,7 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
         // get the authentication value:
         String authValue = getAuthenticationValue(request, response, uri);
         LOG.debug("authValue for {} is {}", getAuthenticationParamName(), authValue);
+        
         // decode for Basic
         if (null != authValue && AUTH_TYPE_BASIC.equals(authenticationMechanism)) {
             byte buf[] = Base64.decodeBase64(authValue);
@@ -136,12 +148,18 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
         
         final String principalName = isAuthenticated(request, response, handler,
                 uri, method, authValue);
+        if (null == principalName && null != response && AUTH_TYPE_BASIC.equals(authenticationMechanism)) {
+            // No match initiate basic authentication with the client
+            response.setStatus(401);
+            response.setHeader("WWW-Authenticate", 
+                    String.format("Basic realm=\"%s\"", realmName));
+        }
         return (null != principalName);
     }
         
     /**
      * Checks if a request is authenticated, based only on uri, method and authValue params.
-     * Hence, this method is suitable for unit testing.
+     * Hence, this method is suitable for unit testing (public for subclass unit tests).
      * @param request not used by this implementation
      * @param response not used by this implementation
      * @param handler not used by this implementation
@@ -150,7 +168,7 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
      * @param authValue as returned by {@link SecurityInterceptor#getAuthenticationValue(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, java.lang.String) 
      * @return username if authenticated, null otherwise
      */
-    protected String isAuthenticated(HttpServletRequest request, 
+    public String isAuthenticated(HttpServletRequest request, 
             HttpServletResponse response, 
             Object handler, 
             final String uri, 
@@ -173,7 +191,7 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
         }
         
         // get the username:
-        String username = getUsername(request, response, uri, authValue);
+        String username = getClientUsername(request, response, uri, authValue);
         LOG.debug("username {}", username);
 
         // load the user details
@@ -213,7 +231,7 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
      * @param authValue header, param or cookie value
      * @return the username to load details for.
      */
-    protected String getUsername(HttpServletRequest request, HttpServletResponse response, String uri, String authValue) {
+    protected String getClientUsername(HttpServletRequest request, HttpServletResponse response, String uri, String authValue) {
         String username = authValue;
         int endIndex = authValue.indexOf(':');
         if (-1 < endIndex && AUTH_TYPE_BASIC.equals(authenticationMechanism)) {
@@ -232,13 +250,30 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
      * @param authValue header, param or cookie value
      * @return the client-provided password
      */
-    protected String getPassword(HttpServletRequest request, HttpServletResponse response, String uri, String authValue) {
+    protected String getClientPassword(HttpServletRequest request, HttpServletResponse response, String uri, String authValue) {
         String password = authValue;
         int beginIndex = authValue.indexOf(':');
         if (-1 < beginIndex && AUTH_TYPE_BASIC.equals(authenticationMechanism)) {
             password = authValue.substring(beginIndex+1);            
         }
         return password;
+    }
+    
+    protected String getRealmPassword(Object details) {
+        if (null == details) {
+            return null;
+        }
+        return details.toString();
+    }
+    
+    /**
+     * 
+     * @param clientUsername
+     * @param details
+     * @return this implementation returns the specified clientUsername
+     */
+    protected String getRealmUsername(String clientUsername, Object details) {
+        return clientUsername;
     }
     
     protected boolean skipEnvironmentPaths(HttpServletRequest request, HttpServletResponse response, String uri) {
@@ -288,6 +323,10 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
 
     public void setSecurityDetailsService(SecurityDetailsService securityDetailsService) {
         this.securityDetailsService = securityDetailsService;
+    }
+
+    public void setRealmName(String realmName) {
+        this.realmName = realmName;
     }
 
 }

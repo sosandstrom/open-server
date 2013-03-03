@@ -24,12 +24,11 @@ public class BasicAuthenticationInterceptor extends DomainInterceptor {
 
     private String realmName = "Open-Server";
     
-    @Override
     protected String doAuthenticate(HttpServletRequest request, HttpServletResponse response) {
         String username = null;
 
         // Find authorization in header?
-        String authorizationHeader = request.getHeader(NAME_AUTHORIZATION);
+        String authorizationHeader = request.getHeader(HEADER_AUTHORIZATION);
         if (null == authorizationHeader) {
             // Alternative way of getting the basic authentication from a parameter
             // Useful with javascript and jquery and some other platforms
@@ -49,7 +48,8 @@ public class BasicAuthenticationInterceptor extends DomainInterceptor {
         if (null == username) {
             // No match initiate basic authentication with the client
             response.setStatus(401);
-            response.setHeader("WWW-Authenticate", "Basic realm=\"Pocket-Review\"");
+            response.setHeader("WWW-Authenticate", 
+                    String.format("Basic realm=\"%s\"", realmName));
         }
         
         return username;
