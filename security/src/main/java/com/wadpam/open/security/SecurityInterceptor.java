@@ -136,7 +136,6 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
         
         final String principalName = isAuthenticated(request, response, handler,
                 uri, method, authValue);
-        request.setAttribute(ATTR_NAME_USERNAME, principalName);
         return (null != principalName);
     }
         
@@ -163,20 +162,14 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
         // Skip Environment-specific paths
         final boolean skipPath = skipEnvironmentPaths(request, response, uri);
         LOG.debug("skipPath {}", skipPath);
-        if (skipPath) {
-            return USERNAME_ANONYMOUS;
-        }
 
         // is this request white-listed?
         final boolean whitelisted = isWhitelistedMethod(uri, method);
         LOG.debug("whitelisted {}", whitelisted);
-        if (whitelisted) {
-            return USERNAME_ANONYMOUS;
-        }
         
         // no credentials supplied?
         if (null == authValue) {
-            return null;
+            return (skipPath || whitelisted) ? USERNAME_ANONYMOUS : null;
         }
         
         // get the username:
@@ -193,14 +186,20 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
         }
         LOG.debug("details {}", details);
         if (null == details) {
-            return null;
+            return (skipPath || whitelisted) ? USERNAME_ANONYMOUS : null;
         }
         
         // Authenticate:
         String principalName = doAuthenticate(request, response, uri, 
                 authValue, username, details);
         LOG.debug("principalName {}", principalName);
-        return principalName;
+        if (null != principalName) {
+            if (null != request) {
+                request.setAttribute(ATTR_NAME_USERNAME, principalName);
+            }
+            return principalName;
+        }
+        return (skipPath || whitelisted) ? USERNAME_ANONYMOUS : null;
     }
 
 

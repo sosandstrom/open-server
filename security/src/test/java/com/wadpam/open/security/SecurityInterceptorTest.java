@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.mock.web.MockHttpServletRequest;
 
 /**
  *
@@ -62,9 +63,11 @@ public class SecurityInterceptorTest extends TestCase {
         Collection<Entry<String, Collection<String>>> whitelistedMethods = Arrays.asList(forUri);
         instance.setWhitelistedMethods(whitelistedMethods);
         final String authValue = null;
-        String actual = instance.isAuthenticated(null, null, null, 
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        String actual = instance.isAuthenticated(request, null, null, 
                 URI, "GET", authValue);
         assertEquals("whitelisted", SecurityInterceptor.USERNAME_ANONYMOUS, actual);
+        assertNull(request.getAttribute(SecurityInterceptor.ATTR_NAME_USERNAME));
     }
     
     public void testIsAuthenticatedNoSuchUser() {
@@ -83,9 +86,11 @@ public class SecurityInterceptorTest extends TestCase {
     
     public void testIsAuthenticated() {
         final String authValue = "domain:domain";
-        String actual = instance.isAuthenticated(null, null, null, 
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        String actual = instance.isAuthenticated(request, null, null, 
                 URI, "GET", authValue);
         assertEquals("OK", "domain", actual);
+        assertEquals("ATTR", "domain", request.getAttribute(SecurityInterceptor.ATTR_NAME_USERNAME));
     }
     
 }
