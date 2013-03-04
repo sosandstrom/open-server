@@ -106,11 +106,11 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
         if (null == value) {
             
             // consider header next:
-            value = request.getHeader(HEADER_AUTHORIZATION);
-            if (null != value && value.startsWith(authenticationMechanism)) {
+            String authorization = request.getHeader(HEADER_AUTHORIZATION);
+            if (null != authorization && authorization.startsWith(authenticationMechanism)) {
                 
                 // strip auth mechanism from header value
-                value = value.substring(authenticationMechanism.length());
+                value = authorization.substring(authenticationMechanism.length());
             }
             
             if (null == value) {
