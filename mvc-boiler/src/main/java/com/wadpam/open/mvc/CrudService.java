@@ -27,7 +27,7 @@ public interface CrudService<
     
     Iterable<T> getByPrimaryKeys(Collection<ID> ids);
 
-    CursorPage<T, ID> getPage(int pageSize, Serializable cursorKey);
+    CursorPage<T, ID> getPage(int pageSize, String cursorKey);
     
     ID getSimpleKey(T domain);
     
@@ -43,6 +43,6 @@ public interface CrudService<
     
     ID update(T domain);
     
-    CursorPage<ID, ID> whatsChanged(Date since, int pageSize, Serializable cursorKey);
+    CursorPage<ID, ID> whatsChanged(Date since, int pageSize, String cursorKey);
 
 }

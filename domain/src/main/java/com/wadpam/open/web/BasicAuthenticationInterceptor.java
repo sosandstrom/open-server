@@ -5,81 +5,87 @@
 package com.wadpam.open.web;
 
 import com.wadpam.open.domain.DAppDomain;
-import java.security.NoSuchAlgorithmException;
+import com.wadpam.open.exceptions.AuthenticationFailedException;
+import com.wadpam.open.security.SecurityDetailsService;
+import com.wadpam.open.service.DomainService;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.codec.binary.Base64;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
  * @author sosandstrom
  */
-public class BasicAuthenticationInterceptor extends DomainInterceptor {
-
-    // Basic authentication
-    private static final String BASIC_AUTH_PARAM_NAME = "jBasic";
-    private static final String BASIC_AUTH_PREFIX = "Basic ";
-
-    private static final Base64 B64 = new Base64();
-
-    private String realmName = "Open-Server";
+public class BasicAuthenticationInterceptor extends DomainInterceptor
+        implements SecurityDetailsService{
     
-    @Override
-    protected String doAuthenticate(HttpServletRequest request, HttpServletResponse response) {
-        String username = null;
+    private static final Pattern PATH_DOMAIN = Pattern.compile("\\A/api/([^/]+)");
 
-        // Find authorization in header?
-        String authorizationHeader = request.getHeader(NAME_AUTHORIZATION);
-        if (null == authorizationHeader) {
-            // Alternative way of getting the basic authentication from a parameter
-            // Useful with javascript and jquery and some other platforms
-            authorizationHeader = String.format("%s%s", BASIC_AUTH_PREFIX, request.getParameter(BASIC_AUTH_PARAM_NAME));
-        }
-        LOG.debug("Incoming authentication header value:{}", authorizationHeader);
-
-        DAppDomain dAppDomain = (DAppDomain) request.getAttribute(ATTR_NAME_DOMAIN);
-        if (null != authorizationHeader && null != dAppDomain) {
-            try {
-                username = verifyBasicAuthentication(authorizationHeader, dAppDomain);
-            } catch (NoSuchAlgorithmException ex) {
-                LOG.error("Basic doAuthenticate", ex);
-            }
-        }
-        
-        if (null == username) {
-            // No match initiate basic authentication with the client
-            response.setStatus(401);
-            response.setHeader("WWW-Authenticate", "Basic realm=\"Pocket-Review\"");
-        }
-        
-        return username;
+    private DomainService domainService;
+    
+    /**
+     * Default constructor, sets the SecurityDetailsService to this.
+     */
+    public BasicAuthenticationInterceptor() {
+        super();
+        setSecurityDetailsService(this);
     }
 
-    // Authenticate using basic authentication
-    protected String verifyBasicAuthentication(String authorizationHeader, DAppDomain dAppDomain)
-            throws NoSuchAlgorithmException {
+    @Override
+    protected String getRealmPassword(Object details) {
+        final DAppDomain appDomain = (DAppDomain) details;
+        final String password = appDomain.getPassword();
+        return password;
+    }
 
-        // Strip away the "Basic " part
-        if (authorizationHeader.startsWith(BASIC_AUTH_PREFIX)) {
-            authorizationHeader = authorizationHeader.substring(BASIC_AUTH_PREFIX.length());
-        } else {
+    @Override
+    protected String getRealmUsername(String clientUsername, Object details) {
+        final DAppDomain appDomain = (DAppDomain) details;
+        final String realmUsername = appDomain.getUsername();
+        
+        // check that specified username matches the DAppDomain.username
+        if (!clientUsername.equals(realmUsername)) {
             return null;
         }
-
-        final String expected = encode(dAppDomain.getUsername(), dAppDomain.getPassword());
-        // correct username and password?
-        LOG.debug("=== checking {} vs {} ===", expected, authorizationHeader);
-        return expected.equals(authorizationHeader) ? dAppDomain.getUsername() : null;
+        
+        return realmUsername;
     }
 
-    // Build basic authentication string
-    private static String encode(String username, String password) {
-        final String decoded = String.format("%s:%s", username, password);
-        return B64.encodeAsString(decoded.getBytes());
+    /**
+     * To load the DAppDomain by domain path variable
+     * @param request
+     * @param response
+     * @param uri
+     * @param authValue
+     * @param clientUsername
+     * @return 
+     */
+    @Override
+    public Object loadUserDetailsByUsername(HttpServletRequest request, 
+            HttpServletResponse response, 
+            String uri, 
+            String authValue, 
+            String clientUsername) {
+        DAppDomain appDomain = null;
+        Matcher m = PATH_DOMAIN.matcher(uri);
+        if (m.find()) {
+            final String domain = m.group(1);
+            appDomain = domainService.get(null, domain);
+            if (null == appDomain) {
+                throw new AuthenticationFailedException(-1, domain);
+            }
+            request.setAttribute(ATTR_NAME_DOMAIN, appDomain);
+        }
+        return appDomain;
     }
 
-    public void setRealmName(String realmName) {
-        this.realmName = realmName;
+    // ---------------------- Setters and getters ------------------------------
+
+    @Autowired
+    public void setDomainService(DomainService domainService) {
+        this.domainService = domainService;
     }
 
 }
