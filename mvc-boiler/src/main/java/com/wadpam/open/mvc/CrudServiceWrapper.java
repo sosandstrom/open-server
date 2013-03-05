@@ -57,7 +57,7 @@ public class CrudServiceWrapper<T extends Object, ID extends Serializable, E ext
     }
 
     @Override
-    public CursorPage<E, ID> getPage(int pageSize, Serializable cursorKey) {
+    public CursorPage<E, ID> getPage(int pageSize, String cursorKey) {
         return (CursorPage<E, ID>) delegate.getPage(pageSize, cursorKey);
     }
 
@@ -87,7 +87,7 @@ public class CrudServiceWrapper<T extends Object, ID extends Serializable, E ext
     }
 
     @Override
-    public CursorPage<ID, ID> whatsChanged(Date since, int pageSize, Serializable cursorKey) {
+    public CursorPage<ID, ID> whatsChanged(Date since, int pageSize, String cursorKey) {
         return delegate.whatsChanged(since, pageSize, cursorKey);
     }
 

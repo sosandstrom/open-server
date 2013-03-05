@@ -396,7 +396,7 @@ public abstract class CrudController<
             @PathVariable String domain,
             Model model,
             @RequestParam(defaultValue="10") int pageSize, 
-            @RequestParam(required=false) Serializable cursorKey) {
+            @RequestParam(required=false) String cursorKey) {
         
         preService(request, domain, CrudListener.GET_PAGE, null, null, cursorKey);
         final CursorPage<T, ID> page = service.getPage(pageSize, cursorKey);
@@ -641,7 +641,7 @@ public abstract class CrudController<
             @PathVariable String domain,
             @RequestHeader(value="If-Modified-Since") Date since,
             @RequestParam(defaultValue="10") int pageSize, 
-            @RequestParam(required=false) Serializable cursorKey) throws ParseException {
+            @RequestParam(required=false) String cursorKey) throws ParseException {
         final long currentMillis = System.currentTimeMillis();
         preService(request, domain, CrudListener.WHAT_CHANGED, null, null, cursorKey);
         final CursorPage<ID, ID> page = service.whatsChanged(since, pageSize, cursorKey);
