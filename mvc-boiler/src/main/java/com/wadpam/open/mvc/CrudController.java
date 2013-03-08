@@ -400,7 +400,8 @@ public abstract class CrudController<
         
         preService(request, domain, CrudListener.GET_PAGE, null, null, cursorKey);
         final CursorPage<T, ID> page = service.getPage(pageSize, cursorKey);
-        final JCursorPage body = convertPage(page);
+        final JCursorPage body = convertPageWithInner(request, response, domain, 
+                model, page);
         postService(request, domain, CrudListener.GET_PAGE, null, cursorKey, body);
 
         return body;
@@ -675,14 +676,22 @@ public abstract class CrudController<
     
     // --------------- Converter methods --------------------------
     
-    /** This implementation does nothing, please override */
-    public J addInnerObjects(HttpServletRequest request, 
+    public void addInnerObjects(HttpServletRequest request, 
             HttpServletResponse response,
             String domain,
             Model model,
             J jEntity) {
+        addInnerObjects(request, response, domain, 
+                model, Arrays.asList(jEntity));
+    }
+
+    /** This implementation does nothing, please override */
+    public void addInnerObjects(HttpServletRequest request, 
+            HttpServletResponse response,
+            String domain,
+            Model model,
+            Iterable<J> jEntity) {
         // do nothing
-        return jEntity;
     }
 
     public J convertDomain(T from) {
@@ -733,7 +742,8 @@ public abstract class CrudController<
     protected J convertWithInner(HttpServletRequest request, HttpServletResponse response,
             String domain, Model model, T from) {
         final J to = convertDomain(from);
-        return addInnerObjects(request, response, domain, model, to);
+        addInnerObjects(request, response, domain, model, to);
+        return to;
     }
     
     public static void convertLongEntity(AbstractLongEntity from, JBaseObject to) {
@@ -801,6 +811,21 @@ public abstract class CrudController<
         return returnValue;
     }
 
+    // Convert iterable
+    public Collection<J> convertWithInner(HttpServletRequest request, HttpServletResponse response,
+            String domain, Model model, Iterable<T> from) {
+        if (null == from)
+            return new ArrayList<J>();
+
+        // basic conversion first
+        final Collection<J> returnValue = convert(from);
+
+        // then add inner objects batch-style
+        addInnerObjects(request, response, domain, model, returnValue);
+        
+        return returnValue;
+    }
+
     // Convert Mardao DLocation
     public static JLocation convert(DLocation from) {
         if (null == from) {
@@ -816,6 +841,18 @@ public abstract class CrudController<
         to.setPageSize(from.getItems().size());
         to.setCursorKey(from.getCursorKey());
         to.setItems(convert(from.getItems()));
+        
+        return to;
+    }
+
+    public JCursorPage<J> convertPageWithInner(HttpServletRequest request, HttpServletResponse response,
+            String domain, Model model, CursorPage<T, ID> from) {
+        final JCursorPage<J> to = new JCursorPage<J>();
+        
+        to.setPageSize(from.getItems().size());
+        to.setCursorKey(from.getCursorKey());
+        to.setItems(convertWithInner(request, response, domain, model, 
+                from.getItems()));
         
         return to;
     }
