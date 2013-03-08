@@ -111,9 +111,7 @@ public abstract class CrudController<
         @RestCode(code=201, description="Entity created", message="Created")
     })
     @RequestMapping(value="v10", method=RequestMethod.GET, 
-            params={"_method=POST"},
-            headers={"X-Requested-With=XMLHttpRequest"},
-            consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+            params={"_method=POST"})
     public ResponseEntity createFromJsonp(
             HttpServletRequest request,
             HttpServletResponse response,
@@ -398,11 +396,12 @@ public abstract class CrudController<
             @PathVariable String domain,
             Model model,
             @RequestParam(defaultValue="10") int pageSize, 
-            @RequestParam(required=false) Serializable cursorKey) {
+            @RequestParam(required=false) String cursorKey) {
         
         preService(request, domain, CrudListener.GET_PAGE, null, null, cursorKey);
         final CursorPage<T, ID> page = service.getPage(pageSize, cursorKey);
-        final JCursorPage body = convertPage(page);
+        final JCursorPage body = convertPageWithInner(request, response, domain, 
+                model, page);
         postService(request, domain, CrudListener.GET_PAGE, null, cursorKey, body);
 
         return body;
@@ -643,7 +642,7 @@ public abstract class CrudController<
             @PathVariable String domain,
             @RequestHeader(value="If-Modified-Since") Date since,
             @RequestParam(defaultValue="10") int pageSize, 
-            @RequestParam(required=false) Serializable cursorKey) throws ParseException {
+            @RequestParam(required=false) String cursorKey) throws ParseException {
         final long currentMillis = System.currentTimeMillis();
         preService(request, domain, CrudListener.WHAT_CHANGED, null, null, cursorKey);
         final CursorPage<ID, ID> page = service.whatsChanged(since, pageSize, cursorKey);
@@ -677,14 +676,22 @@ public abstract class CrudController<
     
     // --------------- Converter methods --------------------------
     
-    /** This implementation does nothing, please override */
-    public J addInnerObjects(HttpServletRequest request, 
+    public void addInnerObjects(HttpServletRequest request, 
             HttpServletResponse response,
             String domain,
             Model model,
             J jEntity) {
+        addInnerObjects(request, response, domain, 
+                model, Arrays.asList(jEntity));
+    }
+
+    /** This implementation does nothing, please override */
+    public void addInnerObjects(HttpServletRequest request, 
+            HttpServletResponse response,
+            String domain,
+            Model model,
+            Iterable<J> jEntity) {
         // do nothing
-        return jEntity;
     }
 
     public J convertDomain(T from) {
@@ -735,7 +742,8 @@ public abstract class CrudController<
     protected J convertWithInner(HttpServletRequest request, HttpServletResponse response,
             String domain, Model model, T from) {
         final J to = convertDomain(from);
-        return addInnerObjects(request, response, domain, model, to);
+        addInnerObjects(request, response, domain, model, to);
+        return to;
     }
     
     public static void convertLongEntity(AbstractLongEntity from, JBaseObject to) {
@@ -803,6 +811,21 @@ public abstract class CrudController<
         return returnValue;
     }
 
+    // Convert iterable
+    public Collection<J> convertWithInner(HttpServletRequest request, HttpServletResponse response,
+            String domain, Model model, Iterable<T> from) {
+        if (null == from)
+            return new ArrayList<J>();
+
+        // basic conversion first
+        final Collection<J> returnValue = convert(from);
+
+        // then add inner objects batch-style
+        addInnerObjects(request, response, domain, model, returnValue);
+        
+        return returnValue;
+    }
+
     // Convert Mardao DLocation
     public static JLocation convert(DLocation from) {
         if (null == from) {
@@ -818,6 +841,18 @@ public abstract class CrudController<
         to.setPageSize(from.getItems().size());
         to.setCursorKey(from.getCursorKey());
         to.setItems(convert(from.getItems()));
+        
+        return to;
+    }
+
+    public JCursorPage<J> convertPageWithInner(HttpServletRequest request, HttpServletResponse response,
+            String domain, Model model, CursorPage<T, ID> from) {
+        final JCursorPage<J> to = new JCursorPage<J>();
+        
+        to.setPageSize(from.getItems().size());
+        to.setCursorKey(from.getCursorKey());
+        to.setItems(convertWithInner(request, response, domain, model, 
+                from.getItems()));
         
         return to;
     }

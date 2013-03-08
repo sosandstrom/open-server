@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -155,12 +156,25 @@ public abstract class AbstractRestTempleIntegrationTest {
         }
     }
 
+    // Prepend the base url if not provided
+    protected String buildUrl(String url) {
+        String expandedUrl = url;
+        if (!url.startsWith(getBaseUrl())) {
+            if (getBaseUrl().endsWith("/") || url.startsWith("/")) {
+                expandedUrl = getBaseUrl() + url;
+            } else {
+                expandedUrl = getBaseUrl() + "/" + url;
+            }
+        }
+        return expandedUrl;
+    }
+
     // Make a post and follow the redirect
     protected <T> ResponseEntity<T> postAndFollowRedirect(
             String url, MultiValueMap<String, Object> map, Class<T> clazz)
             throws MalformedURLException {
 
-        URI redirectUrl = restTemplate.execute(url, HttpMethod.POST,
+        URI redirectUrl = restTemplate.execute(buildUrl(url), HttpMethod.POST,
                 new RequestCallBackBodyWriter(map),
                 new RedirectResponseExtractor());
         assertNotNull("Redirect URL", redirectUrl);
@@ -176,7 +190,7 @@ public abstract class AbstractRestTempleIntegrationTest {
             String url, MultiValueMap<String, Object> map, Class<T> clazz)
             throws MalformedURLException {
 
-        URI redirectUrl = restTemplate.execute(url, HttpMethod.DELETE,
+        URI redirectUrl = restTemplate.execute(buildUrl(url), HttpMethod.DELETE,
                 null,
                 new RedirectResponseExtractor());
         assertNotNull("Redirect URL", redirectUrl);
@@ -199,7 +213,7 @@ public abstract class AbstractRestTempleIntegrationTest {
 
     // Get the http status code of the resource
     protected HttpStatus getResourceStatusCode(String url, Object... urlVariables) {
-        HttpStatus statusCode = restTemplate.execute(url,
+        HttpStatus statusCode = restTemplate.execute(buildUrl(url),
                 HttpMethod.GET,
                 null, // No need to modify the request before sending
                 new StatusCodeResponseExtractor(),
@@ -217,7 +231,7 @@ public abstract class AbstractRestTempleIntegrationTest {
 
     // Delete a resource at the given url
     protected boolean deleteResource(String url, Object ... urlVariables) {
-        HttpStatus statusCode = restTemplate.execute(url,
+        HttpStatus statusCode = restTemplate.execute(buildUrl(url),
                 HttpMethod.DELETE,
                 null, // No need to modify the request before sending
                 new StatusCodeResponseExtractor(),
@@ -229,7 +243,7 @@ public abstract class AbstractRestTempleIntegrationTest {
 
     // Delete a resource at the given url and return the JSON response
     protected <T> ResponseEntity<T> deleteResource(String url, Class<T> clazz, Object ... urlVariables) {
-        ResponseEntity<T> response = restTemplate.exchange(url,
+        ResponseEntity<T> response = restTemplate.exchange(buildUrl(url),
                 HttpMethod.DELETE,
                 null,
                 clazz,
@@ -250,7 +264,7 @@ public abstract class AbstractRestTempleIntegrationTest {
     // Count the number of entities at the resource
     protected int countResources(String url, Object... urlVariables) {
         ResponseEntity<Collection> entity =
-                restTemplate.getForEntity(url, Collection.class, urlVariables);
+                restTemplate.getForEntity(buildUrl(url), Collection.class, urlVariables);
         assertEquals("Http response 200", HttpStatus.OK, entity.getStatusCode());
 
         return entity.getBody().size();
@@ -261,7 +275,7 @@ public abstract class AbstractRestTempleIntegrationTest {
         ParameterizedTypeReference<JCursorPage<T>> jCursorPage =
                 new ParameterizedTypeReference<JCursorPage<T>>() {};
 
-        ResponseEntity<JCursorPage<T>> entity = restTemplate.exchange(url,
+        ResponseEntity<JCursorPage<T>> entity = restTemplate.exchange(buildUrl(url),
                 HttpMethod.GET,
                 null,
                 jCursorPage,
@@ -269,6 +283,21 @@ public abstract class AbstractRestTempleIntegrationTest {
         assertEquals("Http response 200", HttpStatus.OK, entity.getStatusCode());
 
         return entity.getBody().getItems().size();
+    }
+
+    // Get resources in a collection
+    protected <T extends JBaseObject> List<T> getResourceCollection(String url,  Class<T> clazz, Object... urlVariables) {
+        ParameterizedTypeReference<List<T>> list =
+                new ParameterizedTypeReference<List<T>>() {};
+
+        ResponseEntity<List<T>> entity = restTemplate.exchange(buildUrl(url),
+                HttpMethod.GET,
+                null,
+                list,
+                urlVariables);
+        assertEquals("Http response 200", HttpStatus.OK, entity.getStatusCode());
+
+        return entity.getBody();
     }
 
 
