@@ -4,6 +4,7 @@
 
 package com.wadpam.open.io;
 
+import java.io.OutputStream;
 import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,17 +29,26 @@ public class Scheduler<D> {
     
     /**
      * Override to do processing in different thread.
-     * This implementation simply calls {@link Exporter#exportDaoByTask(java.lang.Object, int, int, int) }.
+     * This implementation simply calls {@link Exporter#exportDao(java.lang.Object, int, int, int) }.
      * @param preExport
      * @param daoIndex
      * @param offset
      * @param limit 
      */
-    public void exportDaoImpl(Object preExport, int daoIndex, int offset, int limit) {
+    public void scheduleExportDao(OutputStream out, int daoIndex, int offset, int limit) {
         LOG.debug("scheduling for dao #{}, {}/{}", new Object[] {
             daoIndex, offset, limit
         });
-        exporter.exportDaoByTask(preExport, daoIndex, offset, limit);
+        exporter.exportDao(out, daoIndex, offset, limit);
+    }
+    
+    /**
+     * Override to do postExport in different thread.
+     */
+    protected void schedulePostExport() {
+        LOG.debug("scheduling for postExport");
+        Object preExport = getCached(KEY_PRE_EXPORT);
+        exporter.postExport(null, null, preExport);
     }
     
     public Object getCached(Object key) {
@@ -63,6 +73,8 @@ public class Scheduler<D> {
         int i = 0;
         Object state = null;
         String cacheKey;
+        
+        // are all Daos exported?
         do {
             cacheKey = getDaoKey(i);
             state = getCached(cacheKey);
@@ -71,12 +83,15 @@ public class Scheduler<D> {
         
         // done?
         if (null == state) {
-            Object preExport = getCached(KEY_PRE_EXPORT);
-            exporter.postExport(null, null, preExport);
+            schedulePostExport();
         }
         
         // Created when all done, No Content 
         return null == state ? 201 : 204;
+    }
+    
+    public void preExport(Object arg) {
+        
     }
 
     public void setExporter(Exporter<D> exporter) {

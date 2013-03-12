@@ -89,7 +89,7 @@ public class ExporterTest extends Scheduler<ExporterTest>
      // ----------------  Scheduler methods ------------------------------
 
     @Override
-    public void exportDaoImpl(final Object preExport, 
+    public void scheduleExportDao(final OutputStream out, 
             final int daoIndex, final int offset, final int limit) {
         LOG.info("Scheduler.exportDao #{}, {}/{}", new Object[] {
             daoIndex, offset, limit
@@ -110,14 +110,14 @@ public class ExporterTest extends Scheduler<ExporterTest>
             @Override
             public Integer call() throws Exception {
                 Thread.sleep(4000 + Math.round(Math.random()*4000));
-                exporter.exportDaoByTask(preExport, daoIndex, offset, limit);
+                exporter.exportDao(out, daoIndex, offset, limit);
 //                if (250 == offset) {
                     putCached(keyDao, STATE_DONE);
                     
                     return STATE_DONE;
 //                }
 //                else {
-//                    exportDaoImpl(preExport, daoIndex, 
+//                    scheduleExportDao(preExport, daoIndex, 
 //                            offset+limit, limit);
 //                    return STATE_RUNNING;
 //                }

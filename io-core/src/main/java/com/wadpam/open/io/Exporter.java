@@ -64,6 +64,7 @@ public class Exporter<D> {
         if (null != logPre) {
             LOG.debug("{}", logPre);
         }
+        scheduler.preExport(arg);
         
         int daoIndex = 0;
         for (D dao : daos) {
@@ -73,6 +74,13 @@ public class Exporter<D> {
         return preExport;
     }
         
+    /**
+     * Called by the Controller.
+     * @param out
+     * @param arg
+     * @param preExport
+     * @return 
+     */
     protected Object postExport(OutputStream out, Object arg, Object preExport) {
         // close converter
         Object postExport = extractor.postExport(arg, preExport, daos);
@@ -100,18 +108,28 @@ public class Exporter<D> {
      * @see #exportEntity
      */
     public void exportDao(OutputStream out, Object arg, Object preExport, int daoIndex, D dao) {
-        scheduler.exportDaoImpl(preExport, daoIndex, 0, -1);
+        scheduler.scheduleExportDao(out, daoIndex, 0, -1);
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
-    public void exportDaoByTask(Object preExport, int daoIndex, int offset, int limit) {
-        exportDaoImpl(null, null, preExport, daoIndex, daos[daoIndex], offset, limit);
+    /**
+     * Invoked by Controller
+     * @param preExport
+     * @param daoIndex
+     * @param offset
+     * @param limit
+     * @return true when done
+     */
+    public Integer exportDao(OutputStream out, int daoIndex, int offset, int limit) {
+        return exportDaoImpl(out, null, null, daoIndex, daos[daoIndex], offset, limit);
     }
     
     /**
      * The implementation of the export of a Dao.
+     * @return true when done
      */
-    public void exportDaoImpl(OutputStream out, Object arg, Object preExport, final int daoIndex, D dao, int offset, int limit) {
+    public Integer exportDaoImpl(OutputStream out, Object arg, Object preExport, 
+            final int daoIndex, D dao, final int offset, final int limit) {
         LOG.info("Exporter.exportDao #{}, {}/{}", new Object[] {
             daoIndex, offset, limit
         });
@@ -139,33 +157,32 @@ public class Exporter<D> {
 
         int entityIndex = 0;
         Object log;
-        int pageSize;
         int returned = 0;
-        int actualSize;
-        final int absLimit = limit < 1 ? Integer.MAX_VALUE : limit;
-        do {
-            pageSize = Math.min(50, absLimit-returned);
-            actualSize = 0;
-            LOG.debug("----- query {} items from {} with {} returned.", new Object[] {pageSize, tableName, returned});
-            Iterable entities = extractor.queryIterable(arg, dao, offset+returned, pageSize);
-            for (Object entity : entities) {
-                log = exportEntity(out, arg, preExport, preDao, columns, daoIndex, dao, 
-                        entityIndex, entity);
-                if (null != log) {
-                    entityIndex++;
-                }
-                returned++;
-                actualSize++;
+
+        LOG.debug("----- query {} items from {} with {} returned.", new Object[] {limit, tableName, returned});
+        Iterable entities = extractor.queryIterable(arg, dao, offset, limit);
+        for (Object entity : entities) {
+            log = exportEntity(out, arg, preExport, preDao, columns, daoIndex, dao, 
+                    entityIndex, entity);
+            if (null != log) {
+                entityIndex++;
             }
-        } while (actualSize == pageSize && returned < absLimit);
-            
-        // close converter for dao
+            returned++;
+        }
+
+        // more?
+        if (limit == returned) {
+            return offset + limit;
+        }
+        
+        // done, so close converter for dao
         Object postDao = extractor.postDao(arg, preExport, preDao, dao);
         Object logPostDao = converter.postDao(out, arg, preExport, preDao, postDao, dao);
         if (null != logPostDao) {
             LOG.debug("{} {}", dao, logPostDao);
         }
         scheduler.onDone(daoIndex);
+        return null;
     }
     
     /**
