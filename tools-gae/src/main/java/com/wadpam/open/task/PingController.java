@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * @author os
  */
 @Controller
-@RequestMapping("{domain}/_admin/ping")
+@RequestMapping(value = {"_admin/{domain}/ping", "{domain}/_admin/ping"})
 public class PingController {
     /** Will only schedule a next PING if current time is beyond this timestamp */
     public static final String NEXT_TIMESTAMP = "_next_timestamp";
