@@ -13,6 +13,7 @@ import com.wadpam.open.io.Extractor;
 import com.wadpam.open.io.JsonConverter;
 import com.wadpam.open.io.Mardao2Extractor;
 import java.io.OutputStream;
+import java.util.Arrays;
 import net.sf.mardao.core.dao.Dao;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -33,9 +34,11 @@ public class ExportService {
     @Autowired
     private DOrganizationDao organizationDao;
     
-    private final Exporter<Dao> exporter = new Exporter<Dao>();
+    private Exporter<Dao> exporter;
 
     public void init() {
+        exporter = new Exporter<Dao>(new Dao[] {organizationDao, employeeDao});        
+        
         final String currentNamespace = NamespaceManager.get();
         NamespaceManager.set("itest");
         exporter.setExtractor(EXTRACTOR_MARDAO);
@@ -53,7 +56,7 @@ public class ExportService {
     public void exportAll(OutputStream out, String contentType) {
         exporter.setConverter("application/json".equals(contentType) ? 
                 CONVERTER_JSON : CONVERTER_EXCEL);
-        exporter.export(out, this, organizationDao, employeeDao);
+        exporter.export(out, this);
     }
 
     public void exportDao(OutputStream out, String tableName) {

@@ -54,7 +54,7 @@ public class Exporter<D> {
      * @param daos the DAOs to export
      * @see #exportDao
      */
-    protected Object export(OutputStream out, Object arg, D... daos) {
+    public Object export(OutputStream out, Object arg, D... daos) {
         LOG.info("exporting for {} daos", daos.length);
         
         // first, initialize converter
