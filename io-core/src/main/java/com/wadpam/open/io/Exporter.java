@@ -1,5 +1,6 @@
 package com.wadpam.open.io;
 
+import static com.wadpam.open.io.Scheduler.LOG;
 import java.io.OutputStream;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -20,6 +21,25 @@ public class Exporter<D> {
     private Converter<D> converter;
     private Extractor<D> extractor;
     
+    private Scheduler<D> scheduler = new Scheduler();
+    
+    private final D[] daos;
+    
+    public Exporter(D[] daos) {
+        this.daos = daos;
+        scheduler.setExporter(this);
+    }
+
+    public Exporter() {
+        this(null);
+    }
+    
+    
+    
+    public Object export(OutputStream out, Object arg) {
+        return export(out, arg, daos);
+    }
+    
     /**
      * Entry point for export of multiple "tables". Has the following flow:
      * <ol>
@@ -34,10 +54,12 @@ public class Exporter<D> {
      * @param daos the DAOs to export
      * @see #exportDao
      */
-    public Object export(OutputStream out, Object arg, D... daos) {
+    protected Object export(OutputStream out, Object arg, D... daos) {
+        LOG.info("exporting for {} daos", daos.length);
         
         // first, initialize converter
         Object preExport = extractor.preExport(arg, daos);
+        scheduler.putCached(Scheduler.KEY_PRE_EXPORT, preExport);
         Object logPre = converter.preExport(out, arg, preExport, daos);
         if (null != logPre) {
             LOG.debug("{}", logPre);
@@ -48,7 +70,10 @@ public class Exporter<D> {
             exportDao(out, arg, preExport, daoIndex, dao);
             daoIndex++;
         }
+        return preExport;
+    }
         
+    protected Object postExport(OutputStream out, Object arg, Object preExport) {
         // close converter
         Object postExport = extractor.postExport(arg, preExport, daos);
         Object logPost = converter.postExport(out, arg, preExport, postExport, daos);
@@ -74,24 +99,42 @@ public class Exporter<D> {
      * @param dao the DAO to export
      * @see #exportEntity
      */
-    protected void exportDao(OutputStream out, Object arg, Object preExport, int daoIndex, D dao) {
-        exportDaoImpl(out, arg, preExport, daoIndex, dao, 0, -1);
+    public void exportDao(OutputStream out, Object arg, Object preExport, int daoIndex, D dao) {
+        scheduler.exportDaoImpl(preExport, daoIndex, 0, -1);
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    public void exportDaoByTask(Object preExport, int daoIndex, int offset, int limit) {
+        exportDaoImpl(null, null, preExport, daoIndex, daos[daoIndex], offset, limit);
     }
     
     /**
      * The implementation of the export of a Dao.
      */
-    protected void exportDaoImpl(OutputStream out, Object arg, Object preExport, int daoIndex, D dao, int offset, int limit) {
+    public void exportDaoImpl(OutputStream out, Object arg, Object preExport, final int daoIndex, D dao, int offset, int limit) {
+        LOG.info("Exporter.exportDao #{}, {}/{}", new Object[] {
+            daoIndex, offset, limit
+        });
+        
         // prepare converter for dao
-        Object preDao = extractor.preDao(arg, preExport, dao);
         String tableName = extractor.getTableName(arg, dao);
         Iterable<String> columns = extractor.getColumns(arg, dao);
         LOG.debug("{} has columns {}", tableName, columns);
-        Map<String, String> headers = extractor.getHeaderNames(arg, dao);
-        Object logPreDao = converter.preDao(out, arg, preExport, preDao, tableName, 
-                columns, headers, daoIndex, dao);
-        if (null != logPreDao) {
-            LOG.debug("{} {}", dao, logPreDao);
+        
+        Object preDao = null;
+        if (0 == offset) {
+            preDao = extractor.preDao(arg, preExport, dao);
+            scheduler.putCached(Scheduler.KEY_PRE_DAO, preDao);
+            Map<String, String> headers = extractor.getHeaderNames(arg, dao);
+            Object logPreDao = converter.preDao(out, arg, preExport, preDao, tableName, 
+                    columns, headers, daoIndex, dao);
+            if (null != logPreDao) {
+                LOG.debug("{} {}", dao, logPreDao);
+            }
+        }
+        else {
+            // fetch preDao from MemCache
+            preDao = scheduler.getCached(Scheduler.KEY_PRE_DAO);
         }
 
         int entityIndex = 0;
@@ -122,6 +165,7 @@ public class Exporter<D> {
         if (null != logPostDao) {
             LOG.debug("{} {}", dao, logPostDao);
         }
+        scheduler.onDone(daoIndex);
     }
     
     /**
@@ -159,5 +203,9 @@ public class Exporter<D> {
     public void setExtractor(Extractor extractor) {
         this.extractor = extractor;
     }
-    
+
+    public void setScheduler(Scheduler<D> scheduler) {
+        this.scheduler = scheduler;
+    }
+
 }
