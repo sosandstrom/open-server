@@ -106,11 +106,9 @@ public class TaskScheduler<D> extends Scheduler<D> {
         putCached(fileName, blobKey);
         
         // re-schedule or zip-schedule?
-        int status = HttpStatus.NO_CONTENT.value();
-        if (null == off) {
-            status = onDone(daoIndex);
-        }
-        else {
+        int status = HttpStatus.CREATED.value();
+        if (null != off) {
+            status = HttpStatus.NO_CONTENT.value();
             scheduleExportDao(null, daoIndex, offset, limit);
         }
         

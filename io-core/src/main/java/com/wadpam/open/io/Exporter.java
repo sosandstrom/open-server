@@ -66,7 +66,15 @@ public class Exporter<D> {
         }
         scheduler.preExport(arg);
         
+        // put state for all daos to PENDING
         int daoIndex = 0;
+        for (D dao : daos) {
+            scheduler.putCached(Scheduler.getDaoKey(daoIndex), Scheduler.STATE_PENDING);
+            daoIndex++;
+        }
+        
+        // now, schedule (tasks if so)
+        daoIndex = 0;
         for (D dao : daos) {
             exportDao(out, arg, preExport, daoIndex, dao);
             daoIndex++;
