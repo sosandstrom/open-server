@@ -91,9 +91,6 @@ public class TaskScheduler<D> extends Scheduler<D> {
         final FileService fileService = FileServiceFactory.getFileService();
         
         AppEngineFile file = fileService.createNewBlobFile("text/csv", fileName);
-        final BlobKey blobKey = fileService.getBlobKey(file);
-        LOG.info("processExportDao {}, blobKey={}", fileName, blobKey.getKeyString());
-        putCached(fileName, blobKey);
         SafeBlobstoreOutputStream out = new SafeBlobstoreOutputStream(file);
         
         // run for 9 minutes
@@ -103,6 +100,10 @@ public class TaskScheduler<D> extends Scheduler<D> {
         
         // FIXME: distribute file or blob key
         out.close();
+        
+        final BlobKey blobKey = fileService.getBlobKey(file);
+        LOG.info("processExportDao {}, blobKey={}", fileName, blobKey);
+        putCached(fileName, blobKey);
         
         // re-schedule or zip-schedule?
         int status = HttpStatus.NO_CONTENT.value();
