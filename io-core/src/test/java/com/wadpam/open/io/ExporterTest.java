@@ -98,8 +98,7 @@ public class ExporterTest extends Scheduler<ExporterTest>
         // called when scheduling
         final String keyDao = getDaoKey(daoIndex);
         if (0 == offset) {
-            assertNull(getCached(keyDao));
-            putCached(keyDao, STATE_PENDING);
+            assertEquals(STATE_PENDING, getCached(keyDao));
         }
         else {
             assertEquals(STATE_RUNNING, getCached(keyDao));
