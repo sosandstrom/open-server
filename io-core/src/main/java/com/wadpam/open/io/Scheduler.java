@@ -78,6 +78,8 @@ public class Scheduler<D> {
         do {
             cacheKey = getDaoKey(i);
             state = getCached(cacheKey);
+            LOG.debug("onDone({}) #{} is done: {}", new Object[] 
+                {daoIndex, i, STATE_DONE.equals(state)});
             i++;
         } while (STATE_DONE.equals(state));
         

@@ -11,6 +11,7 @@ import com.google.appengine.api.files.FileServiceFactory;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.RetryOptions;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import static com.wadpam.open.io.Scheduler.KEY_PRE_EXPORT;
 import com.wadpam.open.service.EmailSender;
@@ -23,6 +24,7 @@ import java.util.Date;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -65,16 +67,16 @@ public class TaskScheduler<D> extends Scheduler<D> {
     public void scheduleExportDao(OutputStream notUsed, int daoIndex, int offset, int limitIgnored) {
         // create a task
         TaskOptions task = TaskOptions.Builder.withUrl(
-                String.format("%s/exporter/v10", basePath))
-                .param("daoIndex", Integer.toString(daoIndex))
+                String.format("%s/exporter/v10/%d", basePath, daoIndex))
+                .retryOptions(RetryOptions.Builder.withTaskRetryLimit(0))
                 .param("offset", Integer.toString(offset))
                 .param("limit", "50");
         QueueFactory.getDefaultQueue().add(task);
     }
 
-    @RequestMapping(value="v10", method = RequestMethod.POST, params = {"offset", "limit"})
+    @RequestMapping(value="v10/{daoIndex}", method = RequestMethod.POST, params = {"offset", "limit"})
     public ResponseEntity processExportDao(
-            @RequestParam int daoIndex,
+            @PathVariable int daoIndex,
             @RequestParam int offset,
             @RequestParam int limit
             ) throws IOException {
@@ -89,7 +91,9 @@ public class TaskScheduler<D> extends Scheduler<D> {
         final FileService fileService = FileServiceFactory.getFileService();
         
         AppEngineFile file = fileService.createNewBlobFile("text/csv", fileName);
-        putCached(fileName, fileService.getBlobKey(file));
+        final BlobKey blobKey = fileService.getBlobKey(file);
+        LOG.info("processExportDao {}, blobKey={}", fileName, blobKey.getKeyString());
+        putCached(fileName, blobKey);
         SafeBlobstoreOutputStream out = new SafeBlobstoreOutputStream(file);
         
         // run for 9 minutes
@@ -116,7 +120,8 @@ public class TaskScheduler<D> extends Scheduler<D> {
     protected void schedulePostExport() {
         // create a task
         TaskOptions task = TaskOptions.Builder.withUrl(
-                String.format("%s/exporter/v10/done", basePath));
+                String.format("%s/exporter/v10/done", basePath))
+                .retryOptions(RetryOptions.Builder.withTaskRetryLimit(0));
         QueueFactory.getDefaultQueue().add(task);
     }
     
