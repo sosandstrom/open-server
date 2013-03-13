@@ -128,7 +128,8 @@ public class TaskScheduler<D> extends Scheduler<D> {
     public ResponseEntity processPostExport() {
         String email = (String) getCached(KEY_PRE_EXPORT);
         BlobKey zipKey = (BlobKey) exporter.postExport(null, exporter, email);
-        String html = String.format("%s/blob/v10?blobKey=%s", basePath, zipKey.getKeyString());
+        String link = String.format("%s/blob/v10?blobKey=%s", basePath, zipKey.getKeyString());
+        String html = String.format("<a href='%s'>%s</a>", link, link);
         EmailSender.sendEmail(fromEmail, fromName, Arrays.asList(email), null, null,
                 "Datastore export", null, html, null, null, null);
         return new ResponseEntity(HttpStatus.OK);
