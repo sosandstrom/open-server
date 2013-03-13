@@ -225,7 +225,7 @@ public abstract class MardaoCrudService<
     }
     
     public CursorPage<ID, ID> whatsChanged(Object parentKey, Date since, 
-            int pageSize, Serializable cursorKey, Filter... filters) {
+            int pageSize, String cursorKey, Filter... filters) {
         preDao();
         try {
             // TODO: include deletes from Audit table
