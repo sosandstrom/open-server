@@ -16,6 +16,7 @@ public class GoogleAnalyticsTrackerBuilder {
 
     private TrackerConfiguration trackerConfiguration;
     private Device device;
+    private Application app;
     private Visitor visitor;
     private URLBuilder urlBuilder;
     private EventDispatcher eventDispatcher;
@@ -110,9 +111,14 @@ public class GoogleAnalyticsTrackerBuilder {
      * @param visitorId visitor id
      * @return tracker builder
      */
-    public GoogleAnalyticsTrackerBuilder withVisitorId(int visitorId) {
+    public GoogleAnalyticsTrackerBuilder withVisitorId(String visitorId) {
         long now = System.currentTimeMillis() / 1000L;
         this.visitor = new Visitor(visitorId, now, now, 1);
+        return this;
+    }
+
+    public GoogleAnalyticsTrackerBuilder withApp(String name, String version) {
+        this.app = new Application(name, version);
         return this;
     }
 
@@ -161,6 +167,6 @@ public class GoogleAnalyticsTrackerBuilder {
         }
 
         // Create the tracker
-        return new GoogleAnalyticsTracker(trackerConfiguration, visitor, device, urlBuilder, eventDispatcher);
+        return new GoogleAnalyticsTracker(trackerConfiguration, visitor, device, app, urlBuilder, eventDispatcher);
     }
 }

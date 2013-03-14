@@ -5,14 +5,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.util.UriUtils;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.*;
 
 /**
  * Build a GA url compatible with the version 5.3.7 format.
  * @author mattiaslevin
  */
-public class URLBuilderV5_3_8 implements URLBuilder {
+public class URLBuilderV5_3_8 extends URLBuilder {
     private static final Logger LOG = LoggerFactory.getLogger(URLBuilderV5_3_8.class);
 
     private Random random = new Random();
@@ -29,7 +28,7 @@ public class URLBuilderV5_3_8 implements URLBuilder {
 
     // Build URL
     @Override
-    public String buildURL(TrackerConfiguration trackerConfig, Visitor visitor, Device device, Page data) {
+    public String buildURL(TrackerConfiguration trackerConfig, Visitor visitor, Device device, Application app, Page data) {
         LOG.debug("Build url for version:{}", this.getFormatVersion());
 
         Map<String, String> params = new LinkedHashMap<String, String>();
@@ -127,8 +126,8 @@ public class URLBuilderV5_3_8 implements URLBuilder {
         }
 
         // View port
-        if (null != device.getViewPortResolution()) {
-            params.put("utmvp", device.getViewPortResolution());
+        if (null != device.getViewPortSize()) {
+            params.put("utmvp", device.getViewPortSize());
         }
 
         // color depth
@@ -152,8 +151,8 @@ public class URLBuilderV5_3_8 implements URLBuilder {
         // Page views
         // Do not need to set utmt since default i "page"
         // Page title
-        if (null != data.getPageTitle()) {
-            params.put("utmdt", urlEncode(data.getPageTitle()));
+        if (null != data.getDocumentTitle()) {
+            params.put("utmdt", urlEncode(data.getDocumentTitle()));
         }
 
         // Random number for AdSense
@@ -161,15 +160,15 @@ public class URLBuilderV5_3_8 implements URLBuilder {
 
 
         // Referral
-        if (null != data.getUtmr()) {
-            params.put("utmr", urlEncode(data.getUtmr()));
+        if (null != data.getReferrer()) {
+            params.put("utmr", urlEncode(data.getReferrer()));
         } else {
             params.put("utmr", "-");
         }
 
         // Page url
-        if (null != data.getPageURL()) {
-            params.put("utmp", urlEncode(data.getPageURL()));
+        if (null != data.getDocumentPath()) {
+            params.put("utmp", urlEncode(data.getDocumentPath()));
         }
 
         // Tracking id
@@ -177,7 +176,7 @@ public class URLBuilderV5_3_8 implements URLBuilder {
 
         // Cookie
         int hostnameHash = hostnameHash(data.getHostName());
-        int visitorId = visitor.getVisitorId();
+        int visitorId = visitor.getVisitorId().hashCode();
         long timestampFirst = visitor.getTimestampFirst();
         long timestampPrevious = visitor.getTimestampPrevious();
         int visits = visitor.getVisits();
@@ -198,11 +197,11 @@ public class URLBuilderV5_3_8 implements URLBuilder {
                 .append(".").append(timestampFirst)
                 .append(".1")
                 .append(".1")
-                .append(".utmcsr%3D").append(data.getUtmcsr())
-                .append("%7Cutmccn%3D").append(data.getUtmccn())
-                .append("%7Cutmcmd%3D").append(data.getUtmcmd())
-                .append(data.getUtmctr() != null ? "%7Cutmctr%3D" + data.getUtmcsr() : "")
-                .append(data.getUtmcct() != null ? "%7Cutmcct%3D" + data.getUtmcct() : "")
+                .append(".utmcsr%3D").append(data.getCampaignSource())
+                .append("%7Cutmccn%3D").append(data.getCampaignName())
+                .append("%7Cutmcmd%3D").append(data.getCampaignMedium())
+                .append(data.getCampaignKeyword() != null ? "%7Cutmctr%3D" + data.getCampaignSource() : "")
+                .append(data.getCampaignContent() != null ? "%7Cutmcct%3D" + data.getCampaignContent() : "")
                 .append("%3B");
 
         params.put("utmcc", cookieSB.toString());
@@ -263,23 +262,6 @@ public class URLBuilderV5_3_8 implements URLBuilder {
     * &utmac=UA-17109202-5
     * &utmcc=__utma%3D143101472.2118079581.1279863622.1279863622.1279863622.1%3B%2B__utmz%3D143101472.1279863622.1.1.utmcsr%3D(direct)%7Cutmccn%3D(direct)%7Cutmcmd%3D(none)%3B&gaq=1
     */
-
-
-    // URL encode a string
-    private String urlEncode(String string) {
-        if(null == string){
-            return null;
-        }
-        try {
-            // Google Analytics expect %20 encoding to space
-            //return URLEncoder.encode(string, "UTF-8");        // Will encode space to +
-            return UriUtils.encodeQueryParam(string, "UTF-8");  // Will encode space to %20
-        } catch (UnsupportedEncodingException e) {
-            LOG.error("URL encodes does not support character format");
-            throw new IllegalArgumentException();
-        }
-    }
-
 
     // Host name hash
     private int hostnameHash(String hostname){

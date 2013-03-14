@@ -16,7 +16,7 @@ public class Device {
     private String screenResolution;
 
     /** View port size */
-    private String viewPortResolution;
+    private String viewPortSize;
 
     /** Color depth */
     private String colorDepth;
@@ -41,7 +41,7 @@ public class Device {
     public static Device defaultiPhoneDevice() {
         Device device = new Device();
         device.screenResolution = "1136x640";
-        device.viewPortResolution = "1136x640";
+        device.viewPortSize = "1136x640";
         device.colorDepth = "24-bit";
         device.userLanguage = Locale.getDefault().getLanguage();
         device.userAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25";
@@ -52,7 +52,7 @@ public class Device {
     public static Device defaultiPadDevice() {
         Device device = new Device();
         device.screenResolution = "2048x1536";
-        device.viewPortResolution = "2048x1536";
+        device.viewPortSize = "2048x1536";
         device.colorDepth = "24-bit";
         device.userLanguage = Locale.getDefault().getLanguage();
         device.userAgent = "Mozilla/5.0 (iPad; CPU OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25";
@@ -128,12 +128,12 @@ public class Device {
         this.userLanguage = userLanguage;
     }
 
-    public String getViewPortResolution() {
-        return viewPortResolution;
+    public String getViewPortSize() {
+        return viewPortSize;
     }
 
-    public void setViewPortResolution(String viewPortResolution) {
-        this.viewPortResolution = viewPortResolution;
+    public void setViewPortSize(String viewPortSize) {
+        this.viewPortSize = viewPortSize;
     }
 
     public String getHost() {

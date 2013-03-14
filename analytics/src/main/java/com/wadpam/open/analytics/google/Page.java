@@ -11,13 +11,26 @@ public class Page {
     // Page views
 
     /** Page title */
-    private String pageTitle = null;
+    private String documentTitle = null;
+
+    /**
+     * The full url of the page on which content reside
+     * Setting the host name and page path will override this value
+     * Added in universal analytics.
+     */
+    private String documentUrl = null;
 
     /** Host name */
     private String hostName = null;
 
     /** Page URL */
-    private String pageURL = null;
+    private String documentPath = null;
+
+    /**
+     * Content description
+     * Added in universal analytics.
+     */
+    private String contentDescription = null;
 
 
     // Events
@@ -41,40 +54,46 @@ public class Page {
     /**
      *  utmcsr
      *  Identifies a search engine, newsletter name, or other source specified in the
-     *  utm_source query parameter See the �Marketing Campaign Tracking�
+     *  utm_source query parameter See the Marketing Campaign Tracking
      *  section for more information about query parameters.
      */
-    private String utmcsr = "(direct)";
+    private String campaignSource = "(direct)";
 
     /**
      * utmccn
      * Stores the campaign name or value in the utm_campaign query parameter.
      */
-    private String utmccn = "(direct)";
+    private String campaignName = "(direct)";
 
     /**
      * utmctr
      * Identifies the keywords used in an organic search or the value in the utm_term query parameter.
      */
-    private String utmctr = null;
+    private String campaignKeyword = null;
 
     /**
      * utmcmd
      * A campaign medium or value of utm_medium query parameter.
      */
-    private String utmcmd = "(none)";
+    private String campaignMedium = "(none)";
 
     /**
      * utmcct
      * Campaign content or the content of a particular ad (used for A/B testing)
      */
-    private String utmcct = null;
+    private String campaignContent = null;
+
+    /**
+     * Campaign id.
+     * Added in universal analytics.
+     */
+    private String campaignId = null;
 
 
     /**
      * Referral, complete url
      */
-    private String utmr = null;
+    private String referrer = null;
 
 
     /**
@@ -90,20 +109,20 @@ public class Page {
 
     /** Set referrer */
     public void setReferrer(String site, String page){
-        utmcmd = "referral";
-        utmcct = page;
-        utmccn = "(referral)";
-        utmcsr = site;
-        utmctr = null;
+        campaignMedium = "referral";
+        campaignContent = page;
+        campaignName = "(referral)";
+        campaignSource = site;
+        campaignKeyword = null;
     }
 
     /** Set search referrer */
     public void setSearchReferrer(String searchSource, String searchKeywords){
-        utmcsr = searchSource;
-        utmctr = searchKeywords;
-        utmcmd = "organic";
-        utmccn = "(organic)";
-        utmcct = null;
+        campaignSource = searchSource;
+        campaignKeyword = searchKeywords;
+        campaignMedium = "organic";
+        campaignName = "(organic)";
+        campaignContent = null;
     }
 
     // Setters and getter
@@ -147,68 +166,68 @@ public class Page {
         this.hostName = hostName;
     }
 
-    public String getPageTitle() {
-        return pageTitle;
+    public String getDocumentTitle() {
+        return documentTitle;
     }
 
-    public void setPageTitle(String pageTitle) {
-        this.pageTitle = pageTitle;
+    public void setDocumentTitle(String documentTitle) {
+        this.documentTitle = documentTitle;
     }
 
-    public String getPageURL() {
-        return pageURL;
+    public String getDocumentPath() {
+        return documentPath;
     }
 
-    public void setPageURL(String pageURL) {
-        this.pageURL = pageURL;
+    public void setDocumentPath(String documentPath) {
+        this.documentPath = documentPath;
     }
 
-    public String getUtmccn() {
-        return utmccn;
+    public String getCampaignName() {
+        return campaignName;
     }
 
-    public void setUtmccn(String utmccn) {
-        this.utmccn = utmccn;
+    public void setCampaignName(String campaignName) {
+        this.campaignName = campaignName;
     }
 
-    public String getUtmcct() {
-        return utmcct;
+    public String getCampaignContent() {
+        return campaignContent;
     }
 
-    public void setUtmcct(String utmcct) {
-        this.utmcct = utmcct;
+    public void setCampaignContent(String campaignContent) {
+        this.campaignContent = campaignContent;
     }
 
-    public String getUtmcmd() {
-        return utmcmd;
+    public String getCampaignMedium() {
+        return campaignMedium;
     }
 
-    public void setUtmcmd(String utmcmd) {
-        this.utmcmd = utmcmd;
+    public void setCampaignMedium(String campaignMedium) {
+        this.campaignMedium = campaignMedium;
     }
 
-    public String getUtmcsr() {
-        return utmcsr;
+    public String getCampaignSource() {
+        return campaignSource;
     }
 
-    public void setUtmcsr(String utmcsr) {
-        this.utmcsr = utmcsr;
+    public void setCampaignSource(String campaignSource) {
+        this.campaignSource = campaignSource;
     }
 
-    public String getUtmctr() {
-        return utmctr;
+    public String getCampaignKeyword() {
+        return campaignKeyword;
     }
 
-    public void setUtmctr(String utmctr) {
-        this.utmctr = utmctr;
+    public void setCampaignKeyword(String campaignKeyword) {
+        this.campaignKeyword = campaignKeyword;
     }
 
-    public String getUtmr() {
-        return utmr;
+    public String getReferrer() {
+        return referrer;
     }
 
-    public void setUtmr(String utmr) {
-        this.utmr = utmr;
+    public void setReferrer(String referrer) {
+        this.referrer = referrer;
     }
 
     public List<CustomVariable> getCustomVariables() {
@@ -217,5 +236,29 @@ public class Page {
 
     public void setCustomVariables(List<CustomVariable> customVariables) {
         this.customVariables = customVariables;
+    }
+
+    public String getCampaignId() {
+        return campaignId;
+    }
+
+    public void setCampaignId(String campaignId) {
+        this.campaignId = campaignId;
+    }
+
+    public String getDocumentUrl() {
+        return documentUrl;
+    }
+
+    public void setDocumentUrl(String documentUrl) {
+        this.documentUrl = documentUrl;
+    }
+
+    public String getContentDescription() {
+        return contentDescription;
+    }
+
+    public void setContentDescription(String contentDescription) {
+        this.contentDescription = contentDescription;
     }
 }
