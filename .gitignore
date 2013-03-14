@@ -7,3 +7,13 @@ target/
 *.settings/
 release.properties
 
+analytics/src/main/java/META-INF/
+domain/src/main/java/META-INF/
+io-core/src/main/java/META-INF/
+json/src/main/java/META-INF/
+jsonp/src/main/java/META-INF/
+security/src/main/java/META-INF/
+tools-gae/src/main/java/META-INF/
+webapp-j2ee/src/main/webapp/META-INF/MANIFEST.MF
+webapp/src/main/webapp/META-INF/
+

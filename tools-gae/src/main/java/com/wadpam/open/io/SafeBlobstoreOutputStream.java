@@ -80,7 +80,7 @@ public class SafeBlobstoreOutputStream extends OutputStream {
         
     }
 
-    private void closeChannel(boolean closeFinally) throws IOException {
+    public void closeChannel(boolean closeFinally) throws IOException {
         if (null != channel) {
             try {
                 outputStream.flush();
