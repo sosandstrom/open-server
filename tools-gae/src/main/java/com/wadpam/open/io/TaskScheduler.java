@@ -30,12 +30,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
- *
+ * Schedules using Tasks, and handles the Task callbacks.
  * @author sosandstrom
  */
 @Controller
 @RequestMapping(value={"_admin/{domain}/exporter", "{domain}/_admin/exporter"})
 public class TaskScheduler<D> extends Scheduler<D> {
+    /** Currently set to reschedule after 8 minutes */
+    public static final long MILLIS_TO_RUN = 8L*60L*1000L;
     public static final String KEY_DATE_STRING = "Exporter.Scheduler.dateString";
     private static final MemcacheService MEM_CACHE = MemcacheServiceFactory.getMemcacheService();
     
@@ -93,14 +95,11 @@ public class TaskScheduler<D> extends Scheduler<D> {
         AppEngineFile file = fileService.createNewBlobFile("text/csv", fileName);
         SafeBlobstoreOutputStream out = new SafeBlobstoreOutputStream(file);
         
-        // run for 9 minutes
-        while (null != off && System.currentTimeMillis() < startMillis + 9L*60L*1000L) {
+        // run for some minutes
+        while (null != off && System.currentTimeMillis() < startMillis + MILLIS_TO_RUN) {
             off = exporter.exportDao(out, daoIndex, off, limit);
         }
-        
-        // FIXME: distribute file or blob key
-        out.close();
-        
+
         final BlobKey blobKey = fileService.getBlobKey(file);
         LOG.info("processExportDao {}, blobKey={}", fileName, blobKey);
         putCached(fileName, blobKey);
@@ -108,10 +107,64 @@ public class TaskScheduler<D> extends Scheduler<D> {
         // re-schedule or zip-schedule?
         int status = HttpStatus.CREATED.value();
         if (null != off) {
+            // we will resume and append
+            out.closeChannel(false);
             status = HttpStatus.NO_CONTENT.value();
-            scheduleExportDao(null, daoIndex, offset, limit);
+            scheduleExportDaoResume(blobKey.getKeyString(), daoIndex, off, limit);
+        }
+        else {
+            // close finally
+            out.close();
         }
         
+        return new ResponseEntity(HttpStatus.valueOf(status));
+    }
+
+    public void scheduleExportDaoResume(String blobKeyString, int daoIndex, int offset, int limit) {
+        // create a task
+        TaskOptions task = TaskOptions.Builder.withUrl(
+                String.format("%s/exporter/v10/%d", basePath, daoIndex))
+                .retryOptions(RetryOptions.Builder.withTaskRetryLimit(0))
+                .param("blobKey", blobKeyString)
+                .param("offset", Integer.toString(offset))
+                .param("limit", Integer.toString(limit));
+        QueueFactory.getDefaultQueue().add(task);
+    }
+
+    @RequestMapping(value="v10/{daoIndex}", method = RequestMethod.POST, params = {"offset", "limit", "blobKey"})
+    public ResponseEntity resumeExportDao(
+            @PathVariable int daoIndex,
+            @RequestParam("blobKey") String blobKeyString,
+            @RequestParam int offset,
+            @RequestParam int limit
+            ) throws IOException {
+        long startMillis = System.currentTimeMillis();
+        Integer off = offset;
+        final BlobKey blobKey = new BlobKey(blobKeyString);
+        
+        // Get a file service
+        final FileService fileService = FileServiceFactory.getFileService();
+
+        AppEngineFile file = fileService.getBlobFile(blobKey);
+        SafeBlobstoreOutputStream out = new SafeBlobstoreOutputStream(file);
+        
+        // run for some minutes
+        while (null != off && System.currentTimeMillis() < startMillis + MILLIS_TO_RUN) {
+            off = exporter.exportDao(out, daoIndex, off, limit);
+        }
+        
+        // re-schedule or zip-schedule?
+        int status = HttpStatus.CREATED.value();
+        if (null != off) {
+            // we will resume and append
+            out.closeChannel(false);
+            status = HttpStatus.NO_CONTENT.value();
+            scheduleExportDaoResume(blobKeyString, daoIndex, off, limit);
+        }
+        else {
+            // close finally
+            out.close();
+        }
         return new ResponseEntity(HttpStatus.valueOf(status));
     }
 
