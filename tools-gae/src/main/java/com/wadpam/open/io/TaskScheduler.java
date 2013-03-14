@@ -83,7 +83,8 @@ public class TaskScheduler<D> extends Scheduler<D> {
             @PathVariable int daoIndex,
             @RequestParam int offset,
             @RequestParam int limit
-            ) throws IOException {
+            ) {
+        int status = HttpStatus.CREATED.value();
         long startMillis = System.currentTimeMillis();
         Integer off = offset;
         
@@ -94,29 +95,33 @@ public class TaskScheduler<D> extends Scheduler<D> {
         // Get a file service
         final FileService fileService = FileServiceFactory.getFileService();
         
-        AppEngineFile file = fileService.createNewBlobFile("text/csv", fileName);
-        SafeBlobstoreOutputStream out = new SafeBlobstoreOutputStream(file);
-        
-        // run for some minutes
-        while (null != off && System.currentTimeMillis() < startMillis + MILLIS_TO_RUN) {
-            off = exporter.exportDao(out, daoIndex, off, limit);
-        }
+        try {
+            AppEngineFile file = fileService.createNewBlobFile("text/csv", fileName);
+            SafeBlobstoreOutputStream out = new SafeBlobstoreOutputStream(file);
 
-        final BlobKey blobKey = fileService.getBlobKey(file);
-        LOG.info("processExportDao {}, blobKey={}", fileName, blobKey);
-        putCached(fileName, blobKey);
-        
-        // re-schedule or zip-schedule?
-        int status = HttpStatus.CREATED.value();
-        if (null != off) {
-            // we will resume and append
-            out.closeChannel(false);
-            status = HttpStatus.NO_CONTENT.value();
-            scheduleExportDaoResume(blobKey.getKeyString(), daoIndex, off, limit);
+            // run for some minutes
+            while (null != off && System.currentTimeMillis() < startMillis + MILLIS_TO_RUN) {
+                off = exporter.exportDao(out, daoIndex, off, limit);
+            }
+
+            final BlobKey blobKey = fileService.getBlobKey(file);
+            LOG.info("processExportDao {}, blobKey={}", fileName, blobKey);
+            putCached(fileName, blobKey);
+
+            // re-schedule or zip-schedule?
+            if (null != off) {
+                // we will resume and append
+                out.closeChannel(false);
+                status = HttpStatus.NO_CONTENT.value();
+                scheduleExportDaoResume(blobKey.getKeyString(), daoIndex, off, limit);
+            }
+            else {
+                // close finally
+                out.close();
+            }
         }
-        else {
-            // close finally
-            out.close();
+        catch (IOException any) {
+            LOG.error(Integer.toString(offset), any);
         }
         
         return new ResponseEntity(HttpStatus.valueOf(status));
@@ -139,7 +144,8 @@ public class TaskScheduler<D> extends Scheduler<D> {
             @RequestParam("blobKey") String blobKeyString,
             @RequestParam int offset,
             @RequestParam int limit
-            ) throws IOException {
+            ) {
+        int status = HttpStatus.CREATED.value();
         long startMillis = System.currentTimeMillis();
         Integer off = offset;
         final BlobKey blobKey = new BlobKey(blobKeyString);
@@ -147,25 +153,29 @@ public class TaskScheduler<D> extends Scheduler<D> {
         // Get a file service
         final FileService fileService = FileServiceFactory.getFileService();
 
-        AppEngineFile file = fileService.getBlobFile(blobKey);
-        SafeBlobstoreOutputStream out = new SafeBlobstoreOutputStream(file);
-        
-        // run for some minutes
-        while (null != off && System.currentTimeMillis() < startMillis + MILLIS_TO_RUN) {
-            off = exporter.exportDao(out, daoIndex, off, limit);
+        try {
+            AppEngineFile file = fileService.getBlobFile(blobKey);
+            SafeBlobstoreOutputStream out = new SafeBlobstoreOutputStream(file);
+
+            // run for some minutes
+            while (null != off && System.currentTimeMillis() < startMillis + MILLIS_TO_RUN) {
+                off = exporter.exportDao(out, daoIndex, off, limit);
+            }
+
+            // re-schedule or zip-schedule?
+            if (null != off) {
+                // we will resume and append
+                out.closeChannel(false);
+                status = HttpStatus.NO_CONTENT.value();
+                scheduleExportDaoResume(blobKeyString, daoIndex, off, limit);
+            }
+            else {
+                // close finally
+                out.close();
+            }
         }
-        
-        // re-schedule or zip-schedule?
-        int status = HttpStatus.CREATED.value();
-        if (null != off) {
-            // we will resume and append
-            out.closeChannel(false);
-            status = HttpStatus.NO_CONTENT.value();
-            scheduleExportDaoResume(blobKeyString, daoIndex, off, limit);
-        }
-        else {
-            // close finally
-            out.close();
+        catch (IOException any) {
+            LOG.error(blobKeyString, any);
         }
         return new ResponseEntity(HttpStatus.valueOf(status));
     }
