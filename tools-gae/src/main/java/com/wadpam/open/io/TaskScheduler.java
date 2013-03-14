@@ -103,6 +103,15 @@ public class TaskScheduler<D> extends Scheduler<D> {
             while (null != off && System.currentTimeMillis() < startMillis + MILLIS_TO_RUN) {
                 off = exporter.exportDao(out, daoIndex, off, limit);
             }
+            
+            if (null != off) {
+                // we will resume and append
+                out.closeChannel(false);
+            }
+            else {
+                // close finally
+                out.close();
+            }
 
             final BlobKey blobKey = fileService.getBlobKey(file);
             LOG.info("processExportDao {}, blobKey={}", fileName, blobKey);
@@ -110,14 +119,8 @@ public class TaskScheduler<D> extends Scheduler<D> {
 
             // re-schedule or zip-schedule?
             if (null != off) {
-                // we will resume and append
-                out.closeChannel(false);
                 status = HttpStatus.NO_CONTENT.value();
                 scheduleExportDaoResume(blobKey.getKeyString(), daoIndex, off, limit);
-            }
-            else {
-                // close finally
-                out.close();
             }
         }
         catch (IOException any) {
