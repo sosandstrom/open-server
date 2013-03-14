@@ -40,17 +40,19 @@ public class TaskScheduler<D> extends Scheduler<D> {
     public static final long MILLIS_TO_RUN = 8L*60L*1000L;
     public static final String KEY_DATE_STRING = "Exporter.Scheduler.dateString";
     private static final MemcacheService MEM_CACHE = MemcacheServiceFactory.getMemcacheService();
-    
+
+    private final String serverUrl;
     private final String basePath;
     private String fromEmail;
     private String fromName;
 
     /**
-     * 
      * @param exporter
+     * @param serverUrl e.g. http://localhost:8080 or http://goldengekko.com
      * @param basePath e.g. /api/{domain}/_admin or /api/_admin/{domain}
      */
-    public TaskScheduler(Exporter<D> exporter, String basePath) {
+    public TaskScheduler(Exporter<D> exporter, String serverUrl, String basePath) {
+        this.serverUrl = serverUrl;
         this.basePath = basePath;
         setExporter(exporter);
     }
@@ -181,8 +183,9 @@ public class TaskScheduler<D> extends Scheduler<D> {
     public ResponseEntity processPostExport() {
         String email = (String) getCached(KEY_PRE_EXPORT);
         BlobKey zipKey = (BlobKey) exporter.postExport(null, exporter, email);
-        String link = String.format("%s/blob/v10?blobKey=%s", basePath, zipKey.getKeyString());
-        String html = String.format("<a href='%s'>%s</a>", link, link);
+        
+        String link = String.format("%s%s/blob/v10?attachment=true&key=%s", serverUrl, basePath, zipKey.getKeyString());
+        String html = String.format("Download <a href='%s'>here</a>", link);
         EmailSender.sendEmail(fromEmail, fromName, Arrays.asList(email), null, null,
                 "Datastore export", null, html, null, null, null);
         return new ResponseEntity(HttpStatus.OK);
