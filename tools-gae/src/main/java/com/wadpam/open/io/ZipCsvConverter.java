@@ -55,7 +55,7 @@ public class ZipCsvConverter<D> extends CsvConverter<D> {
             for (D dao : daos) {
                 
                 friendlyName = exporter.getExtractor().getTableName(null, dao);
-                zip.putNextEntry(new ZipEntry(friendlyName));
+                zip.putNextEntry(new ZipEntry(String.format("%s.csv", friendlyName)));
                 
                 // read from blob CSV, write to Zip
                 csvName = TaskScheduler.getDaoFilename(daoIndex);

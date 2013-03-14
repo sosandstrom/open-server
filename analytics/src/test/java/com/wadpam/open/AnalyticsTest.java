@@ -33,7 +33,7 @@ public class AnalyticsTest {
         trackerConfig = new TrackerConfiguration("test-profile", "UA-35889513-2");
 
         // Set visitor
-        visitorData = new Visitor(999, now() - 50000, now() - 4000, 10);
+        visitorData = new Visitor("999", now() - 50000, now() - 4000, 10);
 
         // Set device data
         deviceData.setEncoding("UTF-8");

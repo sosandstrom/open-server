@@ -39,7 +39,8 @@ public class AnalyticsController extends AbstractRestController {
     @ResponseBody
     public void sendEventTask(HttpServletRequest request,
                               @RequestParam String url,
-                              @RequestParam(required=false) String userAgent) {
+                              @RequestParam(required=false) String userAgent,
+                              @RequestParam(required=false) String remoteAddress) {
         LOG.debug("GAE sent event task");
 
         // TODO incomplete implementation
@@ -48,8 +49,9 @@ public class AnalyticsController extends AbstractRestController {
 
         // Forward
         EventDispatcher dispatcher = new SynchronousEventDispatcher();
+
         try {
-            dispatcher.dispatch(Device.defaultiPhoneDevice(), new URI(url)); // TODO not device
+            dispatcher.dispatch(new URI(url), userAgent, remoteAddress);
         } catch (URISyntaxException e) {
             LOG.error("Not possible to convert url to uri with reason:{}", e.getMessage());
             // No need to throw exception, no one is listening to the result
@@ -70,7 +72,7 @@ public class AnalyticsController extends AbstractRestController {
     })
     public void forwardPageView(HttpServletRequest request,
                                 @PathVariable String domain,
-                                @RequestParam int userId,
+                                @RequestParam String userId,
                                 @RequestParam String pageUrl,
                                 @RequestParam String title) {
         LOG.debug("Forward page view");
@@ -111,7 +113,7 @@ public class AnalyticsController extends AbstractRestController {
     })
     public void forwardEvent(HttpServletRequest request,
                              @PathVariable String domain,
-                             @RequestParam int userId,
+                             @RequestParam String userId,
                              @RequestParam String category,
                              @RequestParam String action,
                              @RequestParam(required = false) String label,

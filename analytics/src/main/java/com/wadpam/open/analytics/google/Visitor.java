@@ -7,7 +7,7 @@ package com.wadpam.open.analytics.google;
 public class Visitor {
 
     /** Unique visitor id */
-    private int visitorId;
+    private String visitorId;
 
     /** First time user visited */
     private long timestampFirst;
@@ -31,7 +31,7 @@ public class Visitor {
      * @param visits the number of visits
      * @return a new visitor
      */
-    public Visitor(int visitorId, long timestampFirst, long timestampPrevious, int visits) {
+    public Visitor(String visitorId, long timestampFirst, long timestampPrevious, int visits) {
         this(visitorId, timestampFirst, timestampPrevious, visits, new Session());
     }
 
@@ -44,7 +44,7 @@ public class Visitor {
      * @param visits number of visits
      * @param session current session for the user
      */
-    public Visitor(int visitorId, long timestampFirst, long timestampPrevious, int visits, Session session) {
+    public Visitor(String visitorId, long timestampFirst, long timestampPrevious, int visits, Session session) {
         this.visitorId = visitorId;
         this.timestampFirst = timestampFirst;
         this.timestampPrevious = timestampPrevious;
@@ -85,11 +85,11 @@ public class Visitor {
         this.timestampPrevious = timestampPrevious;
     }
 
-    public int getVisitorId() {
+    public String getVisitorId() {
         return visitorId;
     }
 
-    public void setVisitorId(int visitorId) {
+    public void setVisitorId(String visitorId) {
         this.visitorId = visitorId;
     }
 

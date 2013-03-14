@@ -1,11 +1,8 @@
 package com.wadpam.open.analytics.google;
 
-import com.wadpam.open.analytics.Tracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpRequest;
 
-import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -29,6 +26,9 @@ public class GoogleAnalyticsTracker extends AbstractTracker {
     /** Describes the device */
     private Device device;
 
+    /** Described the application */
+    private Application app;
+
     //** The url builder to use */
     private URLBuilder urlBuilder;
 
@@ -45,14 +45,23 @@ public class GoogleAnalyticsTracker extends AbstractTracker {
      * @param trackerConfig configuration data
      * @param visitor visitor data
      * @param device device data
+     * @param app application data
      */
-    public GoogleAnalyticsTracker(TrackerConfiguration trackerConfig, Visitor visitor, Device device) {
-        this(trackerConfig, visitor, device, new URLBuilderV5_3_8(), new SynchronousEventDispatcher());
+    public GoogleAnalyticsTracker(TrackerConfiguration trackerConfig, Visitor visitor, Device device, Application app) {
+        this(trackerConfig, visitor, device, app, new URLBuilderV5_3_8(), new SynchronousEventDispatcher());
     }
 
 
-    // Create tracker with a specific URL builder and dispatcher
-    public GoogleAnalyticsTracker(TrackerConfiguration trackerConfig, Visitor visitor, Device device,
+    /**
+     * Create a tracker.
+     * @param trackerConfig configuration data
+     * @param visitor visitor data
+     * @param device device data
+     * @param app application data. Optional
+     * @param urlBuilder the url builder used to create the absolute url to Google Analytics
+     * @param eventDispatcher the event dispatcher
+     */
+    public GoogleAnalyticsTracker(TrackerConfiguration trackerConfig, Visitor visitor, Device device, Application app,
                                   URLBuilder urlBuilder, EventDispatcher eventDispatcher) {
 
         // Check input params
@@ -66,6 +75,7 @@ public class GoogleAnalyticsTracker extends AbstractTracker {
         this.trackerConfiguration = trackerConfig;
         this.visitor = visitor;
         this.device = device;
+        this.app = app;
 
         // In the future we can support different URL builders as Google evolve their protocol
         // A new universal analytic protocol is in the pipe but not yet publicly available.
@@ -84,18 +94,18 @@ public class GoogleAnalyticsTracker extends AbstractTracker {
 
     // Track a page view
     @Override
-    public void trackPageView(String pageURL,
+    public void trackPageView(String pathUrl,
                               String pageTitle,
                               String hostName,
                               String referrerPage,
                               String referrerSite,
                               List<CustomVariable> customVariables) {
-        LOG.debug("Track page view for url:{} and tile:{}", pageURL, pageTitle);
+        LOG.debug("Track page view for url:{} and tile:{}", pathUrl, pageTitle);
 
         // Populate the request data
         Page data = new Page();
-        data.setPageURL(pageURL);
-        data.setPageTitle(pageTitle);
+        data.setDocumentPath(pathUrl);
+        data.setDocumentTitle(pageTitle);
         data.setHostName(hostName);
         if (null != referrerSite && null != referrerPage) {
             data.setReferrer(referrerSite, referrerPage);
@@ -132,7 +142,7 @@ public class GoogleAnalyticsTracker extends AbstractTracker {
         LOG.debug("Send request to GA:{}", page);
 
         // Build request URL
-        final String url = urlBuilder.buildURL(trackerConfiguration, visitor, device, page);
+        final String url = urlBuilder.buildURL(trackerConfiguration, visitor, device, app, page);
 
         // Check if in debug mode
         if (debug) {
@@ -144,7 +154,7 @@ public class GoogleAnalyticsTracker extends AbstractTracker {
         try {
             // Make the request
             LOG.debug("Make request with url:{}", url);
-            eventDispatcher.dispatch(device, new URI(url));
+            eventDispatcher.dispatch(new URI(url), device.getUserAgent(), device.getRemoteAddress());
         } catch (URISyntaxException e) {
             LOG.error("Not possible to create URI object from URL with reason:{}", e.getMessage());
             throw new IllegalArgumentException(e);
@@ -199,5 +209,13 @@ public class GoogleAnalyticsTracker extends AbstractTracker {
 
     public void setUrlBuilder(URLBuilder urlBuilder) {
         this.urlBuilder = urlBuilder;
+    }
+
+    public Application getApp() {
+        return app;
+    }
+
+    public void setApp(Application app) {
+        this.app = app;
     }
 }

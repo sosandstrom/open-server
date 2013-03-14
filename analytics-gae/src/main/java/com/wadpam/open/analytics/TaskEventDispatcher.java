@@ -20,21 +20,27 @@ import java.net.URLEncoder;
 public class TaskEventDispatcher implements EventDispatcher {
     static final Logger LOG = LoggerFactory.getLogger(TaskEventDispatcher.class);
 
+    // The worker url that will run the task
+    private String workerUrl = "api/%s/analytics/task";
+    private String domain = "changeMe";
+
 
     // Dispatch the event using GAE task queue
     @Override
-    public boolean dispatch(Device device, URI uri) {
+    public boolean dispatch(URI analyticsUri, final String userAgent, final String remoteAddress) {
         LOG.debug("Dispatch the event using GAE task queue");
 
         // URL encode the uri
         try {
-            String encodedURL = URLEncoder.encode(uri.toURL().toString(), "UTF-8");
+            String encodedURL = URLEncoder.encode(analyticsUri.toURL().toString(), "UTF-8");
             Queue queue = QueueFactory.getDefaultQueue();
 
-            // TODO Incomplete implementation
-            String workerUrl = String.format("/api/_admin/%s/user/export", "brand");
+            // We need to pass over a few parameters
+            queue.add(TaskOptions.Builder.withUrl(String.format(workerUrl, domain))
+                    .param("url", encodedURL)
+                    .param("userAgent", userAgent)
+                    .param("remoteAddress", remoteAddress));
 
-            queue.add(TaskOptions.Builder.withUrl(workerUrl).param("url", encodedURL));
         } catch (UnsupportedEncodingException e) {
             LOG.error("Not possible to encode url with reason:{}", e.getMessage());
             throw new IllegalArgumentException(e);
@@ -44,5 +50,23 @@ public class TaskEventDispatcher implements EventDispatcher {
         }
 
         return true;
+    }
+
+
+    // Getters and setters
+    public String getWorkerUrl() {
+        return workerUrl;
+    }
+
+    public void setWorkerUrl(String workerUrl) {
+        this.workerUrl = workerUrl;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
 }

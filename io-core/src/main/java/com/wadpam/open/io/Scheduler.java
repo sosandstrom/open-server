@@ -59,7 +59,7 @@ public class Scheduler<D> {
         CACHE.put(key, value);
     }
     
-    public String getDaoKey(int daoIndex) {
+    public static String getDaoKey(int daoIndex) {
         return String.format("Exporter.Scheduler.daoKey.%d", daoIndex);        
     }
 
@@ -78,6 +78,8 @@ public class Scheduler<D> {
         do {
             cacheKey = getDaoKey(i);
             state = getCached(cacheKey);
+            LOG.debug("onDone({}) #{} has state {}", new Object[] 
+                {daoIndex, i, state});
             i++;
         } while (STATE_DONE.equals(state));
         
