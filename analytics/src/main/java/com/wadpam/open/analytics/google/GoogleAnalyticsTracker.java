@@ -45,13 +45,22 @@ public class GoogleAnalyticsTracker extends AbstractTracker {
      * @param trackerConfig configuration data
      * @param visitor visitor data
      * @param device device data
+     * @param app application data
      */
     public GoogleAnalyticsTracker(TrackerConfiguration trackerConfig, Visitor visitor, Device device, Application app) {
         this(trackerConfig, visitor, device, app, new URLBuilderV5_3_8(), new SynchronousEventDispatcher());
     }
 
 
-    // Create tracker with a specific URL builder and dispatcher
+    /**
+     * Create a tracker.
+     * @param trackerConfig configuration data
+     * @param visitor visitor data
+     * @param device device data
+     * @param app application data. Optional
+     * @param urlBuilder the url builder used to create the absolute url to Google Analytics
+     * @param eventDispatcher the event dispatcher
+     */
     public GoogleAnalyticsTracker(TrackerConfiguration trackerConfig, Visitor visitor, Device device, Application app,
                                   URLBuilder urlBuilder, EventDispatcher eventDispatcher) {
 
@@ -85,17 +94,17 @@ public class GoogleAnalyticsTracker extends AbstractTracker {
 
     // Track a page view
     @Override
-    public void trackPageView(String pageURL,
+    public void trackPageView(String pathUrl,
                               String pageTitle,
                               String hostName,
                               String referrerPage,
                               String referrerSite,
                               List<CustomVariable> customVariables) {
-        LOG.debug("Track page view for url:{} and tile:{}", pageURL, pageTitle);
+        LOG.debug("Track page view for url:{} and tile:{}", pathUrl, pageTitle);
 
         // Populate the request data
         Page data = new Page();
-        data.setDocumentPath(pageURL);
+        data.setDocumentPath(pathUrl);
         data.setDocumentTitle(pageTitle);
         data.setHostName(hostName);
         if (null != referrerSite && null != referrerPage) {
@@ -145,7 +154,7 @@ public class GoogleAnalyticsTracker extends AbstractTracker {
         try {
             // Make the request
             LOG.debug("Make request with url:{}", url);
-            eventDispatcher.dispatch(device, new URI(url));
+            eventDispatcher.dispatch(new URI(url), device.getUserAgent(), device.getRemoteAddress());
         } catch (URISyntaxException e) {
             LOG.error("Not possible to create URI object from URL with reason:{}", e.getMessage());
             throw new IllegalArgumentException(e);

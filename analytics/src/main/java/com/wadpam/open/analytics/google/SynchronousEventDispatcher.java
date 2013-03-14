@@ -32,17 +32,17 @@ public class SynchronousEventDispatcher implements EventDispatcher {
 
         // Configure the rest template
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(10 * 1000); // 10s timeout
-        factory.setReadTimeout(10 * 1000); // 10s read timeout
+        factory.setConnectTimeout(5 * 1000); // 10s timeout
+        factory.setReadTimeout(5 * 1000); // 10s read timeout
         this.restTemplate = new RestTemplate(factory);
     }
 
 
     // Dispatch an event
     @Override
-    public boolean dispatch(final Device device, URI uri) {
+    public boolean dispatch(URI analyticsUri, final String userAgent, final String remoteAddress) {
 
-        boolean response = restTemplate.execute(uri, HttpMethod.GET,
+        boolean response = restTemplate.execute(analyticsUri, HttpMethod.GET,
                 new RequestCallback() {
                     public void doWithRequest(ClientHttpRequest clientHttpRequest) throws IOException {
                         LOG.debug("Url:{}", clientHttpRequest.getURI().toURL().toString());
@@ -53,12 +53,12 @@ public class SynchronousEventDispatcher implements EventDispatcher {
                         //if (null != device.getHost())  // Not allowed to set this value
                         //    headers.set("Host", device.getHost());
 
-                        if (null != device.getUserAgent())
-                             headers.set("User-Agent", device.getUserAgent());
+                        if (null != userAgent)
+                             headers.set("User-Agent",userAgent);
 
-                        if (null != device.getRemoteAddress()) {
-                            headers.set("X-Forwarded-For", device.getRemoteAddress());
-                            headers.set("X-Real-IP", device.getRemoteAddress());
+                        if (null != remoteAddress) {
+                            headers.set("X-Forwarded-For", remoteAddress);
+                            headers.set("X-Real-IP", remoteAddress);
                         }
                     }
                 },

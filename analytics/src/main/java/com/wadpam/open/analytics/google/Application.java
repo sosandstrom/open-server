@@ -14,7 +14,7 @@ public class Application {
 
     /**
      * Application version
-     *  Added in universal analytics
+     * Added in universal analytics
      */
     private String version;
 

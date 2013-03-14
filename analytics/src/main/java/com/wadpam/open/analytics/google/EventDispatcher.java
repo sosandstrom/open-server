@@ -12,9 +12,11 @@ public interface EventDispatcher {
 
     /**
      * Dispatch a request to GA to track a pageview or event.
-     * @param uri the url to use
+     * @param analyticsUri the url to use
+     * @param userAgent the original senders user agent
+     * @param remoteAddress the original senders remote address
      * @return true if the dispatch was successful (in case of asynchronous request it will always return true)
      */
-    public abstract boolean dispatch(Device device, URI uri);
+    public abstract boolean dispatch(URI analyticsUri, String userAgent, String remoteAddress);
 
 }
