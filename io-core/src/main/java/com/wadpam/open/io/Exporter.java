@@ -167,7 +167,8 @@ public class Exporter<D> {
         Object log;
         int returned = 0;
 
-        LOG.debug("----- query {} items from {} with {} returned.", new Object[] {limit, tableName, returned});
+        LOG.debug("----- query {} items from {} with offset {}", new Object[] {limit, tableName, offset});
+        try {
         Iterable entities = extractor.queryIterable(arg, dao, offset, limit);
         for (Object entity : entities) {
             log = exportEntity(out, arg, preExport, preDao, columns, daoIndex, dao, 
@@ -176,6 +177,10 @@ public class Exporter<D> {
                 entityIndex++;
             }
             returned++;
+        }
+        }
+        catch (Exception any) {
+            LOG.error(Integer.toString(returned), any);
         }
 
         // more?
