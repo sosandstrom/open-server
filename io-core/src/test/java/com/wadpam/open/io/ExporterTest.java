@@ -218,4 +218,10 @@ public class ExporterTest extends Scheduler<ExporterTest>
         }
         return list;
     }
+
+    @Override
+    public Object initPreDao(OutputStream out, Object arg) {
+        return null;
+    }
+
 }
