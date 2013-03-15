@@ -947,5 +947,15 @@ public abstract class CrudController<
                     operation, json, id, serviceResponse);
         }
     }
+    
+    // -----------------  getters and setters    -------------------------------
 
+    public S getService() {
+        return service;
+    }
+
+    public void setService(S service) {
+        this.service = service;
+    }
+    
 }

@@ -192,6 +192,10 @@ public abstract class MardaoCrudService<
     public void setDao(D dao) {
         this.dao = dao;
     }
+
+    public D getDao() {
+        return dao;
+    }
     
     @Override
     public ID update(T domain) {
