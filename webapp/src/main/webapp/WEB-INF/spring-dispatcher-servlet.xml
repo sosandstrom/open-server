@@ -67,6 +67,8 @@
     
     <bean class="com.wadpam.open.web.DoUserController" />
 
+    <bean class="com.wadpam.open.analytics.AnalyticsController" />
+
     <!--           View stuff             -->
         
     <bean id="jsonObjectMapper" class="com.wadpam.open.json.SkipNullObjectMapper" init-method="init" />

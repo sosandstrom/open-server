@@ -10,8 +10,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +27,6 @@ import java.util.Map;
 @RequestMapping(value="{domain}/analytics")
 public class AnalyticsController extends AbstractRestController {
     static final Logger LOG = LoggerFactory.getLogger(AnalyticsController.class);
-
 
     // The default tracker that will be used if no domain-tracker mapping can be found
     private String defaultTrackerId;
@@ -40,18 +42,16 @@ public class AnalyticsController extends AbstractRestController {
     public void sendEventTask(HttpServletRequest request,
                               @RequestParam String url,
                               @RequestParam(required=false) String userAgent,
-                              @RequestParam(required=false) String remoteAddress) {
+                              @RequestParam(required=false) String remoteAddress) throws UnsupportedEncodingException {
         LOG.debug("GAE sent event task");
-
-        // TODO incomplete implementation
-
-        // Decode
 
         // Forward
         EventDispatcher dispatcher = new SynchronousEventDispatcher();
 
         try {
-            dispatcher.dispatch(new URI(url), userAgent, remoteAddress);
+            dispatcher.dispatch(new URI(URLDecoder.decode(url, "UTF-8")),
+                    URLDecoder.decode(userAgent, "UTF-8"),
+                    URLDecoder.decode(remoteAddress, "UTF-8"));
         } catch (URISyntaxException e) {
             LOG.error("Not possible to convert url to uri with reason:{}", e.getMessage());
             // No need to throw exception, no one is listening to the result
@@ -74,7 +74,9 @@ public class AnalyticsController extends AbstractRestController {
                                 @PathVariable String domain,
                                 @RequestParam String userId,
                                 @RequestParam String pageUrl,
-                                @RequestParam String title) {
+                                @RequestParam String title,
+                                @RequestParam String appName,
+                                @RequestParam String appVersion) {
         LOG.debug("Forward page view");
 
         String trackerId = this.domainTrackerIdMapping.get(domain);
@@ -89,6 +91,7 @@ public class AnalyticsController extends AbstractRestController {
                 .withTrackingConfiguration(trackerConfig)
                 .withVisitorId(userId)
                 .withDeviceFromRequest(request)
+                .withApp(appName, appVersion)
                 .build();
 
         tracker.trackPageView(pageUrl, title, request.getRemoteHost());
@@ -116,8 +119,10 @@ public class AnalyticsController extends AbstractRestController {
                              @RequestParam String userId,
                              @RequestParam String category,
                              @RequestParam String action,
-                             @RequestParam(required = false) String label,
-                             @RequestParam(required = false) int value) {
+                             @RequestParam(required=false) String label,
+                             @RequestParam(required=false) int value,
+                             @RequestParam String appName,
+                             @RequestParam String appVersion) {
         LOG.debug("Forward event");
 
         String trackerId = this.domainTrackerIdMapping.get(domain);
@@ -132,6 +137,7 @@ public class AnalyticsController extends AbstractRestController {
                 .withTrackingConfiguration(trackerConfig)
                 .withVisitorId(userId)
                 .withDeviceFromRequest(request)
+                .withApp(appName, appVersion)
                 .build();
 
         tracker.trackEvent(category, action, label, value, null);

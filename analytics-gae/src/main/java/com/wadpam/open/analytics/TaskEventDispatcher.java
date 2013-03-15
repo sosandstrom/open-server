@@ -32,14 +32,13 @@ public class TaskEventDispatcher implements EventDispatcher {
 
         // URL encode the uri
         try {
-            String encodedURL = URLEncoder.encode(analyticsUri.toURL().toString(), "UTF-8");
             Queue queue = QueueFactory.getDefaultQueue();
 
             // We need to pass over a few parameters
             queue.add(TaskOptions.Builder.withUrl(String.format(workerUrl, domain))
-                    .param("url", encodedURL)
-                    .param("userAgent", userAgent)
-                    .param("remoteAddress", remoteAddress));
+                    .param("url", URLEncoder.encode(analyticsUri.toURL().toString(), "UTF-8"))
+                    .param("userAgent", URLEncoder.encode(userAgent, "UTF-8"))
+                    .param("remoteAddress", URLEncoder.encode(remoteAddress, "UTF-8")));
 
         } catch (UnsupportedEncodingException e) {
             LOG.error("Not possible to encode url with reason:{}", e.getMessage());
