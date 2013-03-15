@@ -20,13 +20,18 @@ public class JCursorPage<T extends Object> {
      * If the number of items actually returned are less then the requested page size, end of pagination have been reached.
      */
     private int pageSize;
+    
+    /**
+     * The total number of items available. Use for progress indication.
+     */
+    private Integer totalSize;
 
     /** The products */
     private Collection<T> items;
 
     @Override
     public String toString() {
-        return String.format("cursor:%s page size:%d products:%s", cursorKey, pageSize, items);
+        return String.format("JCursorPage{cursorKey:%s, pageSize:%d, totalSize:%d}", cursorKey, pageSize, totalSize);
     }
 
     // Setters and getters
@@ -53,5 +58,13 @@ public class JCursorPage<T extends Object> {
 
     public void setPageSize(int pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public Integer getTotalSize() {
+        return totalSize;
+    }
+
+    public void setTotalSize(Integer totalSize) {
+        this.totalSize = totalSize;
     }
 }
