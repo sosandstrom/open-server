@@ -43,13 +43,10 @@ public class URLBuilderVMeasurementProtocol extends URLBuilder {
         // Queue time
         //params.put("qt", ?);
 
-        // Cache buster
-        params.put("z", Integer.toString(random.nextInt(Integer.MAX_VALUE)));
-
         // Client id
         params.put("cid", visitor.getVisitorId());
 
-        // Session control
+        // Session control, start, stop
         //params.put("sc", ?);
 
         // Document referrer
@@ -165,7 +162,7 @@ public class URLBuilderVMeasurementProtocol extends URLBuilder {
         }
 
         // Application type
-        if (null != app.getName()) {
+        if (null != app && null != app.getName()) {
             hitType = "appview";
 
             // Application name
@@ -262,6 +259,9 @@ public class URLBuilderVMeasurementProtocol extends URLBuilder {
         // Set the tracking info type
         // Must be one of 'pageview', 'appview', 'event', 'transaction', 'item', 'social', 'exception', 'timing'.
         params.put("t", hitType);
+
+        // Cache buster
+        params.put("z", Integer.toString(random.nextInt(Integer.MAX_VALUE)));
 
         StringBuilder sb = new StringBuilder();
         // Set base url
