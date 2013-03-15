@@ -840,6 +840,7 @@ public abstract class CrudController<
         
         to.setPageSize(from.getItems().size());
         to.setCursorKey(from.getCursorKey());
+        to.setTotalSize(from.getTotalSize());
         to.setItems(convert(from.getItems()));
         
         return to;
@@ -851,6 +852,7 @@ public abstract class CrudController<
         
         to.setPageSize(from.getItems().size());
         to.setCursorKey(from.getCursorKey());
+        to.setTotalSize(from.getTotalSize());
         to.setItems(convertWithInner(request, response, domain, model, 
                 from.getItems()));
         
@@ -945,5 +947,15 @@ public abstract class CrudController<
                     operation, json, id, serviceResponse);
         }
     }
+    
+    // -----------------  getters and setters    -------------------------------
 
+    public S getService() {
+        return service;
+    }
+
+    public void setService(S service) {
+        this.service = service;
+    }
+    
 }

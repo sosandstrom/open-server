@@ -1,8 +1,8 @@
 package com.wadpam.open.io;
 
-import static com.wadpam.open.io.Scheduler.LOG;
 import java.io.OutputStream;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -152,6 +152,8 @@ public class Exporter<D> {
             preDao = extractor.preDao(arg, preExport, dao);
             scheduler.putCached(Scheduler.KEY_PRE_DAO, preDao);
             Map<String, String> headers = extractor.getHeaderNames(arg, dao);
+            
+            converter.initPreDao(out, arg);
             Object logPreDao = converter.preDao(out, arg, preExport, preDao, tableName, 
                     columns, headers, daoIndex, dao);
             if (null != logPreDao) {
@@ -159,6 +161,7 @@ public class Exporter<D> {
             }
         }
         else {
+            converter.initPreDao(out, arg);
             // fetch preDao from MemCache
             preDao = scheduler.getCached(Scheduler.KEY_PRE_DAO);
         }
@@ -183,21 +186,30 @@ public class Exporter<D> {
             LOG.error(Integer.toString(returned), any);
         }
 
+        // done, so close converter for dao
+        postDao(out, arg, preExport, preDao, dao);
+
         // more?
         if (limit == returned) {
             return offset + limit;
         }
         
-        // done, so close converter for dao
-        Object postDao = extractor.postDao(arg, preExport, preDao, dao);
-        Object logPostDao = converter.postDao(out, arg, preExport, preDao, postDao, dao);
-        if (null != logPostDao) {
-            LOG.debug("{} {}", dao, logPostDao);
-        }
+
         scheduler.onDone(daoIndex);
         return null;
     }
-    
+
+    public void postDao(OutputStream out, Object arg, Object preExport, Object preDao, D dao) {
+        try {
+            Object postDao = extractor.postDao(arg, preExport, preDao, dao);
+            Object logPostDao = converter.postDao(out, arg, preExport, preDao, postDao, dao);
+            if (null != logPostDao) {
+                LOG.debug("{} {}", dao, logPostDao);
+            }
+        } catch (Exception any) {
+            LOG.error("post Dao: ", any);
+        }
+    }
     /**
      * Exports one Entity
      * @param out the output stream to write to
