@@ -1,10 +1,11 @@
-package com.wadpam.open.analytics.google;
+package com.wadpam.open.analytics.google.config;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Locale;
 
 /**
- * Contains information about a device.
+ * Contains information about the device being tracked.
+ *
  * @author mattiaslevin
  */
 public class Device {
@@ -37,7 +38,9 @@ public class Device {
     private String userAgent;
 
 
-    // Create a default iPhone5 with basic settings
+    /**
+     * Create a default iPhone5 device running iOS6.
+     */
     public static Device defaultiPhoneDevice() {
         Device device = new Device();
         device.screenResolution = "1136x640";
@@ -48,7 +51,9 @@ public class Device {
         return device;
     }
 
-    // Create a default iPad with basic settings
+    /**
+     * Create a default iPad device running iOS6.
+     */
     public static Device defaultiPadDevice() {
         Device device = new Device();
         device.screenResolution = "2048x1536";
@@ -59,11 +64,27 @@ public class Device {
         return device;
     }
 
-    // Create a default profile from http request
+    /**
+     * Create a default Samsung Galaxy 3 device running Jelly Beans.
+     */
+    public static Device defaultGalaxy3() {
+        Device device = new Device();
+        device.screenResolution = "1280x720";
+        device.viewPortSize = "1280x720";
+        device.colorDepth = "24-bit";
+        device.userLanguage = Locale.getDefault().getLanguage();
+        device.userAgent = "Mozilla/5.0 (Linux; U; Android 4.1.2; en-gb; GT-I9300 Build/IMM76D) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30";
+        return device;
+    }
+
+    /**
+     * Create a device from the http request.
+     * Language, host, remote address and user agent will be set, other properties will be null.
+     */
     public static Device defaultDevice(HttpServletRequest request) {
         Device device = new Device();
-        device.screenResolution = "1136x640";
-        device.colorDepth = "24-bit";
+        //device.screenResolution = "1136x640";
+        //device.colorDepth = "24-bit";
         device.userLanguage = request.getLocale().getLanguage();
         if (null == device.userLanguage || device.userLanguage.isEmpty())
             device.userLanguage = Locale.getDefault().getLanguage();
@@ -73,7 +94,7 @@ public class Device {
         return device;
     }
 
-        @Override
+    @Override
     public String toString() {
         return String.format("User-agent:%s", this.userAgent);
     }

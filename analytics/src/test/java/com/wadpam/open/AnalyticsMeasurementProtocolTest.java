@@ -1,14 +1,16 @@
 package com.wadpam.open;
 
 import com.wadpam.open.analytics.google.*;
+import com.wadpam.open.analytics.google.config.Device;
+import com.wadpam.open.analytics.google.config.Property;
+import com.wadpam.open.analytics.google.config.Visitor;
+import com.wadpam.open.analytics.google.protocol.GoogleAnalyticsProtocol;
+import com.wadpam.open.analytics.google.protocol.MeasurementProtocol_v1;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
@@ -19,23 +21,19 @@ import static org.junit.Assert.assertTrue;
 public class AnalyticsMeasurementProtocolTest {
     static final Logger LOG = LoggerFactory.getLogger(AnalyticsMeasurementProtocolTest.class);
 
-    private TrackerConfiguration trackerConfig;
+    private Property trackerConfig;
     private Device deviceData = new Device();
     private Visitor visitorData;
-    private URLBuilder urlBuilder;
 
     private GoogleAnalyticsTracker tracker;
 
     public AnalyticsMeasurementProtocolTest() {
 
         // Create profile
-        trackerConfig = new TrackerConfiguration("test-profile", "UA-38370095-2");
+        trackerConfig = new Property("test-profile", "UA-38370095-2");
 
         // Set visitor
-        visitorData = new Visitor("999", now() - 50000, now() - 4000, 10);
-
-        // The new Measurement url builder
-        urlBuilder = new URLBuilderVMeasurementProtocol();
+        visitorData = new Visitor("9998", now() - 50000, now() - 4000, 10);
 
         // Set device data
         deviceData.setEncoding("UTF-8");
@@ -51,13 +49,13 @@ public class AnalyticsMeasurementProtocolTest {
     public void setup() {
         visitorData.startNewSession();
         tracker = new GoogleAnalyticsTrackerBuilder()
-                .withTrackingConfiguration(trackerConfig)
-                .withVisitor(visitorData)
-                .withDevice(deviceData)
-                .withApp("Test app", "1.1")
-                .withURLBuilder(urlBuilder)
+                .trackerConfiguration(trackerConfig)
+                .visitor(visitorData)
+                .device(deviceData)
+                .app("Test app", "1.2")
+                .measurementProtocol()
                 .build();
-        tracker.setDebug(true);
+        //tracker.setDebug(true);
     }
 
     @After
@@ -70,7 +68,7 @@ public class AnalyticsMeasurementProtocolTest {
     public void basicEvent() {
         LOG.info("Test basic event");
 
-        tracker.trackEvent("category 1", "action 1");
+        tracker.trackEvent("Category 2", "Action 2");
 
         assertTrue(true);
     }
@@ -80,7 +78,7 @@ public class AnalyticsMeasurementProtocolTest {
     public void basicPageView() {
         LOG.info("Test basic page view");
 
-        tracker.trackPageView("url", "A Title", null);
+        tracker.trackPageView("hostname2", "/path2", "title2");
 
         assertTrue(true);
     }

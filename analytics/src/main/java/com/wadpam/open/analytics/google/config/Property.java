@@ -1,13 +1,15 @@
-package com.wadpam.open.analytics.google;
+package com.wadpam.open.analytics.google.config;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- * Configuration related data.
+ * Configure a Google Analytics Property.
+ * A corresponding Property must be configured in Google Analytics web admin interface.
+ *
  * @author mattiaslevin
  */
-public class TrackerConfiguration {
+public class Property {
 
     /** The tracking Id */
     private String trackingId;
@@ -17,7 +19,7 @@ public class TrackerConfiguration {
 
 
     // Constructor
-    public TrackerConfiguration(String name, String trackingId) {
+    public Property(String name, String trackingId) {
         this.trackingId = trackingId;
         this.name = name;
     }

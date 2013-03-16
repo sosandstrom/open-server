@@ -2,6 +2,9 @@ package com.wadpam.open.web;
 
 import com.wadpam.open.AbstractRestTempleIntegrationTest;
 import com.wadpam.open.analytics.google.*;
+import com.wadpam.open.analytics.google.config.Device;
+import com.wadpam.open.analytics.google.config.Property;
+import com.wadpam.open.analytics.google.config.Visitor;
 import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +16,7 @@ import org.slf4j.LoggerFactory;
 public class AnalyticsITest extends AbstractRestTempleIntegrationTest {
     static final Logger LOG = LoggerFactory.getLogger(AnalyticsITest.class);
 
-    private TrackerConfiguration trackerConfig;
+    private Property trackerConfig;
     private Device deviceData = new Device();
     private Visitor visitorData;
     private GoogleAnalyticsTracker tracker;
@@ -21,7 +24,7 @@ public class AnalyticsITest extends AbstractRestTempleIntegrationTest {
     public AnalyticsITest() {
 
         // Create profile
-        trackerConfig = new TrackerConfiguration("test-profile", "UA-35889513-2");
+        trackerConfig = new Property("test-profile", "UA-35889513-2");
 
         // Set visitor
         visitorData = new Visitor("999", now() - 50000, now() - 4000, 10);
@@ -47,9 +50,9 @@ public class AnalyticsITest extends AbstractRestTempleIntegrationTest {
     public void setUp() {
         visitorData.startNewSession();
         tracker = new GoogleAnalyticsTrackerBuilder()
-                .withTrackingConfiguration(trackerConfig)
-                .withVisitor(visitorData)
-                .withDevice(deviceData)
+                .trackerConfiguration(trackerConfig)
+                .visitor(visitorData)
+                .device(deviceData)
                 .build();
         tracker.setDebug(true);
     }

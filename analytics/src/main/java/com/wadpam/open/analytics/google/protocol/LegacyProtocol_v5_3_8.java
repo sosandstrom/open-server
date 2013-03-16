@@ -1,18 +1,24 @@
-package com.wadpam.open.analytics.google;
+package com.wadpam.open.analytics.google.protocol;
 
+import com.wadpam.open.analytics.google.trackinginfo.*;
+import com.wadpam.open.analytics.google.config.Property;
+import com.wadpam.open.analytics.google.config.Visitor;
+import com.wadpam.open.analytics.google.config.Application;
+import com.wadpam.open.analytics.google.config.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.util.UriUtils;
 
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
- * Build a GA url compatible with the version 5.3.7 format.
+ * A Google Analytics protocol compatible with the legacy 5.3.7 format.
+ * This is a legacy protocol format and has since been replaced with the
+ * new Measurement protocol.
+ *
  * @author mattiaslevin
  */
-public class URLBuilderV5_3_8 extends URLBuilder {
-    private static final Logger LOG = LoggerFactory.getLogger(URLBuilderV5_3_8.class);
+public class LegacyProtocol_v5_3_8 extends GoogleAnalyticsProtocol {
+    private static final Logger LOG = LoggerFactory.getLogger(LegacyProtocol_v5_3_8.class);
 
     private Random random = new Random();
 
@@ -25,11 +31,21 @@ public class URLBuilderV5_3_8 extends URLBuilder {
         return "5.3.8";
     }
 
+    @Override
+    public String baseUrl() {
+        return BASE_URL;
+    }
+
 
     // Build URL
     @Override
-    public String buildURL(TrackerConfiguration trackerConfig, Visitor visitor, Device device, Application app, Page data) {
+    public String buildParams(Property property, Visitor visitor, Device device, Application app, TrackingInfo trackingInfo) {
         LOG.debug("Build url for version:{}", this.getFormatVersion());
+
+        ContentInfo contentInfo = trackingInfo.getContentInfo();
+        TrafficSource trafficSource = trackingInfo.getTrafficSource();
+        Event event = trackingInfo.getEvent();
+
 
         Map<String, String> params = new LinkedHashMap<String, String>();
 
@@ -44,47 +60,47 @@ public class URLBuilderV5_3_8 extends URLBuilder {
         params.put("utmn", Integer.toString(random.nextInt(Integer.MAX_VALUE)));
 
         // Hostname
-        if(null != data.getHostName()) {
-            params.put("utmhn", urlEncode(data.getHostName()));
+        if(null != contentInfo && null != contentInfo.getHostName()) {
+            params.put("utmhn", urlEncode(contentInfo.getHostName()));
         }
 
         // Events
         StringBuilder eventSB = new StringBuilder();
-        if (null != data.getEventAction() && null != data.getEventCategory()) {
+        if (null != event && null != event.getCategory() && null != event.getAction()) {
             params.put("utmt", "event");
 
             // Format 5(category*action*label*value)
 
             // Category and action
-            eventSB.append("5(").append(urlEncode(data.getEventCategory())).
+            eventSB.append("5(").append(urlEncode(event.getCategory())).
                     append("*").
-                    append(urlEncode(data.getEventAction()));
+                    append(urlEncode(event.getAction()));
 
             // Label
-            if(data.getEventLabel() != null){
-                eventSB.append("*").append(urlEncode(data.getEventLabel()));
+            if(null != event.getLabel()){
+                eventSB.append("*").append(urlEncode(event.getLabel()));
             }
 
             // Value
-            if(null != data.getEventValue()) {
-                eventSB.append("*").append(data.getEventValue());
+            if(null != event.getValue()) {
+                eventSB.append("*").append(event.getValue());
             }
 
             eventSB.append(")");
         }
-        else if (data.getEventAction() != null || data.getEventCategory() != null) {
+        else if (null != event && (null != event.getAction() || null != event.getCategory())) {
             // Both category and action must be provided
             throw new IllegalArgumentException("Event tracking must have both a category and an action");
         }
 
         // Custom vars
-        if (null != data.getCustomVariables() && data.getCustomVariables().size() > 0) {
+        if (null != trackingInfo.getCustomVariables() && trackingInfo.getCustomVariables().size() > 0) {
 
             StringBuilder names = new StringBuilder();
             StringBuilder values = new StringBuilder();
             StringBuilder scope = new StringBuilder();
 
-            Iterator<CustomVariable> iterator = data.getCustomVariables().iterator();
+            Iterator<CustomVariable> iterator = trackingInfo.getCustomVariables().iterator();
             while (iterator.hasNext()) {
                 CustomVariable customVariable = iterator.next();
 
@@ -151,36 +167,39 @@ public class URLBuilderV5_3_8 extends URLBuilder {
         // Page views
         // Do not need to set utmt since default i "page"
         // Page title
-        if (null != data.getDocumentTitle()) {
-            params.put("utmdt", urlEncode(data.getDocumentTitle()));
+        if (null != contentInfo && null != contentInfo.getTitle()) {
+            params.put("utmdt", urlEncode(contentInfo.getTitle()));
         }
 
         // Random number for AdSense
         params.put("utmhid", Integer.toString(random.nextInt(Integer.MAX_VALUE)));
 
 
-        // Referral
-        if (null != data.getReferrer()) {
-            params.put("utmr", urlEncode(data.getReferrer()));
+        // Referrer
+        if (null != trafficSource && null != trafficSource.getDocumentReferrer()) {
+            params.put("utmr", urlEncode(trafficSource.getDocumentReferrer()));
         } else {
             params.put("utmr", "-");
         }
 
         // Page url
-        if (null != data.getDocumentPath()) {
-            params.put("utmp", urlEncode(data.getDocumentPath()));
+        if (null != contentInfo && null != contentInfo.getPath()) {
+            params.put("utmp", urlEncode(contentInfo.getPath()));
         }
 
         // Tracking id
-        params.put("utmac", trackerConfig.getTrackingId());
+        params.put("utmac", property.getTrackingId());
 
         // Cookie
-        int hostnameHash = hostnameHash(data.getHostName());
+        int hostnameHash = hostnameHash("DummyHostName");
+        if (null != contentInfo && null != contentInfo.getHostName()) {
+            hostnameHash = hostnameHash(contentInfo.getHostName());
+        }
         int visitorId = visitor.getVisitorId().hashCode();
-        long timestampFirst = visitor.getTimestampFirst();
-        long timestampPrevious = visitor.getTimestampPrevious();
-        int visits = visitor.getVisits();
-        long sessionStart = visitor.getSession().getSessionStart();
+        long timestampFirst = visitor.getFirstVisitTimestamp();
+        long timestampPrevious = visitor.getPreviousVisitTimestamp();
+        int visits = visitor.getNumberOfVisits();
+        long sessionStart = visitor.getSession().getStartTimestamp();
 
         // utmccn=(organic)|utmcsr=google|utmctr=snotwuh|utmcmd=organic
         StringBuilder cookieSB = new StringBuilder();
@@ -197,11 +216,11 @@ public class URLBuilderV5_3_8 extends URLBuilder {
                 .append(".").append(timestampFirst)
                 .append(".1")
                 .append(".1")
-                .append(".utmcsr%3D").append(data.getCampaignSource())
-                .append("%7Cutmccn%3D").append(data.getCampaignName())
-                .append("%7Cutmcmd%3D").append(data.getCampaignMedium())
-                .append(data.getCampaignKeyword() != null ? "%7Cutmctr%3D" + data.getCampaignSource() : "")
-                .append(data.getCampaignContent() != null ? "%7Cutmcct%3D" + data.getCampaignContent() : "")
+                .append(".utmcsr%3D").append(trafficSource != null && trafficSource.getCampaignSource() != null ? trafficSource.getCampaignSource() : "")
+                .append("%7Cutmccn%3D").append(trafficSource != null && trafficSource.getCampaignName() != null ? trafficSource.getCampaignName() : "")
+                .append("%7Cutmcmd%3D").append(trafficSource != null && trafficSource.getCampaignMedium() != null ? trafficSource.getCampaignMedium() : "")
+                .append(trafficSource != null && trafficSource.getCampaignKeyword() != null ? "%7Cutmctr%3D" + trafficSource.getCampaignKeyword() : "")
+                .append(trafficSource != null && trafficSource.getCampaignContent() != null ? "%7Cutmcct%3D" + trafficSource.getCampaignContent() : "")
                 .append("%3B");
 
         params.put("utmcc", cookieSB.toString());
@@ -210,9 +229,8 @@ public class URLBuilderV5_3_8 extends URLBuilder {
         // TODO: Do not know what this is or if it is needed
         params.put("utmu", "qQ~");
 
+        // Build the query string
         StringBuilder sb = new StringBuilder();
-        // Set base url
-        sb.append(BASE_URL).append("?");
         for (Map.Entry<String, String> entry : params.entrySet()) {
             sb.append(entry.getKey()).append("=").append(entry.getValue()).append("&");
         }
@@ -265,7 +283,7 @@ public class URLBuilderV5_3_8 extends URLBuilder {
 
     // Host name hash
     private int hostnameHash(String hostname){
-        return 999;
+        return hostname.hashCode();
     }
 
 }

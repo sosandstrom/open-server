@@ -3,8 +3,7 @@ package com.wadpam.open.analytics;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
-import com.wadpam.open.analytics.google.Device;
-import com.wadpam.open.analytics.google.EventDispatcher;
+import com.wadpam.open.analytics.google.dispatcher.TrackingInfoDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +16,7 @@ import java.net.URLEncoder;
  * An event dispatcher using GAE tasks.
  * @author mattiaslevin
  */
-public class TaskEventDispatcher implements EventDispatcher {
+public class TaskEventDispatcher implements TrackingInfoDispatcher {
     static final Logger LOG = LoggerFactory.getLogger(TaskEventDispatcher.class);
 
     // The worker url that will run the task
@@ -27,7 +26,7 @@ public class TaskEventDispatcher implements EventDispatcher {
 
     // Dispatch the event using GAE task queue
     @Override
-    public boolean dispatch(URI analyticsUri, final String userAgent, final String remoteAddress) {
+    public boolean dispatch(String baseUrl, String params, final String userAgent, final String remoteAddress) {
         LOG.debug("Dispatch the event using GAE task queue");
 
         // URL encode the uri
@@ -36,15 +35,13 @@ public class TaskEventDispatcher implements EventDispatcher {
 
             // We need to pass over a few parameters
             queue.add(TaskOptions.Builder.withUrl(String.format(workerUrl, domain))
-                    .param("url", URLEncoder.encode(analyticsUri.toURL().toString(), "UTF-8"))
+                    .param("baseUrl", URLEncoder.encode(baseUrl, "UTF-8"))
+                    .param("params", URLEncoder.encode(params, "UTF-8"))
                     .param("userAgent", URLEncoder.encode(userAgent, "UTF-8"))
                     .param("remoteAddress", URLEncoder.encode(remoteAddress, "UTF-8")));
 
         } catch (UnsupportedEncodingException e) {
             LOG.error("Not possible to encode url with reason:{}", e.getMessage());
-            throw new IllegalArgumentException(e);
-        } catch (MalformedURLException e) {
-            LOG.error("Malformed url with reason:{}", e.getMessage());
             throw new IllegalArgumentException(e);
         }
 
