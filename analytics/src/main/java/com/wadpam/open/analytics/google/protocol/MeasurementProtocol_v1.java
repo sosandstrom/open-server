@@ -211,9 +211,6 @@ public class MeasurementProtocol_v1 extends GoogleAnalyticsProtocol {
                 // Set the absolute url as default
                 params.put("cd", params.get("dl"));
             }
-
-            // TODO Screen views does still now show, only in real-time view
-
         }
 
         // Application type
@@ -307,6 +304,8 @@ public class MeasurementProtocol_v1 extends GoogleAnalyticsProtocol {
 
         // Exceptions
         if (null != trackingInfo.getException()) {
+            hitType = "exception";
+
             Exception exception = trackingInfo.getException();
 
             // Description

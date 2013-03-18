@@ -24,8 +24,10 @@ public class ContentInfo {
         this.title = title;
 
         // Set a default document url
-        absoluteUrl = String.format("%s%s", hostName,
-                path.startsWith("/") ? path : "/" + path);
+        if (null != hostName && null != path) {
+            absoluteUrl = String.format("%s%s", hostName,
+                    path.startsWith("/") ? path : "/" + path);
+        }
 
         if (null != contentDescription) {
             this.contentDescription = contentDescription;

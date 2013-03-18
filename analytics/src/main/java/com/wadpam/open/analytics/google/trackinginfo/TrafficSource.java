@@ -103,10 +103,10 @@ public class TrafficSource {
      */
     @Deprecated
     public void setReferrer(String site, String page){
+        campaignSource = site;
+        campaignName = "(referral)";
         campaignMedium = "referral";
         campaignContent = page;
-        campaignName = "(referral)";
-        campaignSource = site;
         campaignKeyword = null;
     }
 
@@ -117,10 +117,10 @@ public class TrafficSource {
     @Deprecated
     public void setSearchReferrer(String searchSource, String searchKeywords){
         campaignSource = searchSource;
-        campaignKeyword = searchKeywords;
-        campaignMedium = "organic";
         campaignName = "(organic)";
+        campaignMedium = "organic";
         campaignContent = null;
+        campaignKeyword = searchKeywords;
     }
 
 

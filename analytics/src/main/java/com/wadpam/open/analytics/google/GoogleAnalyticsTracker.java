@@ -10,6 +10,7 @@ import com.wadpam.open.analytics.google.dispatcher.TrackingInfoDispatcher;
 import com.wadpam.open.analytics.google.protocol.GoogleAnalyticsProtocol;
 import com.wadpam.open.analytics.google.protocol.LegacyProtocol_v5_3_8;
 import com.wadpam.open.analytics.google.trackinginfo.*;
+import com.wadpam.open.analytics.google.trackinginfo.Exception;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,11 +118,12 @@ public class GoogleAnalyticsTracker implements Tracker {
     /**
      * Track page view
      */
+    @Override
     public void trackPageView(String hostName,
                               String path,
                               String title,
-                              String referrerPage,
                               String referrerSite,
+                              String referrerPage,
                               List<CustomVariable> customVariables) {
         LOG.debug("Track page view for path:{} and tile:{}", path, title);
 
@@ -133,9 +135,9 @@ public class GoogleAnalyticsTracker implements Tracker {
         trackingInfo.setContentInfo(contentInfo);
 
         // Traffic source
-        if (null != referrerPage && null != referrerSite) {
+        if (null != referrerSite && null != referrerPage) {
             TrafficSource trafficSource = new TrafficSource();
-            trafficSource.setReferrer(referrerSite, referrerPage);
+            trafficSource.setReferrer(referrerSite, referrerPage); // TODO
             trackingInfo.setTrafficSource(trafficSource);
         }
 
@@ -165,6 +167,7 @@ public class GoogleAnalyticsTracker implements Tracker {
     /**
      * Track event
      */
+    @Override
     public void trackEvent(String category,
                            String action,
                            String label,
@@ -184,6 +187,50 @@ public class GoogleAnalyticsTracker implements Tracker {
 
         sendRequest(trackingInfo);
     }
+
+
+    /**
+     * Track screen views in an app.
+     * If you are tracking activities in an app (iOS and Android) use this methods
+     * over tracking page views.
+     *
+     * Screen views are only supported in Measurement protocol and the Property must
+     * to configured for app tracking in the Google Analytics admin web site.
+     * @param screenName the screen name being tracked
+     */
+    public void screenView(String screenName) {
+
+        // Populate the request data
+        TrackingInfo trackingInfo = new TrackingInfo();
+
+        // Content info
+        ContentInfo contentInfo = new ContentInfo();
+        contentInfo.setContentDescription(screenName);
+        trackingInfo.setContentInfo(contentInfo);
+
+        sendRequest(trackingInfo);
+    }
+
+
+    /**
+     * Track an exception.
+     * @param description The description of the exception.
+     *                    Only limited length is supported, make sure important and
+     *                    relevant information is first on the description.
+     *                    It is probably not a good idea to track a full stack trace.
+     * @param isFatal the the exception fatal
+     */
+    public void exception(String description, boolean isFatal) {
+
+        // Populate the request data
+        TrackingInfo trackingInfo = new TrackingInfo();
+
+        Exception exception = new Exception(description, isFatal);
+        trackingInfo.setException(exception);
+
+        sendRequest(trackingInfo);
+    }
+
 
     // Create the request URL and make the request
     private void sendRequest(TrackingInfo trackingInfo) {

@@ -16,15 +16,15 @@ public interface Tracker {
      * @param hostName the host name
      * @param path the page url, e.g. /page/. Must be provided
      * @param title the title of the page
-     * @param referrerPage optional. The referrer page
      * @param referrerSite optional. The referrer site
+     * @param referrerPage optional. The referrer page
      * @param customVariables optional. List of custom variables
      */
     public void trackPageView(String hostName,
                               String path,
                               String title,
-                              String referrerPage,
                               String referrerSite,
+                              String referrerPage,
                               List<CustomVariable> customVariables);
 
     /**
