@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.wadpam.openserver</groupId>
         <artifactId>parent</artifactId>
-        <version>18-SNAPSHOT</version>
+        <version>19-SNAPSHOT</version>
     </parent>
     <artifactId>webapp</artifactId>
     <packaging>war</packaging>
@@ -25,6 +25,11 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>domain</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>test</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

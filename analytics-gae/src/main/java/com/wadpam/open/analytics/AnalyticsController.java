@@ -3,15 +3,21 @@ package com.wadpam.open.analytics;
 import com.wadpam.docrest.domain.RestCode;
 import com.wadpam.docrest.domain.RestReturn;
 import com.wadpam.open.analytics.google.*;
+import com.wadpam.open.analytics.google.config.Property;
+import com.wadpam.open.analytics.google.dispatcher.SynchDispatcher;
+import com.wadpam.open.analytics.google.dispatcher.TrackingInfoDispatcher;
 import com.wadpam.open.web.AbstractRestController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,7 +31,6 @@ import java.util.Map;
 public class AnalyticsController extends AbstractRestController {
     static final Logger LOG = LoggerFactory.getLogger(AnalyticsController.class);
 
-
     // The default tracker that will be used if no domain-tracker mapping can be found
     private String defaultTrackerId;
 
@@ -38,20 +43,19 @@ public class AnalyticsController extends AbstractRestController {
     @RequestMapping(value="task", method= RequestMethod.GET)
     @ResponseBody
     public void sendEventTask(HttpServletRequest request,
-                              @RequestParam String url,
-                              @RequestParam(required=false) String userAgent,
-                              @RequestParam(required=false) String remoteAddress) {
+                              @RequestParam String baseUrl,
+                              @RequestParam String params,
+                              @RequestParam String userAgent,
+                              @RequestParam String remoteAddress) throws UnsupportedEncodingException {
         LOG.debug("GAE sent event task");
 
-        // TODO incomplete implementation
-
-        // Decode
-
         // Forward
-        EventDispatcher dispatcher = new SynchronousEventDispatcher();
-
+        TrackingInfoDispatcher dispatcher = new SynchDispatcher(HttpMethod.GET);
         try {
-            dispatcher.dispatch(new URI(url), userAgent, remoteAddress);
+            dispatcher.dispatch(URLDecoder.decode(baseUrl, "UTF-8"),
+                    URLDecoder.decode(params, "UTF-8"),
+                    URLDecoder.decode(userAgent, "UTF-8"),
+                    URLDecoder.decode(remoteAddress, "UTF-8"));
         } catch (URISyntaxException e) {
             LOG.error("Not possible to convert url to uri with reason:{}", e.getMessage());
             // No need to throw exception, no one is listening to the result
@@ -62,7 +66,7 @@ public class AnalyticsController extends AbstractRestController {
     /**
      * Forward a page view on the behalf of an app.
      * @param userId a unique user id. Must be consistent through requests
-     * @param pageUrl the url or name of the page
+     * @param aboluteUrl the url or name of the page
      * @param title the title of the page
      */
     @RequestMapping(value="pageview", method= RequestMethod.GET)
@@ -73,8 +77,10 @@ public class AnalyticsController extends AbstractRestController {
     public void forwardPageView(HttpServletRequest request,
                                 @PathVariable String domain,
                                 @RequestParam String userId,
-                                @RequestParam String pageUrl,
-                                @RequestParam String title) {
+                                @RequestParam String aboluteUrl,
+                                @RequestParam String title,
+                                @RequestParam String appName,
+                                @RequestParam String appVersion) {
         LOG.debug("Forward page view");
 
         String trackerId = this.domainTrackerIdMapping.get(domain);
@@ -84,14 +90,15 @@ public class AnalyticsController extends AbstractRestController {
             trackerName = "default";
         }
 
-        TrackerConfiguration trackerConfig = new TrackerConfiguration(trackerName, trackerId);
+        Property trackerConfig = new Property(trackerName, trackerId);
         GoogleAnalyticsTracker tracker = new GoogleAnalyticsTrackerBuilder()
-                .withTrackingConfiguration(trackerConfig)
-                .withVisitorId(userId)
-                .withDeviceFromRequest(request)
+                .trackerConfiguration(trackerConfig)
+                .visitor(userId)
+                .deviceFromRequest(request)
+                .app(appName, appVersion)
                 .build();
 
-        tracker.trackPageView(pageUrl, title, request.getRemoteHost());
+        tracker.trackPageView(request.getRemoteHost(), aboluteUrl, title);
     }
 
     private static long now() {
@@ -116,8 +123,10 @@ public class AnalyticsController extends AbstractRestController {
                              @RequestParam String userId,
                              @RequestParam String category,
                              @RequestParam String action,
-                             @RequestParam(required = false) String label,
-                             @RequestParam(required = false) int value) {
+                             @RequestParam(required=false) String label,
+                             @RequestParam(required=false) int value,
+                             @RequestParam String appName,
+                             @RequestParam String appVersion) {
         LOG.debug("Forward event");
 
         String trackerId = this.domainTrackerIdMapping.get(domain);
@@ -127,11 +136,12 @@ public class AnalyticsController extends AbstractRestController {
             trackerName = "default";
         }
 
-        TrackerConfiguration trackerConfig = new TrackerConfiguration(trackerName, trackerId);
+        Property trackerConfig = new Property(trackerName, trackerId);
         GoogleAnalyticsTracker tracker = new GoogleAnalyticsTrackerBuilder()
-                .withTrackingConfiguration(trackerConfig)
-                .withVisitorId(userId)
-                .withDeviceFromRequest(request)
+                .trackerConfiguration(trackerConfig)
+                .visitor(userId)
+                .deviceFromRequest(request)
+                .app(appName, appVersion)
                 .build();
 
         tracker.trackEvent(category, action, label, value, null);

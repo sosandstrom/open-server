@@ -1,7 +1,11 @@
-package com.wadpam.open.analytics.google;
+package com.wadpam.open.analytics.google.trackinginfo;
 
 /**
  * Represent a custom variable.
+ * Only needed in the old legacy protocol.
+ * This feature has been replaced by Custom Dimension and Custom Metric in the
+ * new Measurement protocol (v2).
+ *
  * @author mattiaslevin
  */
 public class CustomVariable {
@@ -20,7 +24,10 @@ public class CustomVariable {
         }
     }
 
-    /** The index of the variable, must be consistent across requests */
+    /**
+     * The index of the variable.
+     * Must be consistent across requests
+     */
     private int index;
 
     /** The name of the variable */

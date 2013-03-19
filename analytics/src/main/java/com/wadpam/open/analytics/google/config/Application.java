@@ -1,20 +1,23 @@
-package com.wadpam.open.analytics.google;
+package com.wadpam.open.analytics.google.config;
 
 /**
- * Represent a tracked application
+ * Represent a tracked application.
+ *
  * @author mattiaslevin*
  */
 public class Application {
 
     /**
      *  Application name.
-     *  Added in universal analytics
+     *
+     *  Added in Measurement protocol.
      */
     private String name;
 
     /**
-     * Application version
-     * Added in universal analytics
+     * Application version.
+     *
+     * Added in Measurement protocol.
      */
     private String version;
 

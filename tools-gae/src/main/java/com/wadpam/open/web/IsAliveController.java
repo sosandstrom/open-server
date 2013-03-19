@@ -90,7 +90,7 @@ public class IsAliveController extends AbstractRestController {
         // Build tracker
         Tracker tracker = new GoogleAnalyticsTrackerBuilder()
                 .withTrackingConfiguration(trackerConfig)
-                .withVisitorId(id.hashCode())
+                .withVisitorId(id)
                 .withDeviceFromRequest(request)
                 .build();
 

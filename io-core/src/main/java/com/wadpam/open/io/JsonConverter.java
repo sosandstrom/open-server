@@ -38,6 +38,11 @@ public class JsonConverter<D> implements Converter<D> {
     }
 
     @Override
+    public Object initPreDao(OutputStream out, Object arg) {
+        return null;
+    }
+
+    @Override
     public Object preDao(OutputStream out, Object arg, Object preExport, Object preDao, 
             String tableName, Iterable<String> columns, Map<String, String> headers, 
             int daoIndex, D dao) {
