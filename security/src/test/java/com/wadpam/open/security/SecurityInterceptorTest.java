@@ -7,6 +7,7 @@ package com.wadpam.open.security;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -38,6 +39,11 @@ public class SecurityInterceptorTest extends TestCase {
                     return username;
                 }
                 throw new com.wadpam.open.exceptions.AuthenticationFailedException(404, username);
+            }
+
+            @Override
+            public Collection<String> getRolesFromUserDetails(Object details) {
+                return Collections.EMPTY_LIST;
             }
         });
         LOG.info("-----           setUp() {}           -----", getName());

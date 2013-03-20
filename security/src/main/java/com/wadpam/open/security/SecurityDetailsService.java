@@ -4,6 +4,7 @@
 
 package com.wadpam.open.security;
 
+import java.util.Collection;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -19,4 +20,5 @@ public interface SecurityDetailsService {
             String authValue, 
             String username);
     
+    Collection<String> getRolesFromUserDetails(Object details);
 }

@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
@@ -42,7 +44,9 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
     public static final String AUTH_PARAM_OAUTH = "access_token";
 
     /** must be same as MardaoPrincipalInterceptor value */
-    public static final String ATTR_NAME_USERNAME = "_username";
+    public static final String ATTR_NAME_USERNAME = "com.wadpam.open.security.username";
+    public static final String ATTR_NAME_PRINCIPAL = "com.wadpam.open.security.principal";
+    public static final String ATTR_NAME_ROLES = "com.wadpam.open.security.roles";
     public static final String USERNAME_ANONYMOUS = "[ANONYMOUS]";
     
     public static final String HEADER_AUTHORIZATION = "Authorization";
@@ -214,6 +218,9 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
         if (null != principalName) {
             if (null != request) {
                 request.setAttribute(ATTR_NAME_USERNAME, principalName);
+                request.setAttribute(ATTR_NAME_PRINCIPAL, details);
+                Collection<String> roles = securityDetailsService.getRolesFromUserDetails(details);
+                request.setAttribute(ATTR_NAME_ROLES, null != roles ? roles : Collections.EMPTY_LIST);
             }
             return principalName;
         }
@@ -312,12 +319,17 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
     }
     
     public void setWhitelistedMethods(Collection<Entry<String, Collection<String>>> whitelistedMethods) {
-        WHITELISTED_METHODS.clear();
+        setListedMethods(whitelistedMethods, WHITELISTED_METHODS);
+    }
+    
+    public static void setListedMethods(Collection<Entry<String, Collection<String>>> methods, 
+            List<Entry<Pattern, Set<String>>> listedMethods) {
+        listedMethods.clear();
         SimpleImmutableEntry<Pattern, Set<String>> sie;
-        for (Entry<String, Collection<String>> entry : whitelistedMethods) {
+        for (Entry<String, Collection<String>> entry : methods) {
             sie = new SimpleImmutableEntry<Pattern, Set<String>>(
                     Pattern.compile(entry.getKey()), new TreeSet<String>(entry.getValue()));
-            WHITELISTED_METHODS.add(sie);
+            listedMethods.add(sie);
         }
     }
 
