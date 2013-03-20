@@ -1,10 +1,12 @@
 package com.wadpam.open.json;
 
+import java.io.Serializable;
+
 /**
  *
  * @author sosandstrom
  */
-public class JBaseObject {
+public class JBaseObject implements Serializable {
     /** Unique id for this Entity in the database */
     private String id;
     
