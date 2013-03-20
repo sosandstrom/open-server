@@ -219,8 +219,15 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
             if (null != request) {
                 request.setAttribute(ATTR_NAME_USERNAME, principalName);
                 request.setAttribute(ATTR_NAME_PRINCIPAL, details);
+                
+                // combine roles
                 Collection<String> roles = securityDetailsService.getRolesFromUserDetails(details);
-                request.setAttribute(ATTR_NAME_ROLES, null != roles ? roles : Collections.EMPTY_LIST);
+                TreeSet<String> combinedRoles = new TreeSet<String>(roles);
+                Collection<String> previousRoles = (Collection<String>) request.getAttribute(ATTR_NAME_ROLES);
+                if (null != previousRoles) {
+                    combinedRoles.addAll(previousRoles);
+                }
+                request.setAttribute(ATTR_NAME_ROLES, combinedRoles);
             }
             return principalName;
         }

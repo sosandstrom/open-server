@@ -24,8 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class BasicAuthenticationInterceptor extends DomainInterceptor
         implements SecurityDetailsService{
     
-    public static final String ROLE_APPLICATION = "ROLE_APPLICATION";
-    
     private static final Pattern PATH_DOMAIN = Pattern.compile("\\A/api/([^/]+)");
 
     private DomainService domainService;

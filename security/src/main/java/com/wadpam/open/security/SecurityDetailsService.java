@@ -14,6 +14,18 @@ import javax.servlet.http.HttpServletResponse;
  */
 public interface SecurityDetailsService {
 
+    /** 
+     * Role given if application is authenticated, 
+     * usually via Basic Authentication.
+     */
+    public static final String ROLE_APPLICATION = "ROLE_APPLICATION";
+    
+    /** 
+     * Role given if user is authenticated, 
+     * usually via Basic Authentication or OAuth2.
+     */
+    public static final String ROLE_USER = "ROLE_USER";
+    
     /**
      * Loads the user details for the specified username.
      * @param request
