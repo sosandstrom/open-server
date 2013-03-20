@@ -4,7 +4,6 @@
 
 package com.wadpam.open.security;
 
-import static com.wadpam.open.security.SecurityInterceptor.setListedMethods;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -53,10 +52,6 @@ public class RolesInterceptor extends HandlerInterceptorAdapter {
         return false;
     }
 
-    public void setRuledMethods(Collection<Map.Entry<String, Collection<String>>> ruledMethods) {
-        setListedMethods(ruledMethods, RULED_METHODS);
-    }
-
     protected static boolean isAuthorized(ArrayList<Map.Entry<Pattern, Set<String>>> RULED_METHODS, String method, String requestUri, Collection<String> grantedRoles) {
         final String methodPath = String.format("%s:%s", method, requestUri);
         LOG.debug("method:requestUri = {}, Granted Roles: {}", methodPath, grantedRoles);
@@ -88,4 +83,8 @@ public class RolesInterceptor extends HandlerInterceptorAdapter {
         return false;
     }
     
+    public void setRuledMethods(Collection<Map.Entry<String, Collection<String>>> ruledMethods) {
+        SecurityInterceptor.setListedMethods(ruledMethods, RULED_METHODS);
+    }
 }
+
