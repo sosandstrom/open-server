@@ -47,6 +47,11 @@ public class BasicAuthenticationInterceptorTest extends TestCase {
                 }
                 return null;
             }
+
+            @Override
+            public Collection<String> getRolesFromUserDetails(Object details) {
+                return BasicAuthenticationInterceptor.getRolesFromUserDetailsImpl(details);
+            }
         });
         LOG.info("-----           setUp() {}           -----", getName());
     }

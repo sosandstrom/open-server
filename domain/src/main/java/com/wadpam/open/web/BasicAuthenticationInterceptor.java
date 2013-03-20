@@ -8,6 +8,9 @@ import com.wadpam.open.domain.DAppDomain;
 import com.wadpam.open.exceptions.AuthenticationFailedException;
 import com.wadpam.open.security.SecurityDetailsService;
 import com.wadpam.open.service.DomainService;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
@@ -20,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class BasicAuthenticationInterceptor extends DomainInterceptor
         implements SecurityDetailsService{
+    
+    public static final String ROLE_APPLICATION = "ROLE_APPLICATION";
     
     private static final Pattern PATH_DOMAIN = Pattern.compile("\\A/api/([^/]+)");
 
@@ -51,6 +56,25 @@ public class BasicAuthenticationInterceptor extends DomainInterceptor
         }
         
         return realmUsername;
+    }
+
+    /**
+     * Returns the ROLE_APPLICATION if specified details are not null.
+     * @param details
+     * @return the ROLE_APPLICATION if specified details are not null.
+     */
+    @Override
+    public Collection<String> getRolesFromUserDetails(Object details) {
+        return getRolesFromUserDetailsImpl(details);
+    }
+
+    /**
+     * Returns the ROLE_APPLICATION if specified details are not null.
+     * @param details
+     * @return the ROLE_APPLICATION if specified details are not null.
+     */
+    public static Collection<String> getRolesFromUserDetailsImpl(Object details) {
+        return null != details ? Arrays.asList(ROLE_APPLICATION) : Collections.EMPTY_LIST;
     }
 
     /**
