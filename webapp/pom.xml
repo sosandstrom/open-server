@@ -12,6 +12,7 @@
 
     <!-- Specify hard-coded project properties here -->
     <properties>
+<!--        <gae.version>1.7.3</gae.version>-->
         <gae.application.version>lab</gae.application.version>
         <gae.application.id>open-user</gae.application.id>
         <netbeans.hint.deploy.server>Tomcat</netbeans.hint.deploy.server>
@@ -28,11 +29,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>domain</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>test</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -133,6 +129,12 @@
             <version>${docrest.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>test</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -327,12 +329,13 @@
             <plugin>
                 <groupId>net.kindleit</groupId>
                 <artifactId>maven-gae-plugin</artifactId>
-                <version>0.9.4</version>
+                <version>0.9.6-SNAPSHOT</version>
                 <configuration>
                     <port>8234</port>
                     <monitorPort>8789</monitorPort>
                     <serverId>private.gmail</serverId>
                     <disableUpdateCheck>true</disableUpdateCheck>
+                    <wait>false</wait>
                     <jvmFlags>
                         <jvmFlag>-Ddatastore.default_high_rep_job_policy_unapplied_job_pct=20</jvmFlag>
                     </jvmFlags>                
@@ -341,7 +344,8 @@
                     <dependency>
                         <groupId>net.kindleit</groupId>
                         <artifactId>gae-runtime</artifactId>
-                        <version>${gae.version}</version>
+                        <version>1.7.5.1</version>
+                        <!--<version>${gae.version}</version>-->
                         <type>pom</type>
                     </dependency>
                     <dependency>
@@ -387,7 +391,8 @@
                                 </goals>
                                 <configuration>
                                     <scanIntervalSeconds>0</scanIntervalSeconds>
-                                    <daemon>true</daemon>
+                                    <!--<daemon>true</daemon>-->
+                                    <wait>false</wait>
                                 </configuration>
                             </execution>
                             <execution>
