@@ -21,7 +21,7 @@ public class Exporter<D> {
     private Converter<D> converter;
     private Extractor<D> extractor;
     
-    private Scheduler<D> scheduler = new Scheduler();
+    private Scheduler<D> scheduler = new Scheduler<D>();
     
     private final D[] daos;
     
@@ -55,7 +55,7 @@ public class Exporter<D> {
      * @see #exportDao
      */
     public Object export(OutputStream out, Object arg, D... daos) {
-        LOG.info("exporting for {} daos", daos.length);
+        LOG.info("exporting for {} daos on {}", daos.length, out);
         
         // first, initialize converter
         Object preExport = extractor.preExport(arg, daos);
@@ -90,6 +90,7 @@ public class Exporter<D> {
      * @return 
      */
     protected Object postExport(OutputStream out, Object arg, Object preExport) {
+        LOG.info("postExport on {} with arg {}", out, arg);
         // close converter
         Object postExport = extractor.postExport(arg, preExport, daos);
         Object logPost = converter.postExport(out, arg, preExport, postExport, daos);
@@ -172,30 +173,29 @@ public class Exporter<D> {
 
         LOG.debug("----- query {} items from {} with offset {}", new Object[] {limit, tableName, offset});
         try {
-        Iterable entities = extractor.queryIterable(arg, dao, offset, limit);
-        for (Object entity : entities) {
-            log = exportEntity(out, arg, preExport, preDao, columns, daoIndex, dao, 
-                    entityIndex, entity);
-            if (null != log) {
-                entityIndex++;
+            Iterable entities = extractor.queryIterable(arg, dao, offset, limit);
+            for (Object entity : entities) {
+                log = exportEntity(out, arg, preExport, preDao, columns, daoIndex, dao, 
+                        entityIndex, entity);
+                if (null != log) {
+                    entityIndex++;
+                }
+                returned++;
             }
-            returned++;
-        }
         }
         catch (Exception any) {
             LOG.error(Integer.toString(returned), any);
         }
-
-        // done, so close converter for dao
-        postDao(out, arg, preExport, preDao, dao);
 
         // more?
         if (limit == returned) {
             return offset + limit;
         }
         
+        // done, so close converter for dao
+        postDao(out, arg, preExport, preDao, dao);
 
-        scheduler.onDone(daoIndex);
+        scheduler.onDone(out, arg, daoIndex);
         return null;
     }
 
