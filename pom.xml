@@ -29,7 +29,7 @@
     </modules>
     
     <properties>
-        <gae.version>1.7.0</gae.version>
+        <gae.version>1.7.5</gae.version>
         <docrest.version>1.22</docrest.version>
         <mardao.version>2.2.2</mardao.version>
         <spring.version>3.1.1.RELEASE</spring.version>

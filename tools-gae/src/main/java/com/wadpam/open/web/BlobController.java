@@ -1,11 +1,16 @@
 package com.wadpam.open.web;
 
-import com.google.appengine.api.NamespaceManager;
+import com.google.appengine.api.blobstore.BlobInfo;
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
+import com.google.appengine.api.images.ImagesService;
+import com.google.appengine.api.images.ImagesServiceFactory;
+import com.google.appengine.api.images.ServingUrlOptions;
 import com.wadpam.docrest.domain.RestCode;
 import com.wadpam.docrest.domain.RestReturn;
+import java.io.IOException;
+import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -13,12 +18,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.ServletException;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Mange blobs in GAE blobstore.
@@ -31,6 +36,7 @@ public class BlobController extends AbstractRestController {
     private static final Logger LOG = LoggerFactory.getLogger(BlobController.class);
 
     private BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
+    private final ImagesService imagesService = ImagesServiceFactory.getImagesService();
 
     /**
      * Get an upload url to blobstore.
@@ -87,21 +93,44 @@ public class BlobController extends AbstractRestController {
     })
     @RequestMapping(value="upload", method= RequestMethod.POST)
     @ResponseBody
-    public Map<String, String> uploadCallback(HttpServletRequest request,
+    public Map<String, List<String>> uploadCallback(HttpServletRequest request,
                                               @PathVariable String domain,
                                               UriComponentsBuilder uriBuilder) {
         LOG.debug("Blobstore upload callback");
 
-        Map<String, List<BlobKey>> blobKeys = blobstoreService.getUploads(request);
+        final Map<String, List<String>> body = new TreeMap<String, List<String>>();
+        Map<String, List<BlobInfo>> blobInfos = blobstoreService.getBlobInfos(request);
+        String accessUrl;
 
-        uriBuilder.path("/{domain}/blob").query("key={blobKey}");
-        Map<String, String> response = new HashMap<String, String>();
-        for (Map.Entry<String, List<BlobKey>> entry : blobKeys.entrySet()) {
-            response.put(entry.getKey(),
-                    uriBuilder.buildAndExpand(domain, entry.getValue().get(0).getKeyString()).toUriString());
+        for (Entry<String, List<BlobInfo>> field : blobInfos.entrySet()) {
+            
+            ArrayList<String> urls = new ArrayList<String>();
+            body.put(field.getKey(), urls);
+            for (BlobInfo blobInfo : field.getValue()) {
+                
+                final BlobKey blobKey = blobInfo.getBlobKey();
+
+                final String contentType = blobInfo.getContentType();
+                if (null != contentType && contentType.startsWith("image")) {
+
+                    // we want to serve directly from ImagesService,
+                    // to avoid involving the GAE app, avoid spinning up instances,
+                    // and to use the awesome Google CDN.
+                    ServingUrlOptions suo = ServingUrlOptions.Builder.withBlobKey(blobKey);
+                    accessUrl = imagesService.getServingUrl(suo);
+                }
+                else {
+
+                    // serve via this BlobController
+                    accessUrl = String.format("%s://%s/api/%s/blob/v10?key=%s", 
+                        request.getScheme(), request.getHeader("Host"), 
+                        domain, blobKey.getKeyString());
+                }
+                urls.add(accessUrl);
+            }
         }
 
-        return response;
+        return body;
     }
 
     /**
@@ -112,8 +141,8 @@ public class BlobController extends AbstractRestController {
     @RequestMapping(value="", method= RequestMethod.GET, params = "key")
     @ResponseBody
     public void getBlob(HttpServletRequest request,
-                                       HttpServletResponse response,
-                                       @RequestParam(required = true) String key) throws IOException {
+            HttpServletResponse response,
+            @RequestParam(required = true) String key) throws IOException {
         LOG.debug("Get blob with key:{}", key);
 
         BlobKey blobKey = new BlobKey(key);
@@ -128,8 +157,8 @@ public class BlobController extends AbstractRestController {
     @RequestMapping(value="", method= RequestMethod.DELETE, params = "key")
     @ResponseBody
     public void deleteBlob(HttpServletRequest request,
-                        HttpServletResponse response,
-                        @RequestParam(required = true) String key) throws IOException {
+            HttpServletResponse response,
+            @RequestParam(required = true) String key) throws IOException {
         LOG.debug("Delete blob with key:{}", key);
 
         BlobKey blobKey = new BlobKey(key);
