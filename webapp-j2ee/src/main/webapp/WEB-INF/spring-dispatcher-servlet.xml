@@ -38,7 +38,8 @@
 
     <!--           Services             -->
 
-    <import resource="classpath:/open-user-service.xml" />
+    <bean class="com.wadpam.open.user.config.UserConfig" />
+    <!--<import resource="classpath:/open-user-service.xml" />-->
     <import resource="classpath:/spring-dao.xml" />
     <import resource="classpath:/mysql-context.xml" />
     
