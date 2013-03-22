@@ -5,6 +5,8 @@
 package com.wadpam.open.config;
 
 import com.wadpam.open.json.SkipNullObjectMapper;
+import com.wadpam.open.security.InMemorySecurityDetailsService;
+import com.wadpam.open.security.SecurityInterceptor;
 import com.wadpam.open.service.ComplexService;
 import com.wadpam.open.service.ExportService;
 import com.wadpam.open.service.SampleService;
@@ -14,17 +16,20 @@ import com.wadpam.open.web.ExportController;
 import com.wadpam.open.web.MonitorController;
 import com.wadpam.open.web.RestJsonExceptionResolver;
 import com.wadpam.open.web.SampleController;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map.Entry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.view.InternalResourceView;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
@@ -80,8 +85,33 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
     
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-//        registry.addInterceptor(brandInterceptor());
+        registry.addInterceptor(securityInterceptor());
 //        registry.addInterceptor(trackingCodeInterceptor()).addPathPatterns("/**/isalive");
+    }
+    
+    @Bean
+    public SecurityInterceptor securityInterceptor() {
+        SecurityInterceptor bean = new SecurityInterceptor();
+        
+        InMemorySecurityDetailsService inMem = new InMemorySecurityDetailsService();
+        inMem.DETAILS_MAP.put("itest", "itest");
+        bean.setSecurityDetailsService(inMem);
+        
+        // white list most of it
+        Collection<Entry<String, Collection<String>>> whitelist = new ArrayList<Entry<String, Collection<String>>>();
+        whitelist.add(new AbstractMap.SimpleImmutableEntry<String, Collection<String>>(
+                "\\A/domain/itest/export/", Arrays.asList("GET", "POST")));
+        whitelist.add(new AbstractMap.SimpleImmutableEntry<String, Collection<String>>(
+                "\\A/domain/itest/sample/", Arrays.asList("GET", "POST", "DELETE")));
+        whitelist.add(new AbstractMap.SimpleImmutableEntry<String, Collection<String>>(
+                "\\A/domain/itest/complex/", Arrays.asList("GET", "POST", "DELETE")));
+        whitelist.add(new AbstractMap.SimpleImmutableEntry<String, Collection<String>>(
+                "\\A/domain/monitor", Arrays.asList("GET", "POST")));
+//        whitelist.add(new AbstractMap.SimpleImmutableEntry<String, Collection<String>>(
+//                "", Arrays.asList("GET", "POST")));
+        bean.setWhitelistedMethods(whitelist);
+                
+        return bean;
     }
     
     @Bean
@@ -117,21 +147,6 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
         return bean;
     }
     
-//    public @Bean VelocityConfigurer velocityConfigurer() {
-//        final VelocityConfigurer bean = new VelocityConfigurer();
-//        bean.setResourceLoaderPath("/WEB-INF/velocity/");
-//        return bean;
-//    }
-//    
-//    public @Bean VelocityViewResolver velocityViewResolver() {
-//        final VelocityViewResolver bean = new VelocityViewResolver();
-//        bean.setOrder(200);
-//        bean.setCache(true);
-//        bean.setPrefix("");
-//        bean.setSuffix(".vm");
-//        return bean;
-//    }
-//    
     public @Bean InternalResourceViewResolver htmlViewResolver() {
         final InternalResourceViewResolver bean = new InternalResourceViewResolver();
         bean.setViewClass(InternalResourceView.class);
