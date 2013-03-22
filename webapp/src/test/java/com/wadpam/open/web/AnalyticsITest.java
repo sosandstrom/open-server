@@ -13,7 +13,8 @@ import org.slf4j.LoggerFactory;
  * Integration tests for Analytics.
  * @author mattiaslevin
  */
-public class AnalyticsITest extends AbstractRestTempleIntegrationTest {
+public class AnalyticsITest {
+    //extends AbstractRestTempleIntegrationTest {
     static final Logger LOG = LoggerFactory.getLogger(AnalyticsITest.class);
 
     private Property trackerConfig;
@@ -61,9 +62,9 @@ public class AnalyticsITest extends AbstractRestTempleIntegrationTest {
     public void tearDown() {
     }
 
-    @Override
+//    @Override
     protected String getBaseUrl() {
-        return "http://localhost:8234/domain/itest/";
+        return CrudITest.BASE_URL;
     }
 
     @Test

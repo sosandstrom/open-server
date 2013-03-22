@@ -39,7 +39,7 @@
     </filter>
     <filter-mapping>
         <filter-name>domainNamespaceFilter</filter-name>
-        <url-pattern>/domain/*</url-pattern>
+        <url-pattern>/api/*</url-pattern>
     </filter-mapping>
 
     <security-constraint>
@@ -57,7 +57,7 @@
     </filter>
     <filter-mapping>
         <filter-name>jsonpFilter</filter-name>
-        <url-pattern>/domain/*</url-pattern>
+        <url-pattern>/api/*</url-pattern>
     </filter-mapping>
 
     <servlet>
@@ -82,7 +82,7 @@
 
     <servlet-mapping>
         <servlet-name>spring-dispatcher</servlet-name>
-        <url-pattern>/domain/*</url-pattern>
+        <url-pattern>/api/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>spring-dispatcher</servlet-name>

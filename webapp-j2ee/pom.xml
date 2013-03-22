@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.wadpam.openserver</groupId>
         <artifactId>parent</artifactId>
-        <version>19-SNAPSHOT</version>
+        <version>20-SNAPSHOT</version>
     </parent>
     <artifactId>webapp-j2ee</artifactId>
     <packaging>war</packaging>
@@ -28,11 +28,6 @@
     </properties>
 
     <dependencies>
-<!--        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>domain</artifactId>
-            <version>${project.version}</version>
-        </dependency>-->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>io-core</artifactId>
@@ -49,9 +44,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>com.wadpam.opencomponents</groupId>
             <artifactId>users</artifactId>
-            <version>14</version>
+            <version>1</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -91,6 +86,14 @@
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
             <version>3.9</version>
+        </dependency>
+        
+        <!-- CGLIB is required for "import" of java Config bean from xml -->
+        <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib</artifactId>
+            <version>2.2.2</version>
+            <scope>runtime</scope>
         </dependency>
 
         <!-- These dependencies are here just for enabling logging -->

@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
@@ -42,11 +44,20 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
     public static final String AUTH_PARAM_OAUTH = "access_token";
 
     /** must be same as MardaoPrincipalInterceptor value */
-    public static final String ATTR_NAME_USERNAME = "_username";
+    public static final String ATTR_NAME_USERNAME = "com.wadpam.open.security.username";
+    public static final String ATTR_NAME_PRINCIPAL = "com.wadpam.open.security.principal";
+    public static final String ATTR_NAME_ROLES = "com.wadpam.open.security.roles";
     public static final String USERNAME_ANONYMOUS = "[ANONYMOUS]";
     
     public static final String HEADER_AUTHORIZATION = "Authorization";
     public static final String PATH_AH = "/_ah/";
+    
+    public static final TreeSet<String> ROLES_ANONYMOUS = new TreeSet<String>();
+    
+    static {
+        ROLES_ANONYMOUS.add(SecurityDetailsService.ROLE_ANONYMOUS);
+    }
+    
     
     private String authenticationMechanism = AUTH_TYPE_BASIC;
     private String realmName = "open-server SecurityInterceptor";
@@ -187,7 +198,7 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
         
         // no credentials supplied?
         if (null == authValue) {
-            return (skipPath || whitelisted) ? USERNAME_ANONYMOUS : null;
+            return populateAnonymousUser(request, skipPath, whitelisted);
         }
         
         // get the username:
@@ -204,7 +215,7 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
         }
         LOG.debug("details {}", details);
         if (null == details) {
-            return (skipPath || whitelisted) ? USERNAME_ANONYMOUS : null;
+            return populateAnonymousUser(request, skipPath, whitelisted);
         }
         
         // Authenticate:
@@ -214,10 +225,20 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
         if (null != principalName) {
             if (null != request) {
                 request.setAttribute(ATTR_NAME_USERNAME, principalName);
+                request.setAttribute(ATTR_NAME_PRINCIPAL, details);
+                
+                // combine roles
+                Collection<String> roles = securityDetailsService.getRolesFromUserDetails(details);
+                TreeSet<String> combinedRoles = new TreeSet<String>(roles);
+                Collection<String> previousRoles = (Collection<String>) request.getAttribute(ATTR_NAME_ROLES);
+                if (null != previousRoles) {
+                    combinedRoles.addAll(previousRoles);
+                }
+                request.setAttribute(ATTR_NAME_ROLES, combinedRoles);
             }
             return principalName;
         }
-        return (skipPath || whitelisted) ? USERNAME_ANONYMOUS : null;
+        return populateAnonymousUser(request, skipPath, whitelisted);
     }
 
 
@@ -312,12 +333,17 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
     }
     
     public void setWhitelistedMethods(Collection<Entry<String, Collection<String>>> whitelistedMethods) {
-        WHITELISTED_METHODS.clear();
+        setListedMethods(whitelistedMethods, WHITELISTED_METHODS);
+    }
+    
+    public static void setListedMethods(Collection<Entry<String, Collection<String>>> methods, 
+            List<Entry<Pattern, Set<String>>> listedMethods) {
+        listedMethods.clear();
         SimpleImmutableEntry<Pattern, Set<String>> sie;
-        for (Entry<String, Collection<String>> entry : whitelistedMethods) {
+        for (Entry<String, Collection<String>> entry : methods) {
             sie = new SimpleImmutableEntry<Pattern, Set<String>>(
                     Pattern.compile(entry.getKey()), new TreeSet<String>(entry.getValue()));
-            WHITELISTED_METHODS.add(sie);
+            listedMethods.add(sie);
         }
     }
 
@@ -327,6 +353,28 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
 
     public void setRealmName(String realmName) {
         this.realmName = realmName;
+    }
+
+    private String populateAnonymousUser(HttpServletRequest request, boolean skipPath, boolean whitelisted) {
+        if (skipPath && null != request) {
+            // populate request
+        }
+        
+        if (whitelisted && null != request) {
+            // populate request
+            request.setAttribute(ATTR_NAME_USERNAME, USERNAME_ANONYMOUS);
+            request.setAttribute(ATTR_NAME_PRINCIPAL, USERNAME_ANONYMOUS);
+
+            // combine roles
+            TreeSet<String> combinedRoles = new TreeSet<String>();
+            Collection<String> previousRoles = (Collection<String>) request.getAttribute(ATTR_NAME_ROLES);
+            if (null != previousRoles) {
+                combinedRoles.addAll(previousRoles);
+            }
+            combinedRoles.add(SecurityDetailsService.ROLE_ANONYMOUS);
+            request.setAttribute(ATTR_NAME_ROLES, combinedRoles);
+        }
+        return (skipPath || whitelisted) ? USERNAME_ANONYMOUS : null;
     }
 
 }

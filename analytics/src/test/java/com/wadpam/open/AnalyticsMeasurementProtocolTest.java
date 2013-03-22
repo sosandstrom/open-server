@@ -33,7 +33,7 @@ public class AnalyticsMeasurementProtocolTest {
         trackerConfig = new Property("test-profile", "UA-38370095-2");
 
         // Set visitor
-        visitorData = new Visitor("9997", now() - 50000, now() - 4000, 10);
+        visitorData = new Visitor("9994", now() - 50000, now() - 4000, 10);
 
         // Set device data
         deviceData.setEncoding("UTF-8");
@@ -54,7 +54,7 @@ public class AnalyticsMeasurementProtocolTest {
                 .app("Test app2", "2.0")
                 .measurementProtocol()
                 .build();
-        tracker.setDebug(true);
+        //tracker.setDebug(true);
     }
 
     @After
@@ -86,8 +86,8 @@ public class AnalyticsMeasurementProtocolTest {
     @Test
     public void screenView() {
         LOG.info("Test screen view");
-        tracker.screenView("Screen 10");
-        tracker.screenView("Screen 11");
+        tracker.screenView("Screen 20");
+        tracker.screenView("Screen 21");
         assertTrue(true);
     }
 

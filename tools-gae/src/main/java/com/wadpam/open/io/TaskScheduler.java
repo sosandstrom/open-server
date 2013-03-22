@@ -187,7 +187,7 @@ public class TaskScheduler<D> extends Scheduler<D> {
     }
 
     @Override
-    protected void schedulePostExport() {
+    protected void schedulePostExport(OutputStream out, Object arg) {
         // create a task
         TaskOptions task = TaskOptions.Builder.withUrl(
                 String.format("%s/exporter/v10/done", basePath))

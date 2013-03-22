@@ -93,12 +93,17 @@ public abstract class MardaoCrudService<
     public T get(String parentKeyString, ID id) {
         preDao();
         try {
+            // TODO: parentKeyString must be decoded by parent dao!
             Object parentKey = dao.getPrimaryKey(parentKeyString);
             T domain = dao.findByPrimaryKey(parentKey, id);
             LOG.debug("GET {}/{}/{} returns {}", new Object[] {
                 dao.getTableName(), parentKey, id, domain});
 
             return domain;
+        }
+        catch (RuntimeException toLog) {
+            LOG.warn("in GET", toLog);
+            throw toLog;
         }
         finally {
             postDao();

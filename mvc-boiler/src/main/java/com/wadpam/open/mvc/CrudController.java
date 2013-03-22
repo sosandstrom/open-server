@@ -22,6 +22,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpUtils;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.domain.AbstractCreatedUpdatedEntity;
 import net.sf.mardao.core.domain.AbstractLongEntity;
@@ -44,6 +45,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  *
@@ -94,8 +96,10 @@ public abstract class CrudController<
             Model model,
             @ModelAttribute J jEntity) {
         
-        final String path = createForLocation(request, domain, model, jEntity);
-        return new RedirectView(path, true);
+        final String id = createForId(request, domain, model, jEntity);
+        final String httpUrl = request.getRequestURL().toString();
+        final String absoluteUrl = String.format("%s/%s", httpUrl, id);
+        return new RedirectView(absoluteUrl);
     }
     
     /**
@@ -118,9 +122,11 @@ public abstract class CrudController<
             @PathVariable String domain,
             Model model,
             @ModelAttribute J jEntity) {
-        final String path = createForLocation(request, domain, model, jEntity);
+        final String id = createForId(request, domain, model, jEntity);
+        final String httpUrl = request.getRequestURL().toString();
+        final String absoluteUrl = String.format("%s/%s", httpUrl, id);
         final HttpHeaders headers = new HttpHeaders();
-        headers.set("Location", path);
+        headers.set("Location", absoluteUrl);
         return new ResponseEntity(headers, HttpStatus.CREATED);
     }
     
@@ -144,8 +150,10 @@ public abstract class CrudController<
             @PathVariable String domain,
             Model model,
             @RequestBody J jEntity) {
-        final String path = createForLocation(request, domain, model, jEntity);
-        return new RedirectView(path, true);
+        final String id = createForId(request, domain, model, jEntity);
+        final String httpUrl = request.getRequestURL().toString();
+        final String absoluteUrl = String.format("%s/%s", httpUrl, id);
+        return new RedirectView(absoluteUrl);
     }
     
     /**
@@ -229,21 +237,20 @@ public abstract class CrudController<
         return convertWithInner(request, response, domain, model, d);
     }
     
-    protected String createForLocation(HttpServletRequest request, 
+    protected String createForId(HttpServletRequest request, 
             String domain,
             Model model, J body) {
         J amendedBody = populateRequestBody(request, model, body);
         T d = create(request, domain, amendedBody);
         
-        final StringBuffer path = new StringBuffer(request.getRequestURI());
-        path.append('/');
+        final StringBuffer path = new StringBuffer();
         path.append(service.getSimpleKey(d));
         final String parentKeyString = service.getParentKeyString(d);
         if (null != parentKeyString) {
             path.append("?parentKeyString=");
             path.append(parentKeyString);
         }
-        LOG.debug("Location for created entity is {}", path.toString());
+        LOG.debug("Path for created entity is {}", path.toString());
         return path.toString();
     }
     
@@ -560,13 +567,15 @@ public abstract class CrudController<
         T d = update(request, response, domain, id, xRequestedWith, model, jEntity);
         
         final StringBuffer path = new StringBuffer();
-        path.append(service.getSimpleKey(d));
         final String parentKeyString = service.getParentKeyString(d);
         if (null != parentKeyString) {
             path.append("?parentKeyString=");
             path.append(parentKeyString);
         }
-        return new RedirectView(path.toString(), true);
+        final String httpUrl = request.getRequestURL().toString();
+        final String absoluteUrl = String.format("%s%s", httpUrl, path.toString());
+        
+        return new RedirectView(absoluteUrl);
     }
     
     @RequestMapping(value="v10/{id}", method=RequestMethod.POST, 

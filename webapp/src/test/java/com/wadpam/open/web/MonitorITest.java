@@ -18,7 +18,7 @@ import org.springframework.web.client.RestTemplate;
  */
 public class MonitorITest {
 
-    static final String                  BASE_URL       = "http://localhost:8234/domain/";
+    protected static final String                  BASE_URL       = "http://localhost:8234/api/";
 
     RestTemplate                         template;
     public MonitorITest() {

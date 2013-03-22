@@ -36,8 +36,8 @@ public class Scheduler<D> {
      * @param limit 
      */
     public void scheduleExportDao(OutputStream out, int daoIndex, int offset, int limit) {
-        LOG.debug("scheduling for dao #{}, {}/{}", new Object[] {
-            daoIndex, offset, limit
+        LOG.debug("scheduling for dao #{}, {}/{} on {}", new Object[] {
+            daoIndex, offset, limit, out
         });
         exporter.exportDao(out, daoIndex, offset, limit);
     }
@@ -45,10 +45,10 @@ public class Scheduler<D> {
     /**
      * Override to do postExport in different thread.
      */
-    protected void schedulePostExport() {
-        LOG.debug("scheduling for postExport");
+    protected void schedulePostExport(OutputStream out, Object arg) {
+        LOG.debug("scheduling for postExport on {}", out);
         Object preExport = getCached(KEY_PRE_EXPORT);
-        exporter.postExport(null, null, preExport);
+        exporter.postExport(out, arg, preExport);
     }
     
     public Object getCached(Object key) {
@@ -67,7 +67,7 @@ public class Scheduler<D> {
      * @param daoIndex
      * @return 201 Created when all done, 204 No Content 
      */
-    public int onDone(int daoIndex) {
+    public int onDone(OutputStream out, Object arg, int daoIndex) {
         putCached(getDaoKey(daoIndex), STATE_DONE);
         
         int i = 0;
@@ -85,7 +85,7 @@ public class Scheduler<D> {
         
         // done?
         if (null == state) {
-            schedulePostExport();
+            schedulePostExport(out, arg);
         }
         
         // Created when all done, No Content 
