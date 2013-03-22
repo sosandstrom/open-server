@@ -12,7 +12,6 @@
 
     <!-- Specify hard-coded project properties here -->
     <properties>
-        <mardao.version>2.2.3-SNAPSHOT</mardao.version>
         <netbeans.hint.deploy.server>Tomcat</netbeans.hint.deploy.server>
         <itest.include>**/*ITest.java</itest.include>
         <surefire.default.skip>true</surefire.default.skip>
