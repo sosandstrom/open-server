@@ -66,7 +66,7 @@ public class RolesInterceptor extends HandlerInterceptorAdapter {
 
             if (matches) {
                 final Set<String> authorizedRoles = entry.getValue();
-                LOG.debug("-   Authorized Roles: ", authorizedRoles);
+                LOG.debug("-   Authorized Roles: {}", authorizedRoles);
 
                 // disjoint is true if the two specified collections have no elements in common.
                 boolean disjoint = Collections.disjoint(grantedRoles, authorizedRoles);

@@ -4,14 +4,15 @@
 
 package com.wadpam.open.config;
 
+import com.wadpam.oauth2.dao.DConnectionDao;
+import com.wadpam.oauth2.domain.DConnection;
+import com.wadpam.oauth2.service.ConnectionService;
 import com.wadpam.oauth2.web.OAuth2Interceptor;
 import com.wadpam.open.json.SkipNullObjectMapper;
-import com.wadpam.open.security.InMemorySecurityDetailsService;
 import com.wadpam.open.security.RolesInterceptor;
 import com.wadpam.open.security.SecurityDetailsService;
 import com.wadpam.open.security.SecurityInterceptor;
 import com.wadpam.open.service.ComplexService;
-import com.wadpam.open.service.DomainService;
 import com.wadpam.open.service.ExportService;
 import com.wadpam.open.service.ItestService;
 import com.wadpam.open.service.SampleService;
@@ -27,9 +28,10 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
+import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -75,6 +77,38 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
         return new ExportService();
     }
     
+    @Bean
+    public ConnectionService mockConnectionService() {
+        ConnectionService bean = new ConnectionService() {
+
+            @Override
+            public DConnection get(String parentKeyString, String id) {
+                LOG.info("getting DConnection for {}", id);
+                if ("itest".equals(id)) {
+                    DConnection conn = new DConnection();
+                    conn.setId(id);
+                    conn.setExpireTime(new Date(System.currentTimeMillis()+1000L));
+                    conn.setUserId(id);
+                    conn.setUserRoles(" ROLE_USER , ROLE_ITEST");
+                    
+                    return conn;
+                }
+                return null;
+            }
+
+            @Override
+            public void setDConnectionDao(DConnectionDao dConnectionDao) {
+            }
+
+            @Override
+            public void setDao(DConnectionDao dao) {
+            }
+
+        };
+        
+        return bean;
+    }
+    
     // -------------- Message Converters ----------------------
 
     @Override
@@ -101,8 +135,8 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(basicAuthenticationInterceptor());
+        registry.addInterceptor(oauth2Interceptor()); // .addPathPatterns("**/itest/**");
         registry.addInterceptor(rolesInterceptor());
-        registry.addInterceptor(oauth2Interceptor()).addPathPatterns("/itest/**");
 //        registry.addInterceptor(trackingCodeInterceptor()).addPathPatterns("/**/isalive");
     }
     
@@ -141,7 +175,7 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
         return bean;
     }
     
-    @Bean
+    @Bean(autowire = Autowire.NO)
     public OAuth2Interceptor oauth2Interceptor() {
         OAuth2Interceptor bean = new OAuth2Interceptor();
         
