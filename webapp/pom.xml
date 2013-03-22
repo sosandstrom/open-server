@@ -65,7 +65,7 @@
         <dependency>
             <groupId>com.wadpam.oauth</groupId>
             <artifactId>oauth2-client</artifactId>
-            <version>1.0</version>
+            <version>1.1</version>
         </dependency>
 
         <dependency>
@@ -334,7 +334,7 @@
             <plugin>
                 <groupId>net.kindleit</groupId>
                 <artifactId>maven-gae-plugin</artifactId>
-                <version>0.9.4</version>
+                <version>0.9.6-SNAPSHOT</version>
                 <configuration>
                     <port>8234</port>
                     <monitor.port>8789</monitor.port>
