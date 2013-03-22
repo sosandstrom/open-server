@@ -64,7 +64,7 @@ public class AnalyticsITest {
 
 //    @Override
     protected String getBaseUrl() {
-        return "http://localhost:8234/domain/itest/";
+        return CrudITest.BASE_URL;
     }
 
     @Test

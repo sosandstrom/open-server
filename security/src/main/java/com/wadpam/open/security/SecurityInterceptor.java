@@ -52,6 +52,13 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
     public static final String HEADER_AUTHORIZATION = "Authorization";
     public static final String PATH_AH = "/_ah/";
     
+    public static final TreeSet<String> ROLES_ANONYMOUS = new TreeSet<String>();
+    
+    static {
+        ROLES_ANONYMOUS.add(SecurityDetailsService.ROLE_ANONYMOUS);
+    }
+    
+    
     private String authenticationMechanism = AUTH_TYPE_BASIC;
     private String realmName = "open-server SecurityInterceptor";
     private SecurityDetailsService securityDetailsService;
@@ -191,7 +198,7 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
         
         // no credentials supplied?
         if (null == authValue) {
-            return (skipPath || whitelisted) ? USERNAME_ANONYMOUS : null;
+            return populateAnonymousUser(request, skipPath, whitelisted);
         }
         
         // get the username:
@@ -208,7 +215,7 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
         }
         LOG.debug("details {}", details);
         if (null == details) {
-            return (skipPath || whitelisted) ? USERNAME_ANONYMOUS : null;
+            return populateAnonymousUser(request, skipPath, whitelisted);
         }
         
         // Authenticate:
@@ -231,7 +238,7 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
             }
             return principalName;
         }
-        return (skipPath || whitelisted) ? USERNAME_ANONYMOUS : null;
+        return populateAnonymousUser(request, skipPath, whitelisted);
     }
 
 
@@ -346,6 +353,28 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
 
     public void setRealmName(String realmName) {
         this.realmName = realmName;
+    }
+
+    private String populateAnonymousUser(HttpServletRequest request, boolean skipPath, boolean whitelisted) {
+        if (skipPath && null != request) {
+            // populate request
+        }
+        
+        if (whitelisted && null != request) {
+            // populate request
+            request.setAttribute(ATTR_NAME_USERNAME, USERNAME_ANONYMOUS);
+            request.setAttribute(ATTR_NAME_PRINCIPAL, USERNAME_ANONYMOUS);
+
+            // combine roles
+            TreeSet<String> combinedRoles = new TreeSet<String>();
+            Collection<String> previousRoles = (Collection<String>) request.getAttribute(ATTR_NAME_ROLES);
+            if (null != previousRoles) {
+                combinedRoles.addAll(previousRoles);
+            }
+            combinedRoles.add(SecurityDetailsService.ROLE_ANONYMOUS);
+            request.setAttribute(ATTR_NAME_ROLES, combinedRoles);
+        }
+        return (skipPath || whitelisted) ? USERNAME_ANONYMOUS : null;
     }
 
 }

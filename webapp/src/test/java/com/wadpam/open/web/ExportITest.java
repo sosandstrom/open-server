@@ -17,7 +17,7 @@ import org.springframework.web.client.RestTemplate;
  */
 public class ExportITest {
 
-    static final String                  BASE_URL       = "http://localhost:8234/domain/itest/";
+    static final String                  BASE_URL       = CrudITest.BASE_URL;
 
     RestTemplate                         template;
     public ExportITest() {

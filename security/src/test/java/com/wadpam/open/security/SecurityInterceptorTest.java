@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map.Entry;
+import java.util.TreeSet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
@@ -73,7 +74,8 @@ public class SecurityInterceptorTest extends TestCase {
         String actual = instance.isAuthenticated(request, null, null, 
                 URI, "GET", authValue);
         assertEquals("whitelisted", SecurityInterceptor.USERNAME_ANONYMOUS, actual);
-        assertNull(request.getAttribute(SecurityInterceptor.ATTR_NAME_USERNAME));
+        assertEquals("anonymous", SecurityInterceptor.USERNAME_ANONYMOUS, request.getAttribute(SecurityInterceptor.ATTR_NAME_USERNAME));
+        assertEquals("anonymous role", SecurityInterceptor.ROLES_ANONYMOUS, request.getAttribute(SecurityInterceptor.ATTR_NAME_ROLES));
     }
     
     public void testIsAuthenticatedNoSuchUser() {

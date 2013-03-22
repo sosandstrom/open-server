@@ -15,6 +15,11 @@ import javax.servlet.http.HttpServletResponse;
 public interface SecurityDetailsService {
 
     /** 
+     * Role given if method:path is whitelisted.
+     */
+    public static final String ROLE_ANONYMOUS = "ROLE_ANONYMOUS";
+    
+    /** 
      * Role given if application is authenticated, 
      * usually via Basic Authentication.
      */

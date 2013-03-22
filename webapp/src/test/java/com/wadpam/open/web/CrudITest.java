@@ -24,7 +24,7 @@ import org.springframework.web.client.HttpClientErrorException;
 public class CrudITest {
     static final Logger LOG = LoggerFactory.getLogger(CrudITest.class);
 
-    static final String                  BASE_URL       = "http://localhost:8234/domain/itest/";
+    protected static final String                  BASE_URL       = MonitorITest.BASE_URL + "itest/";
 
     RestTemplate                         template;
     public CrudITest() {
