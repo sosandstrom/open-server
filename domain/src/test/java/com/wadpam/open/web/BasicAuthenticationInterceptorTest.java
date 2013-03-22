@@ -80,7 +80,7 @@ public class BasicAuthenticationInterceptorTest extends TestCase {
         String actual = instance.isAuthenticated(request, null, null, 
                 URI, "GET", authValue);
         assertEquals("whitelisted", SecurityInterceptor.USERNAME_ANONYMOUS, actual);
-        assertNull(request.getAttribute(SecurityInterceptor.ATTR_NAME_USERNAME));
+        assertEquals(SecurityInterceptor.USERNAME_ANONYMOUS, request.getAttribute(SecurityInterceptor.ATTR_NAME_USERNAME));
     }
     
     public void testIsAuthenticatedNoSuchUser() {

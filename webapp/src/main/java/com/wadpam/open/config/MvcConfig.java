@@ -89,7 +89,7 @@ public class MvcConfig extends WebMvcConfigurerAdapter {
                     conn.setId(id);
                     conn.setExpireTime(new Date(System.currentTimeMillis()+1000L));
                     conn.setUserId(id);
-                    conn.setUserRoles(" ROLE_USER , ROLE_ITEST");
+//                    conn.setUserRoles(" ROLE_USER , ROLE_ITEST");
                     
                     return conn;
                 }
