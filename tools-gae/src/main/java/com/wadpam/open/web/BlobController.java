@@ -1,16 +1,16 @@
 package com.wadpam.open.web;
 
-import com.google.appengine.api.blobstore.BlobInfo;
-import com.google.appengine.api.blobstore.BlobKey;
-import com.google.appengine.api.blobstore.BlobstoreService;
-import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
+import com.google.appengine.api.blobstore.*;
 import com.google.appengine.api.images.ImagesService;
 import com.google.appengine.api.images.ImagesServiceFactory;
 import com.google.appengine.api.images.ServingUrlOptions;
 import com.wadpam.docrest.domain.RestCode;
 import com.wadpam.docrest.domain.RestReturn;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -37,6 +37,10 @@ public class BlobController extends AbstractRestController {
 
     private final BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
     private final ImagesService imagesService = ImagesServiceFactory.getImagesService();
+
+    private final String HEADER_CACHE_CONTROL = "Cache-Control";
+    private final String HEADER_CONTENT_DESPOSITION = "Content-Disposition";
+
 
     /**
      * Get an upload url to blobstore.
@@ -123,20 +127,65 @@ public class BlobController extends AbstractRestController {
         return body;
     }
 
+
+
     /**
      * Get a blob.
-     * @param  key The blob store key
+     * @param key The blob store key
+     * @param maxCacheAge Optional. Decides the value the Cache-Control header sent back end the response.
+     *                    Default value is 1 day.
+     *                    Set the 0 if set the cache directive to "no-cache" to avoid the http client
+     *                    to do any caching.
+     * @param asAttachment Optional. Set the Content-Disposition header to decide if the file
+     *                     should be returned as an attachment. Default is false.
      * @return the blob
      */
     @RequestMapping(value="", method= RequestMethod.GET, params = "key")
     @ResponseBody
     public void getBlob(HttpServletRequest request,
             HttpServletResponse response,
-            @RequestParam String key) throws IOException {
+            @RequestParam String key,
+            @RequestParam(defaultValue="86400") int maxCacheAge,
+            @RequestParam(defaultValue ="false") boolean asAttachment) throws IOException {
         LOG.debug("Get blob with key:{}", key);
 
+        // make sure iOS caches the image (default 1 day)
+        if (maxCacheAge > 0) {
+            response.setHeader(HEADER_CACHE_CONTROL, String.format("public, max-age=%d", maxCacheAge));
+        } else {
+            response.setHeader(HEADER_CACHE_CONTROL, "no-cache");
+        }
+
         BlobKey blobKey = new BlobKey(key);
-        this.blobstoreService.serve(blobKey, response);
+        BlobInfo blobInfo = new BlobInfoFactory().loadBlobInfo(blobKey);
+        //set response header
+        response.setContentType(blobInfo.getContentType());
+
+        if (asAttachment) {
+            // Download the file as attachment
+            response.setHeader(HEADER_CONTENT_DESPOSITION, String.format("filename=\"%s\"",
+                    getEncodeFileName(request.getHeader("User-Agent"), blobInfo.getFilename())));
+        }
+
+        // serve blob
+        blobstoreService.serve(blobKey, response);
+    }
+
+
+    // Encode header value for Content-Disposition
+    public static String getEncodeFileName(String userAgent, String fileName) {
+        String encodedFileName = fileName;
+        try {
+            if (userAgent.contains("MSIE") || userAgent.contains("Opera")) {
+                encodedFileName = URLEncoder.encode(fileName, "UTF-8");
+            } else {
+                encodedFileName = "=?UTF-8?B?" + new String(Base64.encodeBase64(fileName.getBytes("UTF-8")), "UTF-8") + "?=";
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+        }
+
+        return encodedFileName;
     }
 
     /**
