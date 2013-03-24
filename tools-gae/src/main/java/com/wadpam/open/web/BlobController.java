@@ -35,11 +35,17 @@ import javax.servlet.http.HttpServletResponse;
 public class BlobController extends AbstractRestController {
     private static final Logger LOG = LoggerFactory.getLogger(BlobController.class);
 
-    private BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
+    private final BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
     private final ImagesService imagesService = ImagesServiceFactory.getImagesService();
 
     /**
      * Get an upload url to blobstore.
+     * @param callbackPath Optional. The url that Blobstore should use as callback url.
+     *                     Only set this values if you want a specific handled  method to run
+     *                     after a file upload (when default behaviour is not enough)
+     * @param request Optional. If set to true, the callback url will also contain the same
+     *                query parameters as the this quests. Use this to forward parameters to
+     *                the callback method, e.g. access_token.
      * @return a blobstore upload url
      */
     @RestReturn(value=Map.class, entity=Map.class, code={
@@ -47,45 +53,30 @@ public class BlobController extends AbstractRestController {
     })
     @RequestMapping(value="upload", method= RequestMethod.GET)
     @ResponseBody
-    public Map<String, String> getUploadUrl(HttpServletRequest request) {
+    public Map<String, String> getUploadUrl(HttpServletRequest request,
+                                            @RequestParam(required=false) String callbackPath,
+                                            @RequestParam(required=false) Boolean retainParams) {
         LOG.debug("Get blobstore upload url");
 
-        String callbackUrl = request.getRequestURI();
+        // Use callback path if provided
+        String callbackUrl = null != callbackPath ? callbackPath : request.getRequestURI();
 
-        Map<String, String> response = new HashMap<String, String>();
-        response.put("url", blobstoreService.createUploadUrl(callbackUrl));
-
-        return response;
-    }
-
-    @RequestMapping(value = "v10", method = RequestMethod.GET, params={"callbackPath"})
-    @ResponseBody
-    public Map<String, String> getUploadUrl(HttpServletRequest request, 
-            @PathVariable String domain,
-            @RequestParam String callbackPath) {
-
-        // include an upload URL
-        String callbackUrl = 
-                null != callbackPath ? callbackPath : String.format("/api/%s/blob/v10", domain);
-        
-        // if the callback URL should contain query parameters, e.g. access_token,
-        // set callbackPath to "#"
-        if ("#".equals(callbackPath)) {
+        // Forward any existing query parameters, e.g. access_token
+        if (null != retainParams && retainParams) {
             final String queryString = request.getQueryString();
-            callbackUrl = String.format("%s?%s", 
-                    request.getRequestURI(), 
-                    null != queryString ? queryString : "");
+            callbackUrl = String.format("%s?%s", callbackUrl, null != queryString ? queryString : "");
         }
 
-        // get uploadUrl from blob service
+        // Response
         Map<String, String> response = new HashMap<String, String>();
         response.put("url", blobstoreService.createUploadUrl(callbackUrl));
 
         return response;
     }
-    
+
     /**
      * Upload file to blobstore callback.
+     * This method will be call by the Blonstore service after a successful file upload.
      * @return the download url for each of the uploaded files
      */
     @RestReturn(value=Map.class, entity=Map.class, code={
@@ -98,21 +89,22 @@ public class BlobController extends AbstractRestController {
                                               UriComponentsBuilder uriBuilder) {
         LOG.debug("Blobstore upload callback");
 
-        final Map<String, List<String>> body = new TreeMap<String, List<String>>();
+        // Get all uploaded blob info records
         Map<String, List<BlobInfo>> blobInfos = blobstoreService.getBlobInfos(request);
-        String accessUrl;
+        // Response body
+        final Map<String, List<String>> body = new TreeMap<String, List<String>>();
 
         for (Entry<String, List<BlobInfo>> field : blobInfos.entrySet()) {
-            
+            // All urls for a specific upload
             ArrayList<String> urls = new ArrayList<String>();
             body.put(field.getKey(), urls);
+
             for (BlobInfo blobInfo : field.getValue()) {
-                
+                String accessUrl;
                 final BlobKey blobKey = blobInfo.getBlobKey();
 
                 final String contentType = blobInfo.getContentType();
                 if (null != contentType && contentType.startsWith("image")) {
-
                     // we want to serve directly from ImagesService,
                     // to avoid involving the GAE app, avoid spinning up instances,
                     // and to use the awesome Google CDN.
@@ -120,11 +112,9 @@ public class BlobController extends AbstractRestController {
                     accessUrl = imagesService.getServingUrl(suo);
                 }
                 else {
-
                     // serve via this BlobController
-                    accessUrl = String.format("%s://%s/api/%s/blob/v10?key=%s", 
-                        request.getScheme(), request.getHeader("Host"), 
-                        domain, blobKey.getKeyString());
+                    accessUrl = uriBuilder.query("key={blobkey}").
+                            buildAndExpand(blobKey.getKeyString()).toUriString();
                 }
                 urls.add(accessUrl);
             }
@@ -142,7 +132,7 @@ public class BlobController extends AbstractRestController {
     @ResponseBody
     public void getBlob(HttpServletRequest request,
             HttpServletResponse response,
-            @RequestParam(required = true) String key) throws IOException {
+            @RequestParam String key) throws IOException {
         LOG.debug("Get blob with key:{}", key);
 
         BlobKey blobKey = new BlobKey(key);
@@ -158,7 +148,7 @@ public class BlobController extends AbstractRestController {
     @ResponseBody
     public void deleteBlob(HttpServletRequest request,
             HttpServletResponse response,
-            @RequestParam(required = true) String key) throws IOException {
+            @RequestParam String key) throws IOException {
         LOG.debug("Delete blob with key:{}", key);
 
         BlobKey blobKey = new BlobKey(key);
