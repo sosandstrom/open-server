@@ -55,21 +55,21 @@ public class BlobController extends AbstractRestController {
     @ResponseBody
     public Map<String, String> getUploadUrl(HttpServletRequest request,
                                             @RequestParam(required=false) String callbackPath,
-                                            @RequestParam(required=false) Boolean retainParams) {
+                                            @RequestParam(defaultValue="false") Boolean retainParams) {
         LOG.debug("Get blobstore upload url");
 
         // Use callback path if provided
         String callbackUrl = null != callbackPath ? callbackPath : request.getRequestURI();
 
         // Forward any existing query parameters, e.g. access_token
-        if (null != retainParams && retainParams) {
+        if (retainParams) {
             final String queryString = request.getQueryString();
             callbackUrl = String.format("%s?%s", callbackUrl, null != queryString ? queryString : "");
         }
 
         // Response
         Map<String, String> response = new HashMap<String, String>();
-        response.put("url", blobstoreService.createUploadUrl(callbackUrl));
+        response.put("uploadUrl", blobstoreService.createUploadUrl(callbackUrl));
 
         return response;
     }
