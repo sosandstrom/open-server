@@ -4,6 +4,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import net.sf.mardao.core.CursorPage;
 
@@ -20,6 +21,8 @@ public interface CrudService<
     ID create(T domain);
     
     void delete(String parentKeyString, ID id);
+
+    void delete(String parentKeyString, ID[] id);
 
     void exportCsv(OutputStream out, Long startDate, Long endDate);
     
@@ -42,6 +45,8 @@ public interface CrudService<
     Map<String, Class> getTypeMap();
     
     ID update(T domain);
+    
+    List<ID> upsert(Iterable<T> domains);
     
     CursorPage<ID, ID> whatsChanged(Date since, int pageSize, String cursorKey);
 

@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import net.sf.mardao.core.CursorPage;
 
@@ -38,6 +39,11 @@ public class CrudServiceWrapper<T extends Object, ID extends Serializable, E ext
 
     @Override
     public void delete(String parentKeyString, ID id) {
+        delegate.delete(parentKeyString, id);
+    }
+
+    @Override
+    public void delete(String parentKeyString, ID[] id) {
         delegate.delete(parentKeyString, id);
     }
 
@@ -84,6 +90,11 @@ public class CrudServiceWrapper<T extends Object, ID extends Serializable, E ext
     @Override
     public ID update(E domain) {
         return delegate.update(domain);
+    }
+
+    @Override
+    public List<ID> upsert(Iterable<E> domains) {
+        return delegate.upsert((Iterable<T>) domains);
     }
 
     @Override

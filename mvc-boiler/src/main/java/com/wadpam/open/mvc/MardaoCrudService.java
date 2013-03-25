@@ -3,10 +3,13 @@ package com.wadpam.open.mvc;
 import com.wadpam.open.exceptions.RestException;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.Future;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.Filter;
 import net.sf.mardao.core.dao.Dao;
@@ -71,6 +74,22 @@ public abstract class MardaoCrudService<
         try {
             Object parentKey = dao.getPrimaryKey(parentKeyString);
             dao.delete(parentKey, id);
+        }
+        finally {
+            postDao();
+        }
+    }
+
+    @Override
+    public void delete(String parentKeyString, ID[] id) {
+        preDao();
+        try {
+            Object parentKey = dao.getPrimaryKey(parentKeyString);
+            final ArrayList<ID> ids = new ArrayList<ID>();
+            for (ID i : id) {
+                ids.add(i);
+            }
+            dao.delete(parentKey, ids);
         }
         finally {
             postDao();
@@ -219,6 +238,47 @@ public abstract class MardaoCrudService<
         finally {
             postDao();
         }
+    }
+    
+    @Override
+    public List<ID> upsert(Iterable<T> dEntities) {
+        // group entities by create or update:
+        final ArrayList<T> toCreate = new ArrayList<T>();
+        final ArrayList<T> toUpdate = new ArrayList<T>();
+        ID id;
+        for (T d : dEntities) {
+            id = dao.getSimpleKey(d);
+            if (null == id) {
+                toCreate.add(d);
+            }
+            else {
+                toUpdate.add(d);
+            }
+        }
+        
+        // create new entities using async API
+        Future<List<?>> createFuture = null;
+        if (!toCreate.isEmpty()) {
+            createFuture = dao.persistForFuture(toCreate);
+        }
+        
+        // update in parallel
+        if (!toUpdate.isEmpty()) {
+            dao.update(toUpdate);
+        }
+        
+        // join future
+        if (null != createFuture) {
+            dao.getSimpleKeys(createFuture);
+        }
+
+        // collect the IDs
+        final ArrayList<ID> body = new ArrayList<ID>();
+        for (T d : dEntities) {
+            body.add(getSimpleKey(d));
+        }
+
+        return body;
     }
     
     @Override
