@@ -1,10 +1,12 @@
 package com.wadpam.open.json;
 
+import java.io.Serializable;
+
 /**
  * A JLocation contains the latitude and longitude coordinates.
  * @author sosandstrom
  */
-public class JLocation {
+public class JLocation implements Serializable {
 
     private Float latitude;
     private Float longitude;

@@ -1,10 +1,12 @@
 package com.wadpam.open.json;
 
+import java.io.Serializable;
+
 /**
  * Implement a basic monitor controller that can be used for monitoring uptime of a backend.
  * @author sosandstrom
  */
-public class JMonitor {
+public class JMonitor implements Serializable {
 
     private Long currentTimeMillis;
     private String ipAddress;
