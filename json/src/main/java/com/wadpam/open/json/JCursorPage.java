@@ -7,7 +7,7 @@ import java.util.Collection;
  * Json object for a pages of items.
  * @author mattiaslevin
  */
-public class JCursorPage<T extends Object> {
+public class JCursorPage<T extends Object> implements Serializable {
 
     /**
      * The cursor used to return the next page of items
