@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -255,6 +256,8 @@ public abstract class MardaoCrudService<
                 toUpdate.add(d);
             }
         }
+        LOG.debug("Creating {}, Updating {}", toCreate.size(), toUpdate.size());
+        LOG.debug("Creating {}, Updating {}", toCreate, toUpdate);
         
         // create new entities using async API
         Future<List<?>> createFuture = null;
@@ -269,7 +272,11 @@ public abstract class MardaoCrudService<
         
         // join future
         if (null != createFuture) {
-            dao.getSimpleKeys(createFuture);
+            Collection<ID> ids = dao.getSimpleKeys(createFuture);
+            Iterator<ID> i = ids.iterator();
+            for (T t : toCreate) {
+                dao.setSimpleKey(t, i.next());
+            }
         }
 
         // collect the IDs

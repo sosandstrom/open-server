@@ -22,7 +22,6 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpUtils;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.domain.AbstractCreatedUpdatedEntity;
 import net.sf.mardao.core.domain.AbstractLongEntity;
@@ -45,7 +44,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.view.RedirectView;
-import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  *
@@ -702,18 +700,20 @@ public abstract class CrudController<
             HttpServletResponse response,
             @PathVariable String domain,
             Model model,
-            @RequestBody J[] jEntities) {
+            @RequestBody ArrayList<Map<String,Object>> jEntities) {
+        LOG.debug("upserting {} entities", jEntities.size());
 
         ArrayList<T> dEntities = new ArrayList<T>();
-        for (J jEntity : jEntities) {
+        for (Map<String,Object> map : jEntities) {
+            J jEntity = convertMap(map);
             J amendedBody = populateRequestBody(request, model, jEntity);
             T d = convertJson(amendedBody);
             dEntities.add(d);
         }
         
-//        preService(request, domain, CrudListener.UPDATE, jEntity, d, id);
+        preService(request, domain, CrudListener.UPSERT_BATCH, jEntities, dEntities, null);
         final List<ID> body = service.upsert(dEntities);
-//        postService(request, domain, CrudListener.UPDATE, jEntity, id, d);
+        postService(request, domain, CrudListener.UPSERT_BATCH, jEntities, null, body);
 
         return body;
     }
@@ -806,8 +806,25 @@ public abstract class CrudController<
         return to;
     }
 
+    public J convertMap(Map<String,Object> from) {
+        if (null == from) {
+            return null;
+        }
+        J to = createJson();
+        convertJMap(from, to);
+        return to;
+    }
+
     public abstract void convertDomain(T from, J to);
     public abstract void convertJson(J from, T to);
+    
+    /**
+     * Override to get upsertBatch to work!
+     * @param from is a LinkedHashMap created by Jackson
+     */
+    public void convertJMap(Map<String,Object> from, J to) {
+        throw new UnsupportedOperationException("Override in subclass!"); 
+    }
     
     public J createJson() {
         try {
@@ -871,6 +888,17 @@ public abstract class CrudController<
         to.setUpdatedDate(toDate(from.getUpdatedDate()));
     }
     
+    public static void convertJCreatedUpdated(Map<String, Object> from, JBaseObject to) {
+        if (null == from || null == to) {
+            return;
+        }
+
+        to.setCreatedBy((String)from.get("createdBy"));
+        to.setCreatedDate((Long)from.get("createdDate"));
+        to.setUpdatedBy((String)from.get("updatedBy"));
+        to.setUpdatedDate((Long)from.get("updatedDate"));
+    }
+    
     public static void convertJLong(JBaseObject from, AbstractLongEntity to) {
         if (null == from || null == to) {
             return;
@@ -878,6 +906,16 @@ public abstract class CrudController<
         convertJCreatedUpdated(from, to);
 
         to.setId(toLong(from.getId()));
+    }
+    
+    public static void convertJLong(Map<String, Object> from, JBaseObject to) {
+        if (null == from || null == to) {
+            return;
+        }
+        convertJCreatedUpdated(from, to);
+
+        Object id = from.get("id");
+        to.setId(null != id ? id.toString() : null);
     }
 
     public static void convertJString(JBaseObject from, AbstractStringEntity to) {
