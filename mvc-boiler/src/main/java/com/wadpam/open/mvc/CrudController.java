@@ -22,7 +22,6 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpUtils;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.domain.AbstractCreatedUpdatedEntity;
 import net.sf.mardao.core.domain.AbstractLongEntity;
@@ -45,7 +44,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.view.RedirectView;
-import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  *
@@ -198,6 +196,7 @@ public abstract class CrudController<
     public J createFromJsonWithContent(HttpServletRequest request,
             HttpServletResponse response,
             @PathVariable String domain,
+            @RequestParam(value="_expects") Integer _expects,
             Model model,
             @RequestBody J jEntity) {
         return createForObject(request, response, domain, model, jEntity);
@@ -297,9 +296,60 @@ public abstract class CrudController<
             HttpServletResponse response,
             @PathVariable String domain,
             @PathVariable ID id,
-            @RequestParam(required=false) String parentKeyString
+            @RequestParam(required=false) String parentKeyString,
+            @RequestParam("_method") String _method
             ) {
         return delete(request, response, domain, id, parentKeyString);
+    }
+
+    /**
+    * deleteFromJsonp  for cross-domain - delete an Entity and return HttpStatus.NO_CONTENT .
+    * @param domain the path-variable domain
+    * @param id the ids as an array
+    * @param _method value must be  "DELETE"	 	 
+    * @return  HttpStatus.NO_CONTENT
+    */	
+    @RestReturn(value=ResponseEntity.class, code={
+        @RestCode(code=204, description="Entities deleted", message="OK")
+    })		 
+    @RequestMapping(value="v10", method=RequestMethod.DELETE)
+    public ResponseEntity deleteBatch(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable String domain,
+            @RequestParam ID[] id,
+            @RequestParam(required=false) String parentKeyString
+            ) {
+        LOG.debug("DELETE {}/{}", parentKeyString, id);
+        
+        preService(request, domain, CrudListener.DELETE_BATCH, null, null, id);
+        service.delete(parentKeyString, id);
+        postService(request, domain, CrudListener.DELETE_BATCH, null, id, null);
+        
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    /**
+    * deleteFromJsonp  for cross-domain - delete an Entity and return HttpStatus.NO_CONTENT .
+    * @param domain the path-variable domain
+    * @param id the ids as an array
+    * @param _method value must be  "DELETE"	 	 
+    * @return  HttpStatus.NO_CONTENT
+    */	
+    @RestReturn(value=ResponseEntity.class, code={
+        @RestCode(code=204, description="Entities deleted", message="OK")
+    })		 
+    @RequestMapping(value="v10", method=RequestMethod.GET,
+            params={"_method=DELETE"})
+    public ResponseEntity deleteBatchFromJsonp(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable String domain,
+            @RequestParam ID[] id,
+            @RequestParam(required=false) String parentKeyString,
+            @RequestParam("_method") String _method
+            ) {
+        return deleteBatch(request, response, domain, id, parentKeyString);
     }
 
     /**
@@ -633,6 +683,41 @@ public abstract class CrudController<
                 model, jEntity);
     }
     
+  /**
+     * Upserts a batch from the json-object-encoded array body by MediaType.APPLICATION_JSON_VALUE, 
+     * and responds with the upserted IDs.
+     * @param domain the path-variable domain
+     * @param jEntities The Request body will be bound to this object array
+     * @return 200 and the upserted Ids
+     */
+    @RestReturn(value=Object.class, code={
+        @RestCode(code=200, description="Batch of Entities upserted", message="OK")
+    })
+    @RequestMapping(value="v10/_batch", method=RequestMethod.POST, 
+            consumes=MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<ID> upsertBatchFromJsonWithContent(HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable String domain,
+            Model model,
+            @RequestBody ArrayList<Map<String,Object>> jEntities) {
+        LOG.debug("upserting {} entities", jEntities.size());
+
+        ArrayList<T> dEntities = new ArrayList<T>();
+        for (Map<String,Object> map : jEntities) {
+            J jEntity = convertMap(map);
+            J amendedBody = populateRequestBody(request, model, jEntity);
+            T d = convertJson(amendedBody);
+            dEntities.add(d);
+        }
+        
+        preService(request, domain, CrudListener.UPSERT_BATCH, jEntities, dEntities, null);
+        final List<ID> body = service.upsert(dEntities);
+        postService(request, domain, CrudListener.UPSERT_BATCH, jEntities, null, body);
+
+        return body;
+    }
+    
     /**
      * Queries for a (next) page of ids which has changed since last update.
      * Header If-Modified-Since is required, timestamp of last update; use "Sat, 29 Oct 1994 19:43:31 GMT" if none
@@ -721,8 +806,25 @@ public abstract class CrudController<
         return to;
     }
 
+    public J convertMap(Map<String,Object> from) {
+        if (null == from) {
+            return null;
+        }
+        J to = createJson();
+        convertJMap(from, to);
+        return to;
+    }
+
     public abstract void convertDomain(T from, J to);
     public abstract void convertJson(J from, T to);
+    
+    /**
+     * Override to get upsertBatch to work!
+     * @param from is a LinkedHashMap created by Jackson
+     */
+    public void convertJMap(Map<String,Object> from, J to) {
+        throw new UnsupportedOperationException("Override in subclass!"); 
+    }
     
     public J createJson() {
         try {
@@ -786,6 +888,17 @@ public abstract class CrudController<
         to.setUpdatedDate(toDate(from.getUpdatedDate()));
     }
     
+    public static void convertJCreatedUpdated(Map<String, Object> from, JBaseObject to) {
+        if (null == from || null == to) {
+            return;
+        }
+
+        to.setCreatedBy((String)from.get("createdBy"));
+        to.setCreatedDate((Long)from.get("createdDate"));
+        to.setUpdatedBy((String)from.get("updatedBy"));
+        to.setUpdatedDate((Long)from.get("updatedDate"));
+    }
+    
     public static void convertJLong(JBaseObject from, AbstractLongEntity to) {
         if (null == from || null == to) {
             return;
@@ -793,6 +906,16 @@ public abstract class CrudController<
         convertJCreatedUpdated(from, to);
 
         to.setId(toLong(from.getId()));
+    }
+    
+    public static void convertJLong(Map<String, Object> from, JBaseObject to) {
+        if (null == from || null == to) {
+            return;
+        }
+        convertJCreatedUpdated(from, to);
+
+        Object id = from.get("id");
+        to.setId(null != id ? id.toString() : null);
     }
 
     public static void convertJString(JBaseObject from, AbstractStringEntity to) {

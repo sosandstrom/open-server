@@ -19,6 +19,8 @@ public interface CrudListener {
     public static final int DELETE = 4;
     public static final int GET_PAGE = 11;
     public static final int WHAT_CHANGED = 12;
+    public static final int UPSERT_BATCH = 13;
+    public static final int DELETE_BATCH = 14;
     
     /**
      * Triggered by the CrudController before the CrudService is invoked.
