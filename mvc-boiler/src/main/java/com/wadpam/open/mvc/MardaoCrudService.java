@@ -273,10 +273,10 @@ public abstract class MardaoCrudService<
         // join future
         if (null != createFuture) {
             Collection<ID> ids = dao.getSimpleKeys(createFuture);
-            Iterator<ID> i = ids.iterator();
-            for (T t : toCreate) {
-                dao.setSimpleKey(t, i.next());
-            }
+//            Iterator<ID> i = ids.iterator();
+//            for (T t : toCreate) {
+//                dao.setSimpleKey(t, i.next());
+//            }
         }
 
         // collect the IDs
