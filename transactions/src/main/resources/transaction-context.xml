@@ -35,10 +35,11 @@
         <property name="maxRetries" value="3"/>
     </bean>
 
+<!--  You also need to select an appropriate Transaction Manager implementation: 
     <tx:annotation-driven transaction-manager="transactionManager" order="200"/>
 
     <bean id="transactionManager" class="com.wadpam.open.transaction.GaeTransactionManager">
         <property name="transactionSynchronization" value="2" />
-    </bean>
+    </bean>-->
 
 </beans>

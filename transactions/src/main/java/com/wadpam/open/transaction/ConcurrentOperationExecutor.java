@@ -11,9 +11,9 @@ import java.util.ConcurrentModificationException;
  * Class for implementing a finite number of retries when a GAE datastore transaction fail.
  * @author mattiaslevin
  */
-public class GaeConcurrentOperationExecutor implements Ordered {
+public class ConcurrentOperationExecutor implements Ordered {
 
-    static final Logger LOG = LoggerFactory.getLogger(GaeConcurrentOperationExecutor.class);
+    static final Logger LOG = LoggerFactory.getLogger(ConcurrentOperationExecutor.class);
 
     private static final int DEFAULT_MAX_RETRIES = 3;
     private static final int DEFAULT_WAIT = 100;
