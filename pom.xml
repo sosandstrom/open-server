@@ -20,6 +20,7 @@
         <module>jsonp</module>
         <module>mvc-boiler</module>
         <module>push</module>
+        <module>transactions</module>
         <module>transactions-gae</module>
         <module>security-gae</module>
         <module>webapp</module>
