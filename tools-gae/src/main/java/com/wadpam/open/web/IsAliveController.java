@@ -4,6 +4,8 @@ import com.wadpam.docrest.domain.RestCode;
 import com.wadpam.docrest.domain.RestReturn;
 import com.wadpam.open.analytics.Tracker;
 import com.wadpam.open.analytics.google.*;
+import com.wadpam.open.analytics.google.config.Property;
+import com.wadpam.open.analytics.google.trackinginfo.CustomVariable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -77,11 +79,11 @@ public class IsAliveController extends AbstractRestController {
 
 
         // Create tracking configuration
-        TrackerConfiguration trackerConfig = null;
+        Property propertyConfiguration = null;
         if (null != trackingCode) {
-            trackerConfig = new TrackerConfiguration("IsAliveTracker", trackingCode);
+            propertyConfiguration = new Property("IsAliveTracker", trackingCode);
         } else if (null != this.trackingCode) {
-            trackerConfig = new TrackerConfiguration("IsAliveTracker", this.trackingCode);
+            propertyConfiguration = new Property("IsAliveTracker", this.trackingCode);
         }  else {
             LOG.info("No tracker configured, is alive message will not be sent to any tracker");
             return;
@@ -89,9 +91,9 @@ public class IsAliveController extends AbstractRestController {
 
         // Build tracker
         Tracker tracker = new GoogleAnalyticsTrackerBuilder()
-                .withTrackingConfiguration(trackerConfig)
-                .withVisitorId(id.hashCode())
-                .withDeviceFromRequest(request)
+                .trackerConfiguration(propertyConfiguration)
+                .visitor(id)
+                .deviceFromRequest(request)
                 .build();
 
         // Custom variables

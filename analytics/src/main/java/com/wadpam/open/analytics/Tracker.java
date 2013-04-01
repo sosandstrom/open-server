@@ -1,6 +1,6 @@
 package com.wadpam.open.analytics;
 
-import com.wadpam.open.analytics.google.CustomVariable;
+import com.wadpam.open.analytics.google.trackinginfo.CustomVariable;
 
 import java.util.List;
 
@@ -13,18 +13,18 @@ public interface Tracker {
 
     /**
      * Track a page view referrer and custom variables.
-     * @param pageURL the page url, e.g. /page/. Must be provided
-     * @param pageTitle the title of the page
      * @param hostName the host name
-     * @param referrerPage optional. The referrer page
+     * @param path the page url, e.g. /page/. Must be provided
+     * @param title the title of the page
      * @param referrerSite optional. The referrer site
+     * @param referrerPage optional. The referrer page
      * @param customVariables optional. List of custom variables
      */
-    public void trackPageView(String pageURL,
-                              String pageTitle,
-                              String hostName,
-                              String referrerPage,
+    public void trackPageView(String hostName,
+                              String path,
+                              String title,
                               String referrerSite,
+                              String referrerPage,
                               List<CustomVariable> customVariables);
 
     /**
@@ -32,8 +32,8 @@ public interface Tracker {
      * @param category the category
      * @param action the action
      * @param label the label
-     * @param value optional. The value
-     * @param customVariables optional. custom variables
+     * @param value optional. Event value
+     * @param customVariables optional. Custom variables
      */
     public void trackEvent(String category,
                            String action,

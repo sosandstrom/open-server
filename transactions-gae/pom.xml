@@ -4,11 +4,11 @@
     <parent>
         <groupId>com.wadpam.openserver</groupId>
         <artifactId>parent</artifactId>
-        <version>14-SNAPSHOT</version>
+        <version>21-SNAPSHOT</version>
     </parent>
     <artifactId>transactions-gae</artifactId>
     <packaging>jar</packaging>
-    <name>Open-Server transactions-gae</name>
+    <name>Open-Server transactions GAE</name>
 
     <!-- Specify hard-coded project properties here -->
     <properties>
@@ -42,6 +42,12 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>transactions</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjtools</artifactId>

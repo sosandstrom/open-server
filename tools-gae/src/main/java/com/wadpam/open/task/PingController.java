@@ -6,6 +6,8 @@ import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import javax.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,10 +22,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * @author os
  */
 @Controller
-@RequestMapping("_admin/{domain}/ping")
+@RequestMapping(value = {"_admin/{domain}/ping", "{domain}/_admin/ping"})
 public class PingController {
     /** Will only schedule a next PING if current time is beyond this timestamp */
     public static final String NEXT_TIMESTAMP = "_next_timestamp";
+    
+    static final Logger LOG = LoggerFactory.getLogger(PingController.class);
     
     final MemcacheService MEMCACHE_SERVICE = MemcacheServiceFactory.getMemcacheService(null);
     
@@ -65,6 +69,9 @@ public class PingController {
             }
             scheduleTask(uri, System.currentTimeMillis(), interval, token);
         }
+        else {
+            LOG.info("Discarding PING task {} != {}", cachedToken, token);
+        }
         
         return cachedToken;
     }
@@ -72,6 +79,7 @@ public class PingController {
     protected void scheduleTask(final String uri, final long currentMillis, Long interval, final String token) {
         // Will only schedule a next PING if current time is beyond this timestamp
         final Long minNextTime = (Long) MEMCACHE_SERVICE.get(NEXT_TIMESTAMP);
+        LOG.debug("Match: {}, overdue {}ms", token, Long.toString(currentMillis - (null != minNextTime ? minNextTime : 0L)));
         if (null == minNextTime || minNextTime <= currentMillis) {
             MEMCACHE_SERVICE.put(NEXT_TIMESTAMP, currentMillis + interval);
             final TaskOptions options = TaskOptions.Builder

@@ -50,7 +50,7 @@ public class Mardao1Extractor implements Extractor<Dao> {
         return null != map ? map : Collections.EMPTY_MAP;
     }
     
-    public void setHeaderNames(Map<String, String> headerNames, net.sf.mardao.core.dao.Dao dao) {
+    public void setHeaderNames(Map<String, String> headerNames, Dao dao) {
         daoHeaders.put(dao.getTableName(), headerNames);
     }
 

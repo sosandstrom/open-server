@@ -8,6 +8,8 @@ import java.util.Map;
  * @author os
  */
 public interface Converter<D> {
+    
+    Object initPreDao(OutputStream out, Object arg);
 
     Object preExport(OutputStream out, Object arg, Object preExport, D[] daos);
 

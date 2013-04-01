@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.wadpam.openserver</groupId>
         <artifactId>parent</artifactId>
-        <version>14-SNAPSHOT</version>
+        <version>21-SNAPSHOT</version>
     </parent>
     <artifactId>webapp</artifactId>
     <packaging>war</packaging>
@@ -12,6 +12,7 @@
 
     <!-- Specify hard-coded project properties here -->
     <properties>
+<!--        <gae.version>1.7.3</gae.version>-->
         <gae.application.version>lab</gae.application.version>
         <gae.application.id>open-user</gae.application.id>
         <netbeans.hint.deploy.server>Tomcat</netbeans.hint.deploy.server>
@@ -19,6 +20,9 @@
         <surefire.default.skip>true</surefire.default.skip>
         <downloadSources>true</downloadSources>
         <logging.level>ALL</logging.level>
+        
+        <!-- override spring.version for test ParameterizedTypeReference -->
+        <!--<spring.version>3.2.0.RELEASE</spring.version>-->
     </properties>
 
     <dependencies>
@@ -45,11 +49,16 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>users</artifactId>
-            <version>${project.version}</version>
+            <version>14</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>tools-gae</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>test</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -319,21 +328,24 @@
             <plugin>
                 <groupId>net.kindleit</groupId>
                 <artifactId>maven-gae-plugin</artifactId>
-                <version>0.9.4</version>
+                <version>0.9.6-B1</version>
                 <configuration>
                     <port>8234</port>
-                    <monitorPort>8789</monitorPort>
+                    <monitor.port>8789</monitor.port>
                     <serverId>private.gmail</serverId>
                     <disableUpdateCheck>true</disableUpdateCheck>
+                    <wait>false</wait>
                     <jvmFlags>
                         <jvmFlag>-Ddatastore.default_high_rep_job_policy_unapplied_job_pct=20</jvmFlag>
                     </jvmFlags>                
+                    <scanIntervalSeconds>0</scanIntervalSeconds>
                 </configuration>
                 <dependencies>
                     <dependency>
                         <groupId>net.kindleit</groupId>
                         <artifactId>gae-runtime</artifactId>
-                        <version>${gae.version}</version>
+                        <version>1.7.5.1</version>
+                        <!--<version>${gae.version}</version>-->
                         <type>pom</type>
                     </dependency>
                     <dependency>
@@ -374,13 +386,9 @@
                                 <id>start-gae</id>
                                 <phase>pre-integration-test</phase>
                                 <goals>
-                                    <goal>stop</goal>
+                                    <!--<goal>stop</goal>-->
                                     <goal>start</goal>
                                 </goals>
-                                <configuration>
-                                    <scanIntervalSeconds>0</scanIntervalSeconds>
-                                    <daemon>true</daemon>
-                                </configuration>
                             </execution>
                             <execution>
                                 <id>stop-gae</id>
@@ -407,6 +415,7 @@
                                     <includes>
                                         <include>${itest.include}</include>
                                     </includes>
+                                    <testFailureIgnore>true</testFailureIgnore>
                                 </configuration>
                             </execution>
                         </executions>

@@ -4,21 +4,25 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.wadpam.openserver</groupId>
     <artifactId>parent</artifactId>
-    <version>14-SNAPSHOT</version>
+    <version>21-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Open-Server parent</name>
+    <url>http://github.com/sosandstrom/open-server</url>
+    <description>Open Server contains modules for Server development, most on top of Spring and some for Google App Engine</description>
 
     <modules>
         <module>errors</module>
         <module>j2ee</module>
+        <module>security</module>
         <module>domain</module>
         <module>io-core</module>
+        <module>json</module>
         <module>jsonp</module>
         <module>mvc-boiler</module>
         <module>push</module>
+        <module>transactions</module>
         <module>transactions-gae</module>
         <module>security-gae</module>
-        <module>users</module>
         <module>webapp</module>
         <module>analytics</module>
         <module>analytics-gae</module>
@@ -28,9 +32,9 @@
     </modules>
     
     <properties>
-        <gae.version>1.7.0</gae.version>
-        <docrest.version>1.21</docrest.version>
-        <mardao.version>2.1.8</mardao.version>
+        <gae.version>1.7.5</gae.version>
+        <docrest.version>1.22</docrest.version>
+        <mardao.version>2.2.3</mardao.version>
         <spring.version>3.1.1.RELEASE</spring.version>
         <spring.security.version>3.1.0.RELEASE</spring.security.version>
         <org.springframework.social.version>1.0.1.RELEASE</org.springframework.social.version>
@@ -42,6 +46,16 @@
     </properties>
     
     <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.2.2</version>
+                <configuration>
+                    <mavenExecutorId>forked-path</mavenExecutorId>
+                </configuration>
+            </plugin>
+        </plugins>
         <pluginManagement>
             <plugins>
                 <!-- Java compiler version -->
@@ -96,6 +110,15 @@
         </pluginManagement>
     </build>
     
+    <licenses>
+        <license>
+            <name>GPL v3</name>
+            <url>http://www.gnu.org/licenses/gpl-3.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>Third party libraries used in this project have their own licenses.</comments>
+        </license>
+    </licenses>
+        
     <developers>
         <developer>
             <id>mattiaslevin</id>
@@ -116,16 +139,6 @@
         <developerConnection>scm:git:ssh://git@github.com/sosandstrom/open-server.git</developerConnection>
     </scm>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.sun</groupId>
-            <artifactId>tools</artifactId>
-            <version>1.7</version>
-            <scope>system</scope>
-            <systemPath>${toolsjar}</systemPath>
-        </dependency>
-    </dependencies>
-    
     <distributionManagement>
         <repository>
             <id>sosandstrom-github-releases</id>
@@ -139,35 +152,73 @@
         </snapshotRepository>
     </distributionManagement>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>sosandstrom-github-releases</id>
-            <name>sosandstrom Maven releases repo at GitHub</name>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <url>https://raw.github.com/sosandstrom/maven-repo/master/releases</url>
-        </pluginRepository>
-    </pluginRepositories>
-    <repositories>
-        <repository>
-            <id>sosandstrom-github-releases</id>
-            <name>sosandstrom Maven releases repo at GitHub</name>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <url>https://raw.github.com/sosandstrom/maven-repo/master/releases</url>
-        </repository>
-    </repositories>
+    <issueManagement>
+        <system>github</system>
+        <url>https://github.com/sosandstrom/open-server/issues</url>
+    </issueManagement>
 
-    <!--Profiles for handling different location of tools.jar on OSX-->
     <profiles>
+        <profile>
+            <id>release-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.8</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadoc</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>2.1.2</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.1</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <distributionManagement>
+                <repository>
+                    <id>sonatype-nexus-staging</id>
+                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+                </repository>
+            </distributionManagement>
+        </profile>
+        
+        <!--Profiles for handling different location of tools.jar on OSX-->
         <profile>
             <id>default-profile</id>
             <activation>

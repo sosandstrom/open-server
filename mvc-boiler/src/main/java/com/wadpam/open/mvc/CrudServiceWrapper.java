@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import net.sf.mardao.core.CursorPage;
 
@@ -42,6 +43,11 @@ public class CrudServiceWrapper<T extends Object, ID extends Serializable, E ext
     }
 
     @Override
+    public void delete(String parentKeyString, ID[] id) {
+        delegate.delete(parentKeyString, id);
+    }
+
+    @Override
     public void exportCsv(OutputStream out, Long startDate, Long endDate) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -57,7 +63,7 @@ public class CrudServiceWrapper<T extends Object, ID extends Serializable, E ext
     }
 
     @Override
-    public CursorPage<E, ID> getPage(int pageSize, Serializable cursorKey) {
+    public CursorPage<E, ID> getPage(int pageSize, String cursorKey) {
         return (CursorPage<E, ID>) delegate.getPage(pageSize, cursorKey);
     }
 
@@ -87,7 +93,12 @@ public class CrudServiceWrapper<T extends Object, ID extends Serializable, E ext
     }
 
     @Override
-    public CursorPage<ID, ID> whatsChanged(Date since, int pageSize, Serializable cursorKey) {
+    public List<ID> upsert(Iterable<E> domains) {
+        return delegate.upsert((Iterable<T>) domains);
+    }
+
+    @Override
+    public CursorPage<ID, ID> whatsChanged(Date since, int pageSize, String cursorKey) {
         return delegate.whatsChanged(since, pageSize, cursorKey);
     }
 

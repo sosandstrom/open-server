@@ -20,7 +20,7 @@
         In your application, you need to define the aop:config with aspect and pointcuts, e.g.
         
         <aop:config>
-            <aop:aspect id="gaeConcurrentOperationAspect" ref="gaeConcurrentOperationExecutor">
+            <aop:aspect id="concurrentOperationAspect" ref="concurrentOperationExecutor">
                 <aop:pointcut id="transactionMethods"
                               expression="within(com.wadpam.rnr.service.RnrService)
                               and (execution(* add*(..)) or execution(* delete*(..)) or execution(* update*(..)))
@@ -30,7 +30,7 @@
         </aop:config>
      -->
 
-    <bean id="gaeConcurrentOperationExecutor" class="com.wadpam.open.transaction.GaeConcurrentOperationExecutor">
+    <bean id="concurrentOperationExecutor" class="com.wadpam.open.transaction.ConcurrentOperationExecutor">
         <property name="order" value="10"/>
         <property name="maxRetries" value="3"/>
     </bean>

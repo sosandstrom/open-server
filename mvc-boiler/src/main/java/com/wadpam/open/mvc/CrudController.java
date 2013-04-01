@@ -69,7 +69,7 @@ public abstract class CrudController<
     
     protected final ArrayList<CrudListener> listeners = new ArrayList<CrudListener>();
     
-    protected CrudController(Class jsonClazz) {
+    protected CrudController(Class<J> jsonClazz) {
         this.jsonClass = jsonClazz;
     }
     
@@ -94,8 +94,10 @@ public abstract class CrudController<
             Model model,
             @ModelAttribute J jEntity) {
         
-        final String path = createForLocation(request, domain, model, jEntity);
-        return new RedirectView(path, true);
+        final String id = createForId(request, domain, model, jEntity);
+        final String httpUrl = request.getRequestURL().toString();
+        final String absoluteUrl = String.format("%s/%s", httpUrl, id);
+        return new RedirectView(absoluteUrl);
     }
     
     /**
@@ -111,18 +113,18 @@ public abstract class CrudController<
         @RestCode(code=201, description="Entity created", message="Created")
     })
     @RequestMapping(value="v10", method=RequestMethod.GET, 
-            params={"_method=POST"},
-            headers={"X-Requested-With=XMLHttpRequest"},
-            consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+            params={"_method=POST"})
     public ResponseEntity createFromJsonp(
             HttpServletRequest request,
             HttpServletResponse response,
             @PathVariable String domain,
             Model model,
             @ModelAttribute J jEntity) {
-        final String path = createForLocation(request, domain, model, jEntity);
+        final String id = createForId(request, domain, model, jEntity);
+        final String httpUrl = request.getRequestURL().toString();
+        final String absoluteUrl = String.format("%s/%s", httpUrl, id);
         final HttpHeaders headers = new HttpHeaders();
-        headers.set("Location", path);
+        headers.set("Location", absoluteUrl);
         return new ResponseEntity(headers, HttpStatus.CREATED);
     }
     
@@ -146,8 +148,10 @@ public abstract class CrudController<
             @PathVariable String domain,
             Model model,
             @RequestBody J jEntity) {
-        final String path = createForLocation(request, domain, model, jEntity);
-        return new RedirectView(path, true);
+        final String id = createForId(request, domain, model, jEntity);
+        final String httpUrl = request.getRequestURL().toString();
+        final String absoluteUrl = String.format("%s/%s", httpUrl, id);
+        return new RedirectView(absoluteUrl);
     }
     
     /**
@@ -174,6 +178,17 @@ public abstract class CrudController<
         return createForObject(request, response, domain, model, jEntity);
     }
     
+  /**
+     * Creates an Entity from the json-object-encoded body by MediaType.APPLICATION_JSON_VALUE, 
+     * and redirects to the created Entity.
+     * @param domain the path-variable domain
+     * @param _expects must be set to 200
+     * @param jEntity The Request body will be bound to this object
+     * @return 200 and the created entity
+     */
+    @RestReturn(value=Object.class, code={
+        @RestCode(code=200, description="Entity created", message="OK")
+    })
     @RequestMapping(value="v10", method=RequestMethod.POST, 
             params={"_expects=200"},
             consumes=MediaType.APPLICATION_JSON_VALUE)
@@ -181,6 +196,7 @@ public abstract class CrudController<
     public J createFromJsonWithContent(HttpServletRequest request,
             HttpServletResponse response,
             @PathVariable String domain,
+            @RequestParam(value="_expects") Integer _expects,
             Model model,
             @RequestBody J jEntity) {
         return createForObject(request, response, domain, model, jEntity);
@@ -220,24 +236,32 @@ public abstract class CrudController<
         return convertWithInner(request, response, domain, model, d);
     }
     
-    protected String createForLocation(HttpServletRequest request, 
+    protected String createForId(HttpServletRequest request, 
             String domain,
             Model model, J body) {
         J amendedBody = populateRequestBody(request, model, body);
         T d = create(request, domain, amendedBody);
         
-        final StringBuffer path = new StringBuffer(request.getRequestURI());
-        path.append('/');
+        final StringBuffer path = new StringBuffer();
         path.append(service.getSimpleKey(d));
         final String parentKeyString = service.getParentKeyString(d);
         if (null != parentKeyString) {
             path.append("?parentKeyString=");
             path.append(parentKeyString);
         }
-        LOG.debug("Location for created entity is {}", path.toString());
+        LOG.debug("Path for created entity is {}", path.toString());
         return path.toString();
     }
     
+	 /**
+	     *  delete an Entity and return HttpStatus.NO_CONTENT .
+	     * @param domain the path-variable domain
+	     * @param id the path-variable id	 	     
+	     * @return  HttpStatus.NO_CONTENT
+	     */
+    @RestReturn(value=ResponseEntity.class, code={
+        @RestCode(code=204, description="Entity deleted", message="OK")
+    })		 
     @RequestMapping(value="v10/{id}", method=RequestMethod.DELETE)
     public ResponseEntity delete(
             HttpServletRequest request,
@@ -255,6 +279,16 @@ public abstract class CrudController<
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
+	 /**
+	     * deleteFromJsonp  for cross-domain - delete an Entity and return HttpStatus.NO_CONTENT .
+	     * @param domain the path-variable domain
+	     * @param id the path-variable id
+	     * @param _method value must be  "DELETE"	 	 
+	     * @return  HttpStatus.NO_CONTENT
+	     */	
+    @RestReturn(value=ResponseEntity.class, code={
+        @RestCode(code=204, description="Entity deleted", message="OK")
+    })		 
     @RequestMapping(value="v10/{id}", method=RequestMethod.GET,
             params={"_method=DELETE"})
     public ResponseEntity deleteFromJsonp(
@@ -262,9 +296,60 @@ public abstract class CrudController<
             HttpServletResponse response,
             @PathVariable String domain,
             @PathVariable ID id,
-            @RequestParam(required=false) String parentKeyString
+            @RequestParam(required=false) String parentKeyString,
+            @RequestParam("_method") String _method
             ) {
         return delete(request, response, domain, id, parentKeyString);
+    }
+
+    /**
+    * deleteFromJsonp  for cross-domain - delete an Entity and return HttpStatus.NO_CONTENT .
+    * @param domain the path-variable domain
+    * @param id the ids as an array
+    * @param _method value must be  "DELETE"	 	 
+    * @return  HttpStatus.NO_CONTENT
+    */	
+    @RestReturn(value=ResponseEntity.class, code={
+        @RestCode(code=204, description="Entities deleted", message="OK")
+    })		 
+    @RequestMapping(value="v10", method=RequestMethod.DELETE)
+    public ResponseEntity deleteBatch(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable String domain,
+            @RequestParam ID[] id,
+            @RequestParam(required=false) String parentKeyString
+            ) {
+        LOG.debug("DELETE {}/{}", parentKeyString, id);
+        
+        preService(request, domain, CrudListener.DELETE_BATCH, null, null, id);
+        service.delete(parentKeyString, id);
+        postService(request, domain, CrudListener.DELETE_BATCH, null, id, null);
+        
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    /**
+    * deleteFromJsonp  for cross-domain - delete an Entity and return HttpStatus.NO_CONTENT .
+    * @param domain the path-variable domain
+    * @param id the ids as an array
+    * @param _method value must be  "DELETE"	 	 
+    * @return  HttpStatus.NO_CONTENT
+    */	
+    @RestReturn(value=ResponseEntity.class, code={
+        @RestCode(code=204, description="Entities deleted", message="OK")
+    })		 
+    @RequestMapping(value="v10", method=RequestMethod.GET,
+            params={"_method=DELETE"})
+    public ResponseEntity deleteBatchFromJsonp(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable String domain,
+            @RequestParam ID[] id,
+            @RequestParam(required=false) String parentKeyString,
+            @RequestParam("_method") String _method
+            ) {
+        return deleteBatch(request, response, domain, id, parentKeyString);
     }
 
     /**
@@ -291,7 +376,14 @@ public abstract class CrudController<
         
         service.exportCsv(out, startDate, endDate);
     }
-    
+    /**
+	* get Entity detail 
+	* @param id is path-variable
+	* @return Entity as json object
+	*/
+	@RestReturn(value=Object.class, code={
+        @RestCode(code=200, description="get Entity successfully", message="OK")
+    })
     @RequestMapping(value="v10/{id}", method=RequestMethod.GET)
     @ResponseBody
     public J get(
@@ -361,12 +453,13 @@ public abstract class CrudController<
             @PathVariable String domain,
             Model model,
             @RequestParam(defaultValue="10") int pageSize, 
-            @RequestParam(required=false) Serializable cursorKey) {
+            @RequestParam(required=false) String cursorKey) {
         
         preService(request, domain, CrudListener.GET_PAGE, null, null, cursorKey);
         final CursorPage<T, ID> page = service.getPage(pageSize, cursorKey);
-        final JCursorPage body = convertPage(page);
-        postService(request, domain, CrudListener.GET_PAGE, null, cursorKey, body);
+        final JCursorPage body = convertPageWithInner(request, response, domain, 
+                model, page);
+        postService(request, domain, CrudListener.GET_PAGE, body, cursorKey, page);
 
         return body;
     }
@@ -403,28 +496,12 @@ public abstract class CrudController<
             return "boolean";
         }
         else if (Date.class.equals(value)) {
-            return "date";
+            return "datetime";
         }
         return value.getSimpleName();
     }
     
-    @RequestMapping(value="v10/{id}", method=RequestMethod.POST, consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public RedirectView updateFromForm(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            @PathVariable String domain,
-            @PathVariable ID id,
-            @RequestHeader(value=NAME_X_REQUESTED_WITH, required=false) String xRequestedWith,
-            Model model,
-            @ModelAttribute J jEntity) {
-        return updateForLocation(request, response, 
-                domain, id, 
-                xRequestedWith, 
-                model, 
-                jEntity);
-    }
-    
-    protected RedirectView updateForLocation(HttpServletRequest request,
+    protected T update(HttpServletRequest request,
             HttpServletResponse response,
             String domain,
             ID id,
@@ -439,24 +516,146 @@ public abstract class CrudController<
         service.update(d);
         postService(request, domain, CrudListener.UPDATE, jEntity, id, d);
         
+        return d;
+    }
+	  /**
+	     * update an Entity from the form-encoded body, 
+	     * and return HttpStatus.NO_CONTENT.
+	     * @param domain the path-variable domain
+	     * @param id the path-variable id
+	     * @param jEntity The form-encoded body will be bound to this object
+	     * @return HttpStatus.NO_CONTENT.
+	     */
+    @RestReturn(value=ResponseEntity.class, code={
+        @RestCode(code=204, description="Entity updated", message="OK")
+    })
+    @RequestMapping(value="v10/{id}", method=RequestMethod.POST, consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity updateFromForm(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable String domain,
+            @PathVariable ID id,
+            @RequestHeader(value=NAME_X_REQUESTED_WITH, required=false) String xRequestedWith,
+            Model model,
+            @ModelAttribute J jEntity) {
+        
+        update(request, response, 
+                domain, id, 
+                xRequestedWith, 
+                model, 
+                jEntity);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+    
+	 /**  updateFromJsonp update entity with cross-domain jsonp	     
+	     * and return HttpStatus.NO_CONTENT.
+	     * @param domain the path-variable domain
+	     * @param id the path-variable id
+              * @param  _method  value must be "POST"
+	     * @param jEntity The form-encoded body will be bound to this object
+	     * @return HttpStatus.NO_CONTENT.
+	     */
+	@RestReturn(value=ResponseEntity.class, code={
+        @RestCode(code=204, description="Entity updated", message="OK")
+    })	 
+    @RequestMapping(value="v10/{id}", method=RequestMethod.GET, 
+            params={"_method=POST"},
+            consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public ResponseEntity updateFromJsonp(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable String domain,
+            @PathVariable ID id,
+            @RequestHeader(value=NAME_X_REQUESTED_WITH, required=false) String xRequestedWith,
+            Model model,
+            @ModelAttribute J jEntity) {
+
+        update(request, response, 
+                domain, id, 
+                xRequestedWith, 
+                model, 
+                jEntity);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+    
+	 /**  updateFromJson update entity with MediaType.APPLICATION_JSON_VALUE header
+	     * and return HttpStatus.NO_CONTENT.
+	     * @param domain the path-variable domain
+	     * @param id the path-variable id        
+	     * @param jEntity  RequestBody
+	     * @return HttpStatus.NO_CONTENT.
+	     */
+	@RestReturn(value=ResponseEntity.class, code={
+        @RestCode(code=204, description="Entity updated", message="OK")
+    })
+    @RequestMapping(value="v10/{id}", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity updateFromJson(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable String domain,
+            @PathVariable ID id,
+            @RequestHeader(value=NAME_X_REQUESTED_WITH, required=false) String xRequestedWith,
+            Model model,
+            @RequestBody J jEntity) {
+        
+        update(request, response, 
+                domain, id, 
+                xRequestedWith, 
+                model, 
+                jEntity);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+    
+    protected RedirectView updateForLocation(HttpServletRequest request,
+            HttpServletResponse response,
+            String domain,
+            ID id,
+            String xRequestedWith,
+            Model model,
+            J jEntity) {
+
+        T d = update(request, response, domain, id, xRequestedWith, model, jEntity);
+        
         final StringBuffer path = new StringBuffer();
-        path.append(service.getSimpleKey(d));
         final String parentKeyString = service.getParentKeyString(d);
         if (null != parentKeyString) {
             path.append("?parentKeyString=");
             path.append(parentKeyString);
         }
-        return new RedirectView(path.toString(), true);
+        final String httpUrl = request.getRequestURL().toString();
+        final String absoluteUrl = String.format("%s%s", httpUrl, path.toString());
+        
+        return new RedirectView(absoluteUrl);
     }
     
-    @RequestMapping(value="v10/{id}", method=RequestMethod.GET, 
-            params={"_method=POST"},
+    @RequestMapping(value="v10/{id}", method=RequestMethod.POST, 
+            params={"_expects=302"},
             consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public RedirectView updateFromJsonp(
+    public RedirectView updateFromFormForLocation(
             HttpServletRequest request,
             HttpServletResponse response,
             @PathVariable String domain,
             @PathVariable ID id,
+            @RequestParam(value="_expects") Integer _expects,
+            @RequestHeader(value=NAME_X_REQUESTED_WITH, required=false) String xRequestedWith,
+            Model model,
+            @ModelAttribute J jEntity) {
+        return updateForLocation(request, response, 
+                domain, id, 
+                xRequestedWith, 
+                model, 
+                jEntity);
+    }
+    
+    @RequestMapping(value="v10/{id}", method=RequestMethod.GET, 
+            params={"_method=POST", "_expects=302"},
+            consumes=MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public RedirectView updateFromJsonpForLocation(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable String domain,
+            @PathVariable ID id,
+            @RequestParam(value="_expects") Integer _expects,
             @RequestHeader(value=NAME_X_REQUESTED_WITH, required=false) String xRequestedWith,
             Model model,
             @ModelAttribute J jEntity) {
@@ -465,18 +664,58 @@ public abstract class CrudController<
                 xRequestedWith, 
                 model, jEntity);
     }
+
     
-    @RequestMapping(value="v10/{id}", method=RequestMethod.POST, consumes=MediaType.APPLICATION_JSON_VALUE)
-    public RedirectView updateFromJson(
+    
+    @RequestMapping(value="v10/{id}", method=RequestMethod.POST, 
+            params={"_expects=302"},
+            consumes=MediaType.APPLICATION_JSON_VALUE)
+    public RedirectView updateFromJsonForLocation(
             HttpServletRequest request,
             HttpServletResponse response,
             @PathVariable String domain,
             @PathVariable ID id,
+            @RequestParam(value="_expects") Integer _expects,
             @RequestHeader(value=NAME_X_REQUESTED_WITH, required=false) String xRequestedWith,
             Model model,
             @RequestBody J jEntity) {
         return updateForLocation(request, response, domain, id, xRequestedWith, 
                 model, jEntity);
+    }
+    
+  /**
+     * Upserts a batch from the json-object-encoded array body by MediaType.APPLICATION_JSON_VALUE, 
+     * and responds with the upserted IDs.
+     * @param domain the path-variable domain
+     * @param jEntities The Request body will be bound to this object array
+     * @return 200 and the upserted Ids
+     */
+    @RestReturn(value=Object.class, code={
+        @RestCode(code=200, description="Batch of Entities upserted", message="OK")
+    })
+    @RequestMapping(value="v10/_batch", method=RequestMethod.POST, 
+            consumes=MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<ID> upsertBatchFromJsonWithContent(HttpServletRequest request,
+            HttpServletResponse response,
+            @PathVariable String domain,
+            Model model,
+            @RequestBody ArrayList<Map<String,Object>> jEntities) {
+        LOG.debug("upserting {} entities", jEntities.size());
+
+        ArrayList<T> dEntities = new ArrayList<T>();
+        for (Map<String,Object> map : jEntities) {
+            J jEntity = convertMap(map);
+            J amendedBody = populateRequestBody(request, model, jEntity);
+            T d = convertJson(amendedBody);
+            dEntities.add(d);
+        }
+        
+        preService(request, domain, CrudListener.UPSERT_BATCH, jEntities, dEntities, null);
+        final List<ID> body = service.upsert(dEntities);
+        postService(request, domain, CrudListener.UPSERT_BATCH, jEntities, null, body);
+
+        return body;
     }
     
     /**
@@ -497,7 +736,7 @@ public abstract class CrudController<
             @PathVariable String domain,
             @RequestHeader(value="If-Modified-Since") Date since,
             @RequestParam(defaultValue="10") int pageSize, 
-            @RequestParam(required=false) Serializable cursorKey) throws ParseException {
+            @RequestParam(required=false) String cursorKey) throws ParseException {
         final long currentMillis = System.currentTimeMillis();
         preService(request, domain, CrudListener.WHAT_CHANGED, null, null, cursorKey);
         final CursorPage<ID, ID> page = service.whatsChanged(since, pageSize, cursorKey);
@@ -531,14 +770,22 @@ public abstract class CrudController<
     
     // --------------- Converter methods --------------------------
     
-    /** This implementation does nothing, please override */
-    public J addInnerObjects(HttpServletRequest request, 
+    public void addInnerObjects(HttpServletRequest request, 
             HttpServletResponse response,
             String domain,
             Model model,
             J jEntity) {
+        addInnerObjects(request, response, domain, 
+                model, Arrays.asList(jEntity));
+    }
+
+    /** This implementation does nothing, please override */
+    public void addInnerObjects(HttpServletRequest request, 
+            HttpServletResponse response,
+            String domain,
+            Model model,
+            Iterable<J> jEntity) {
         // do nothing
-        return jEntity;
     }
 
     public J convertDomain(T from) {
@@ -559,8 +806,25 @@ public abstract class CrudController<
         return to;
     }
 
+    public J convertMap(Map<String,Object> from) {
+        if (null == from) {
+            return null;
+        }
+        J to = createJson();
+        convertJMap(from, to);
+        return to;
+    }
+
     public abstract void convertDomain(T from, J to);
     public abstract void convertJson(J from, T to);
+    
+    /**
+     * Override to get upsertBatch to work!
+     * @param from is a LinkedHashMap created by Jackson
+     */
+    public void convertJMap(Map<String,Object> from, J to) {
+        throw new UnsupportedOperationException("Override in subclass!"); 
+    }
     
     public J createJson() {
         try {
@@ -589,7 +853,8 @@ public abstract class CrudController<
     protected J convertWithInner(HttpServletRequest request, HttpServletResponse response,
             String domain, Model model, T from) {
         final J to = convertDomain(from);
-        return addInnerObjects(request, response, domain, model, to);
+        addInnerObjects(request, response, domain, model, to);
+        return to;
     }
     
     public static void convertLongEntity(AbstractLongEntity from, JBaseObject to) {
@@ -623,6 +888,17 @@ public abstract class CrudController<
         to.setUpdatedDate(toDate(from.getUpdatedDate()));
     }
     
+    public static void convertJCreatedUpdated(Map<String, Object> from, JBaseObject to) {
+        if (null == from || null == to) {
+            return;
+        }
+
+        to.setCreatedBy((String)from.get("createdBy"));
+        to.setCreatedDate((Long)from.get("createdDate"));
+        to.setUpdatedBy((String)from.get("updatedBy"));
+        to.setUpdatedDate((Long)from.get("updatedDate"));
+    }
+    
     public static void convertJLong(JBaseObject from, AbstractLongEntity to) {
         if (null == from || null == to) {
             return;
@@ -630,6 +906,16 @@ public abstract class CrudController<
         convertJCreatedUpdated(from, to);
 
         to.setId(toLong(from.getId()));
+    }
+    
+    public static void convertJLong(Map<String, Object> from, JBaseObject to) {
+        if (null == from || null == to) {
+            return;
+        }
+        convertJCreatedUpdated(from, to);
+
+        Object id = from.get("id");
+        to.setId(null != id ? id.toString() : null);
     }
 
     public static void convertJString(JBaseObject from, AbstractStringEntity to) {
@@ -657,6 +943,21 @@ public abstract class CrudController<
         return returnValue;
     }
 
+    // Convert iterable
+    public Collection<J> convertWithInner(HttpServletRequest request, HttpServletResponse response,
+            String domain, Model model, Iterable<T> from) {
+        if (null == from)
+            return new ArrayList<J>();
+
+        // basic conversion first
+        final Collection<J> returnValue = convert(from);
+
+        // then add inner objects batch-style
+        addInnerObjects(request, response, domain, model, returnValue);
+        
+        return returnValue;
+    }
+
     // Convert Mardao DLocation
     public static JLocation convert(DLocation from) {
         if (null == from) {
@@ -671,7 +972,21 @@ public abstract class CrudController<
         
         to.setPageSize(from.getItems().size());
         to.setCursorKey(from.getCursorKey());
+        to.setTotalSize(from.getTotalSize());
         to.setItems(convert(from.getItems()));
+        
+        return to;
+    }
+
+    public JCursorPage<J> convertPageWithInner(HttpServletRequest request, HttpServletResponse response,
+            String domain, Model model, CursorPage<T, ID> from) {
+        final JCursorPage<J> to = new JCursorPage<J>();
+        
+        to.setPageSize(from.getItems().size());
+        to.setCursorKey(from.getCursorKey());
+        to.setTotalSize(from.getTotalSize());
+        to.setItems(convertWithInner(request, response, domain, model, 
+                from.getItems()));
         
         return to;
     }
@@ -764,5 +1079,15 @@ public abstract class CrudController<
                     operation, json, id, serviceResponse);
         }
     }
+    
+    // -----------------  getters and setters    -------------------------------
 
+    public S getService() {
+        return service;
+    }
+
+    public void setService(S service) {
+        this.service = service;
+    }
+    
 }

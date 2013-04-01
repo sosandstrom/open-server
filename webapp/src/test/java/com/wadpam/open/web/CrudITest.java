@@ -11,6 +11,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.web.client.RestTemplate;
 import static org.junit.Assert.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 
 /**
@@ -18,8 +22,9 @@ import org.springframework.web.client.HttpClientErrorException;
  * @author sosandtrom
  */
 public class CrudITest {
+    static final Logger LOG = LoggerFactory.getLogger(CrudITest.class);
 
-    static final String                  BASE_URL       = "http://localhost:8234/domain/itest/";
+    protected static final String                  BASE_URL       = MonitorITest.BASE_URL + "itest/";
 
     RestTemplate                         template;
     public CrudITest() {
@@ -36,6 +41,7 @@ public class CrudITest {
     @Before
     public void setUp() {
         template = new RestTemplate();
+        LOG.info("----------------- setUp() ---------------------------");
     }
 
     @After
@@ -44,6 +50,7 @@ public class CrudITest {
 
     @Test
     public void testCreateSample() {
+        LOG.info("+ testCreateSample():");
         final String NAME = "mySampleName";
         JSample actual = createSample(NAME);
         assertNotNull("Assigned Sample ID", actual.getId());
@@ -55,12 +62,15 @@ public class CrudITest {
         request.setName(name);
         URI uri = template.postForLocation(BASE_URL + "sample/v10", request);
         
+        LOG.info("GET {}", uri);
         JSample actual = template.getForObject(uri, JSample.class);
+//        JSample actual = template.postForObject(BASE_URL + "sample/v10", request, JSample.class);
         return actual;
     }
 
     @Test
     public void testCreateComplex() {
+        LOG.info("+ testCreateComplex():");
         final String ORG_NAME = "myOrganizationName";
         JSample org = createSample(ORG_NAME);
         
@@ -104,7 +114,25 @@ public class CrudITest {
         
         // update
         request.setName(NAME);
-        URI updatedUri = template.postForLocation(uri, request);
+        ResponseEntity entity = template.postForEntity(uri, request, JSample.class);
+        assertEquals(HttpStatus.NO_CONTENT, entity.getStatusCode());
+        
+        JSample actual = template.getForObject(uri, JSample.class);
+        assertEquals("Updated name", NAME, actual.getName());
+        assertTrue("UpdatedDate", actual.getCreatedDate() < actual.getUpdatedDate());
+    }
+    
+    @Test
+    public void testUpdateSampleForLocation() {
+        final String NAME = "mySampleName";
+        JSample request = new JSample();
+        request.setName("initialName");
+        URI uri = template.postForLocation(BASE_URL + "sample/v10", request);
+        request = template.getForObject(uri, JSample.class);
+        
+        // update
+        request.setName(NAME);
+        URI updatedUri = template.postForLocation(uri.toString() + "?_expects=302", request);
         assertEquals(uri, updatedUri);
         
         JSample actual = template.getForObject(uri, JSample.class);

@@ -3,10 +3,14 @@ package com.wadpam.open.mvc;
 import com.wadpam.open.exceptions.RestException;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.Future;
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.Filter;
 import net.sf.mardao.core.dao.Dao;
@@ -78,6 +82,22 @@ public abstract class MardaoCrudService<
     }
 
     @Override
+    public void delete(String parentKeyString, ID[] id) {
+        preDao();
+        try {
+            Object parentKey = dao.getPrimaryKey(parentKeyString);
+            final ArrayList<ID> ids = new ArrayList<ID>();
+            for (ID i : id) {
+                ids.add(i);
+            }
+            dao.delete(parentKey, ids);
+        }
+        finally {
+            postDao();
+        }
+    }
+
+    @Override
     public void exportCsv(OutputStream out, Long startDate, Long endDate) {
         preDao();
         try {
@@ -93,12 +113,17 @@ public abstract class MardaoCrudService<
     public T get(String parentKeyString, ID id) {
         preDao();
         try {
+            // TODO: parentKeyString must be decoded by parent dao!
             Object parentKey = dao.getPrimaryKey(parentKeyString);
             T domain = dao.findByPrimaryKey(parentKey, id);
             LOG.debug("GET {}/{}/{} returns {}", new Object[] {
                 dao.getTableName(), parentKey, id, domain});
 
             return domain;
+        }
+        catch (RuntimeException toLog) {
+            LOG.warn("in GET", toLog);
+            throw toLog;
         }
         finally {
             postDao();
@@ -133,7 +158,7 @@ public abstract class MardaoCrudService<
     }
 
     @Override
-    public CursorPage<T, ID> getPage(int pageSize, Serializable cursorKey) {
+    public CursorPage<T, ID> getPage(int pageSize, String cursorKey) {
         preDao();
         try {
             return dao.queryPage(pageSize, cursorKey);
@@ -192,6 +217,10 @@ public abstract class MardaoCrudService<
     public void setDao(D dao) {
         this.dao = dao;
     }
+
+    public D getDao() {
+        return dao;
+    }
     
     @Override
     public ID update(T domain) {
@@ -213,7 +242,54 @@ public abstract class MardaoCrudService<
     }
     
     @Override
-    public CursorPage<ID, ID> whatsChanged(Date since, int pageSize, Serializable cursorKey) {
+    public List<ID> upsert(Iterable<T> dEntities) {
+        // group entities by create or update:
+        final ArrayList<T> toCreate = new ArrayList<T>();
+        final ArrayList<T> toUpdate = new ArrayList<T>();
+        ID id;
+        for (T d : dEntities) {
+            id = dao.getSimpleKey(d);
+            if (null == id) {
+                toCreate.add(d);
+            }
+            else {
+                toUpdate.add(d);
+            }
+        }
+        LOG.debug("Creating {}, Updating {}", toCreate.size(), toUpdate.size());
+        LOG.debug("Creating {}, Updating {}", toCreate, toUpdate);
+        
+        // create new entities using async API
+        Future<List<?>> createFuture = null;
+        if (!toCreate.isEmpty()) {
+            createFuture = dao.persistForFuture(toCreate);
+        }
+        
+        // update in parallel
+        if (!toUpdate.isEmpty()) {
+            dao.update(toUpdate);
+        }
+        
+        // join future
+        if (null != createFuture) {
+            Collection<ID> ids = dao.getSimpleKeys(createFuture);
+//            Iterator<ID> i = ids.iterator();
+//            for (T t : toCreate) {
+//                dao.setSimpleKey(t, i.next());
+//            }
+        }
+
+        // collect the IDs
+        final ArrayList<ID> body = new ArrayList<ID>();
+        for (T d : dEntities) {
+            body.add(getSimpleKey(d));
+        }
+
+        return body;
+    }
+    
+    @Override
+    public CursorPage<ID, ID> whatsChanged(Date since, int pageSize, String cursorKey) {
         preDao();
         try {
             // TODO: include deletes from Audit table
@@ -225,7 +301,7 @@ public abstract class MardaoCrudService<
     }
     
     public CursorPage<ID, ID> whatsChanged(Object parentKey, Date since, 
-            int pageSize, Serializable cursorKey, Filter... filters) {
+            int pageSize, String cursorKey, Filter... filters) {
         preDao();
         try {
             // TODO: include deletes from Audit table

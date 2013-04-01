@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.wadpam.openserver</groupId>
         <artifactId>parent</artifactId>
-        <version>14-SNAPSHOT</version>
+        <version>21-SNAPSHOT</version>
     </parent>
     <artifactId>io-core</artifactId>
     <packaging>jar</packaging>
@@ -142,7 +142,7 @@
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
+            <artifactId>slf4j-log4j12</artifactId>
             <version>1.6.1</version>
             <scope>test</scope>
         </dependency>

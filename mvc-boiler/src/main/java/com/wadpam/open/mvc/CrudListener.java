@@ -12,13 +12,16 @@ import javax.servlet.http.HttpServletRequest;
  * On multiple Controller listeners, the order of notification cannot be guaranteed.
  * @author os
  */
-public interface CrudListener {
+public interface CrudListener<J extends Object, T extends Object, ID extends Serializable, S extends CrudService<T, ID>> {
     public static final int CREATE = 1;
     public static final int GET = 2;
     public static final int UPDATE = 3;
     public static final int DELETE = 4;
     public static final int GET_PAGE = 11;
     public static final int WHAT_CHANGED = 12;
+    public static final int UPSERT_BATCH = 13;
+    public static final int DELETE_BATCH = 14;
+    public static final int GET_EXISTING = 15;
     
     /**
      * Triggered by the CrudController before the CrudService is invoked.
@@ -31,7 +34,7 @@ public interface CrudListener {
      * @param domain The domain / service entity object for this operation
      * @param id defined for GET, UPDATE, DELETE
      */
-    public void preService(CrudController controller, CrudService service,
+    public void preService(CrudController<J, T, ID, S> controller, S service,
             HttpServletRequest request, String namespace,
             int operation, Object json, Object domain, Serializable id);
 
@@ -46,7 +49,7 @@ public interface CrudListener {
      * @param id defined for GET, UPDATE, DELETE
      * @param serviceResponse 
      */
-    public void postService(CrudController controller, CrudService service,
+    public void postService(CrudController<J, T, ID, S> controller, S service,
             HttpServletRequest request, String domain,
             int operation, Object json, Serializable id, Object serviceResponse);
 }

@@ -4,6 +4,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,14 +15,25 @@ import java.util.Map;
  * @author os
  */
 public class CsvConverter<D> implements Converter<D> {
-    
+
+    private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+
     protected final ThreadLocal<PrintWriter> pw = new ThreadLocal<PrintWriter>();
-    
+
     public String convertToString(Object o) {
         if (null == o) {
             return null;
         }
-        return o.toString();
+
+        if (o instanceof Boolean) {
+            return ((Boolean) o) ? "True" : "False";
+        }
+        else if (o instanceof Date) {
+            return dateFormat.format((Date) o);
+        }
+        else {
+            return o.toString();
+        }
     }
 
     public static String escapeCsv(String s) {
@@ -45,12 +59,17 @@ public class CsvConverter<D> implements Converter<D> {
     }
 
     @Override
-    public Object preDao(OutputStream out, Object arg, Object preExport, Object preDao, 
-            String tableName, Iterable<String> columns, Map<String, String> headers, int daoIndex, D dao) {
+    public Object initPreDao(OutputStream out, Object arg) {
         try {
             pw.set(new PrintWriter(new OutputStreamWriter(out, "UTF-8")));
         }
         catch (UnsupportedEncodingException willNeverHappen) {}
+        return null;
+    }
+
+    @Override
+    public Object preDao(OutputStream out, Object arg, Object preExport, Object preDao, 
+            String tableName, Iterable<String> columns, Map<String, String> headers, int daoIndex, D dao) {
         final HashMap<String, Object> headerValues = new HashMap<String, Object>();
         String headerName;
         for (String col : columns) {
@@ -92,4 +111,7 @@ public class CsvConverter<D> implements Converter<D> {
         return s;
     }
 
+    public void setDatePattern(String pattern) {
+        dateFormat = new SimpleDateFormat(pattern);
+    }
 }
