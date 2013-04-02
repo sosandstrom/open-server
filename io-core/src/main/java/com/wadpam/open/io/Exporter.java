@@ -149,7 +149,7 @@ public class Exporter<D> {
         LOG.debug("{} has columns {}", tableName, columns);
         
         Object preDao = null;
-        if (0 == offset) {
+        if (offset <= 0) {
             preDao = extractor.preDao(arg, preExport, dao);
             scheduler.putCached(Scheduler.KEY_PRE_DAO, preDao);
             Map<String, String> headers = extractor.getHeaderNames(arg, dao);
@@ -162,7 +162,6 @@ public class Exporter<D> {
             }
         }
         else {
-            converter.initPreDao(out, arg);
             // fetch preDao from MemCache
             preDao = scheduler.getCached(Scheduler.KEY_PRE_DAO);
         }
