@@ -6,8 +6,8 @@ package com.wadpam.open.web;
 
 import com.wadpam.open.domain.DAppDomain;
 import com.wadpam.open.exceptions.AuthenticationFailedException;
+import com.wadpam.open.mvc.CrudService;
 import com.wadpam.open.security.SecurityDetailsService;
-import com.wadpam.open.service.DomainService;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,7 +26,7 @@ public class BasicAuthenticationInterceptor extends DomainInterceptor
     
     private static final Pattern PATH_DOMAIN = Pattern.compile("\\A/api/([^/]+)");
 
-    private DomainService domainService;
+    private CrudService<DAppDomain, String> domainService;
     
     /**
      * Default constructor, sets the SecurityDetailsService to this.
@@ -106,7 +106,7 @@ public class BasicAuthenticationInterceptor extends DomainInterceptor
     // ---------------------- Setters and getters ------------------------------
 
     @Autowired
-    public void setDomainService(DomainService domainService) {
+    public void setDomainService(CrudService domainService) {
         this.domainService = domainService;
     }
 

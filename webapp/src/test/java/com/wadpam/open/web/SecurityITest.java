@@ -15,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -97,19 +98,4 @@ public class SecurityITest {
                 String.class);
         assertEquals(HttpStatus.OK, entity.getStatusCode());
     }
-
-    @Test
-    public void testSecurityFullyAuthenticated() {
-        LOG.info("+ testSecurityFullyAuthenticated");
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", DomainHelper.J_BASIC_ITEST);
-        HttpEntity requestEntity = new HttpEntity(headers);
-        ResponseEntity<String> entity = template.exchange(BASE_URL + "security?access_token={access_token}", 
-                HttpMethod.POST,
-                requestEntity,
-                String.class,
-                "itest");
-        assertEquals(HttpStatus.OK, entity.getStatusCode());
-    }
-
 }

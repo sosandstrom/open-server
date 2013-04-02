@@ -459,7 +459,7 @@ public abstract class CrudController<
         final CursorPage<T, ID> page = service.getPage(pageSize, cursorKey);
         final JCursorPage body = convertPageWithInner(request, response, domain, 
                 model, page);
-        postService(request, domain, CrudListener.GET_PAGE, null, cursorKey, body);
+        postService(request, domain, CrudListener.GET_PAGE, body, cursorKey, page);
 
         return body;
     }

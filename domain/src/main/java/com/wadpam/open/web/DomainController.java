@@ -4,6 +4,7 @@ import com.google.appengine.api.datastore.Email;
 import com.wadpam.open.domain.DAppDomain;
 import com.wadpam.open.json.JAppDomain;
 import com.wadpam.open.mvc.CrudController;
+import com.wadpam.open.mvc.CrudService;
 import com.wadpam.open.service.DomainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  */
 @Controller
 @RequestMapping("{domain}/_admin/domain")
-public class DomainController extends CrudController<JAppDomain, DAppDomain, String, DomainService> {
+public class DomainController extends CrudController<JAppDomain, DAppDomain, String, CrudService<DAppDomain, String>> {
 
     public static final int ERR_BASE_DOMAIN = DomainService.ERR_BASE_DOMAIN;
     public static final int ERR_DOMAIN_NOT_FOUND = ERR_BASE_DOMAIN + 101;
@@ -52,7 +53,7 @@ public class DomainController extends CrudController<JAppDomain, DAppDomain, Str
     }
     
     @Autowired
-    public void setDomainService(DomainService domainService) {
+    public void setDomainService(CrudService domainService) {
         this.service = domainService;
     }
 }

@@ -4,17 +4,27 @@
 
 package com.wadpam.open.mvc;
 
+import com.wadpam.open.json.JCursorPage;
 import java.io.Serializable;
 import javax.servlet.http.HttpServletRequest;
+import net.sf.mardao.core.CursorPage;
 
 /**
  *
  * @author sosandstrom
  */
-public class CrudListenerAdapter implements CrudListener {
+public class CrudListenerAdapter<J extends Object, T extends Object, ID extends Serializable, S extends CrudService<T, ID>>
+        implements CrudListener<J, T, ID, S> {
 
     @Override
-    public void preService(CrudController controller, CrudService service, HttpServletRequest request, String namespace, int operation, Object json, Object domain, Serializable id) {
+    public void preService(CrudController<J, T, ID, S> controller, 
+            S service, 
+            HttpServletRequest request, 
+            String namespace, 
+            int operation, 
+            Object json, 
+            Object domain, 
+            Serializable id) {
         switch (operation) {
             case CREATE:
                 preCreate(controller, service, request, namespace, json, domain);
@@ -28,11 +38,28 @@ public class CrudListenerAdapter implements CrudListener {
             case DELETE:
                 preDelete(controller, service, request, namespace, id);
                 break;
+            case GET_PAGE:
+                break;
+            case WHAT_CHANGED:
+                break;
+            case UPSERT_BATCH:
+                break;
+            case DELETE_BATCH:
+                break;
+            case GET_EXISTING:
+                break;
         }
     }
 
     @Override
-    public void postService(CrudController controller, CrudService service, HttpServletRequest request, String namespace, int operation, Object json, Serializable id, Object serviceResponse) {
+    public void postService(CrudController<J, T, ID, S> controller, 
+            S service, 
+            HttpServletRequest request, 
+            String namespace, 
+            int operation, 
+            Object json, 
+            Serializable id, 
+            Object serviceResponse) {
         switch (operation) {
             case CREATE:
                 postCreate(controller, service, request, namespace, json, id, serviceResponse);
@@ -45,6 +72,18 @@ public class CrudListenerAdapter implements CrudListener {
                 break;
             case DELETE:
                 postDelete(controller, service, request, namespace, id);
+                break;
+            case GET_PAGE:
+                postGetPage(controller, service, request, namespace, (JCursorPage<J>) json, (String) id, (CursorPage<T, ID>) serviceResponse);
+                break;
+            case WHAT_CHANGED:
+                break;
+            case UPSERT_BATCH:
+                break;
+            case DELETE_BATCH:
+                break;
+            case GET_EXISTING:
+                break;
         }
     }
 
@@ -99,6 +138,9 @@ public class CrudListenerAdapter implements CrudListener {
     }
 
     protected void postDelete(CrudController controller, CrudService service, HttpServletRequest request, String namespace, Serializable id) {
+    }
+
+    protected void postGetPage(CrudController<J, T, ID, S> controller, S service, HttpServletRequest request, String namespace, JCursorPage<J> jPage, String cursorKey, CursorPage<T, ID> serviceResponse) {
     }
 
 }
