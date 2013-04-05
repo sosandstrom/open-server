@@ -19,3 +19,4 @@ webapp/src/main/webapp/META-INF/
 
 domain/bin/
 tools-gae/bin/
+security/bin/
