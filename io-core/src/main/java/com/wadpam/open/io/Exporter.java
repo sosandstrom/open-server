@@ -5,6 +5,9 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+
+import com.wadpam.open.exceptions.RestException;
 
 /**
  * Export "tables" using the specified Dao objects.
@@ -23,7 +26,7 @@ public class Exporter<D> {
     
     private Scheduler<D> scheduler = new Scheduler<D>();
     
-    private final D[] daos;
+    private D[] daos;
     
     public Exporter(D[] daos) {
         this.daos = daos;
@@ -33,9 +36,7 @@ public class Exporter<D> {
     public Exporter() {
         this(null);
     }
-    
-    
-    
+
     public Object export(OutputStream out, Object arg) {
         return export(out, arg, daos);
     }
@@ -56,7 +57,23 @@ public class Exporter<D> {
      */
     public Object export(OutputStream out, Object arg, D... daos) {
         LOG.info("exporting for {} daos on {}", daos.length, out);
-        
+
+        // check idle before starting export
+        String cacheKey;
+        Object state;
+
+        for (int i = 0; i < 100; i++) {
+            cacheKey = Scheduler.getDaoKey(i);
+            state = scheduler.getCached(cacheKey);
+
+            if (state != null && !Scheduler.STATE_DONE.equals(state)) {
+                // there still export process going on.
+                throw new RestException(9001, HttpStatus.CONFLICT, "Export engine is occupied. Please try later.");
+            }
+        }
+
+        this.daos = daos;
+
         // first, initialize converter
         Object preExport = extractor.preExport(arg, daos);
         scheduler.putCached(Scheduler.KEY_PRE_EXPORT, preExport);
@@ -65,17 +82,24 @@ public class Exporter<D> {
             LOG.debug("{}", logPre);
         }
         scheduler.preExport(arg);
-        
+
         // put state for all daos to PENDING
         int daoIndex = 0;
-        for (D dao : daos) {
+        for(D dao : daos) {
             scheduler.putCached(Scheduler.getDaoKey(daoIndex), Scheduler.STATE_PENDING);
             daoIndex++;
         }
-        
+        // clear old status in cache
+        for (; daoIndex < 100; daoIndex++) {
+            if (scheduler.getCached(Scheduler.getDaoKey(daoIndex)) == null) {
+                break;
+            }
+            scheduler.removeCached(Scheduler.getDaoKey(daoIndex));
+        }
+
         // now, schedule (tasks if so)
         daoIndex = 0;
-        for (D dao : daos) {
+        for(D dao : daos) {
             exportDao(out, arg, preExport, daoIndex, dao);
             daoIndex++;
         }

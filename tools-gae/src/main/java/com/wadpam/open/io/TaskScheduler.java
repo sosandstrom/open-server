@@ -202,6 +202,7 @@ public class TaskScheduler<D> extends Scheduler<D> {
         
         String link = String.format("%sblob/v10?attachment=true&key=%s", apiUrl, zipKey.getKeyString());
         String html = String.format("Download <a href='%s'>here</a>", link);
+        LOG.debug("EXPORTED BLOB: DOWNLOAD HERE: {}", html);
         EmailSender.sendEmail(fromEmail, fromName, Arrays.asList(email), null, null,
                 "Datastore export", null, html, null, null, null);
         return new ResponseEntity(HttpStatus.OK);
