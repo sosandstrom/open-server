@@ -377,13 +377,17 @@ public abstract class CrudController<
         service.exportCsv(out, startDate, endDate);
     }
     /**
-	* get Entity detail 
-	* @param id is path-variable
-	* @return Entity as json object
-	*/
-	@RestReturn(value=Object.class, code={
-        @RestCode(code=200, description="get Entity successfully", message="OK")
-    })
+     * get Entity details
+     * @param domain the domain namespace
+     * @param id the Entity's primary key or ID
+     * @param parentKeyString the Entity's parent key as String if any
+     * @return Entity as json object, 404 if not found
+     */
+    @RestReturn(value=Object.class, code={
+        @RestCode(code=200, description="get Entity successfully", message="OK"),
+        @RestCode(code=404, description="Entity not found", message="Not Found")
+    },
+    supportsClassParams=true)
     @RequestMapping(value="v10/{id}", method=RequestMethod.GET)
     @ResponseBody
     public J get(
@@ -444,7 +448,8 @@ public abstract class CrudController<
      * @return a page of entities
      */
     @RestReturn(value=JCursorPage.class, code={
-        @RestCode(code=200, description="A CursorPage with JSON entities", message="OK")})
+        @RestCode(code=200, description="A CursorPage with JSON entities", message="OK")},
+    supportsClassParams=true)
     @RequestMapping(value="v10", method= RequestMethod.GET)
     @ResponseBody
     public JCursorPage<J> getPage(

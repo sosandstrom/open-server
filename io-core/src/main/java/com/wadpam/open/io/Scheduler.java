@@ -50,7 +50,7 @@ public class Scheduler<D> {
         Object preExport = getCached(KEY_PRE_EXPORT);
         exporter.postExport(out, arg, preExport);
     }
-    
+
     public Object getCached(Object key) {
         return CACHE.get(key);
     }
@@ -58,7 +58,11 @@ public class Scheduler<D> {
     public void putCached(Object key, Object value) {
         CACHE.put(key, value);
     }
-    
+
+    public void removeCached(Object key) {
+        CACHE.remove(key);
+    }
+
     public static String getDaoKey(int daoIndex) {
         return String.format("Exporter.Scheduler.daoKey.%d", daoIndex);        
     }

@@ -39,8 +39,7 @@ public class ZipCsvConverter<D> extends CsvConverter<D> {
     @Override
     public Object postExport(OutputStream ignored, Object argExporter, Object preExport, Object postExport, D[] daos) {
         try {
-            DateFormat df = new SimpleDateFormat("yyyyMMdd");
-            final String zipFilename = "DataStore-" + df.format(new Date()) + ".zip";
+            final String zipFilename = getOutputFileName(daos);
             final FileService fileService = FileServiceFactory.getFileService();
             
             AppEngineFile file = fileService.createNewBlobFile("application/zip", zipFilename);
@@ -80,6 +79,10 @@ public class ZipCsvConverter<D> extends CsvConverter<D> {
         return null;
     }
 
-    
-    
+    public String getOutputFileName(D[] daos) {
+        DateFormat df = new SimpleDateFormat("yyyyMMdd");
+        final String zipFilename = "DataStore-" + df.format(new Date()) + ".zip";
+        return zipFilename;
+    }
+
 }
