@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.wadpam.openserver</groupId>
         <artifactId>parent</artifactId>
-        <version>23-SNAPSHOT</version>
+        <version>23</version>
     </parent>
     <artifactId>jsonp</artifactId>
     <packaging>jar</packaging>
