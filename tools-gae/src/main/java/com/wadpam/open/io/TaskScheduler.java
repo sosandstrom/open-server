@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.google.appengine.api.blobstore.BlobInfo;
+import com.google.appengine.api.blobstore.BlobInfoFactory;
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.files.AppEngineFile;
 import com.google.appengine.api.files.FileService;
@@ -199,12 +201,17 @@ public class TaskScheduler<D> extends Scheduler<D> {
     public ResponseEntity processPostExport() {
         String email = (String) getCached(KEY_PRE_EXPORT);
         BlobKey zipKey = (BlobKey) exporter.postExport(null, exporter, email);
-        
+        BlobInfo blobInfo = new BlobInfoFactory().loadBlobInfo(zipKey);
+
         String link = String.format("%sblob/v10?attachment=true&key=%s", apiUrl, zipKey.getKeyString());
         String html = String.format("Download <a href='%s'>here</a>", link);
         LOG.debug("EXPORTED BLOB: DOWNLOAD HERE: {}", html);
+
+        
+        
         EmailSender.sendEmail(fromEmail, fromName, Arrays.asList(email), null, null,
-                "Datastore export", null, html, null, null, null);
+                String.format("Datastore export - %s", blobInfo.getFilename()),
+                null, html, null, null, null);
         return new ResponseEntity(HttpStatus.OK);
     }
 
