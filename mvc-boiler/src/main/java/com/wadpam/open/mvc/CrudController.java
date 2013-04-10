@@ -6,8 +6,6 @@ import com.wadpam.open.exceptions.NotFoundException;
 import com.wadpam.open.json.JBaseObject;
 import com.wadpam.open.json.JCursorPage;
 import com.wadpam.open.json.JLocation;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.URI;
 import java.text.ParseException;
@@ -352,30 +350,6 @@ public abstract class CrudController<
         return deleteBatch(request, response, domain, id, parentKeyString);
     }
 
-    /**
-     * Writes the entities as CSV on response body
-     * @param response
-     * @param startDate
-     * @param endDate
-     * @throws IOException 
-     */
-    @RestReturn(value=String.class, code={
-        @RestCode(code=200, description="A CSV stream with Tasks", message="OK")})
-    @RequestMapping(value="v10", method= RequestMethod.GET, params={"startDate"})
-    public void exportCsv(
-            HttpServletResponse response,
-            @RequestParam Long startDate,
-            @RequestParam(required=false) Long endDate
-    ) throws IOException 
-    {
-        response.setContentType("text/csv");
-        final String contentDisposition = String.format("attachment;filename=%ss.csv",
-                service.getTableName());
-        response.setHeader("Content-Disposition", contentDisposition);
-        final OutputStream out = response.getOutputStream();
-        
-        service.exportCsv(out, startDate, endDate);
-    }
     /**
      * get Entity details
      * @param domain the domain namespace
