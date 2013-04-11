@@ -7,13 +7,13 @@ import java.util.Map;
  * @author os
  */
 public interface Extractor<D> {
-    
+
     Iterable<String> getColumns(Object arg, D dao);
 
-    Map<String,String> getHeaderNames(Object arg, D dao);    
-    
+    Map<String, String> getHeaderNames(Object arg, D dao);
+
     Map<String, Object> getValues(Object arg, D dao, Object entity);
-    
+
     String getTableName(Object arg, D dao);
 
     Object postDao(Object arg, Object preExport, Object preDao, D dao);

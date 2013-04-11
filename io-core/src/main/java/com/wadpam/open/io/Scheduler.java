@@ -20,6 +20,7 @@ public class Scheduler<D> {
     static final String KEY_PRE_EXPORT = "Exporter.Scheduler.preExport";
     static final String KEY_PRE_DAO = "Exporter.Scheduler.preDao";
     static final String KEY_EXPORT_STATUS = "Exporter.Scheduler.status";
+    static final String KEY_EXPORT_DAO_INDEXES = "Exporter.Scheduler.Dao.indexes";
     static final Integer STATE_PENDING = 0;
     static final Integer STATE_RUNNING = 1;
     static final Integer STATE_DONE = 2;
@@ -27,6 +28,7 @@ public class Scheduler<D> {
     protected final HashMap<Object, Object> CACHE = new HashMap<Object, Object>();
 
     protected static Exporter exporter = null;
+
     
     /**
      * Override to do processing in different thread.

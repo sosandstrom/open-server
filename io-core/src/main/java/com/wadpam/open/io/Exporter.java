@@ -1,6 +1,8 @@
 package com.wadpam.open.io;
 
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -77,7 +79,18 @@ public class Exporter<D> {
             throw new RestException(9001, HttpStatus.CONFLICT, "Export engine is occupied. Please try later.");
         }
 
-        this.daos = daos;
+        // Store actual index of dao
+        List<Integer> daoIndexes = new ArrayList<Integer>();
+        for (D dao : daos) {
+            int i = 0;
+            for (D d : this.daos) {
+                if (dao.equals(d)) {
+                    daoIndexes.add(i);
+                }
+                i++;
+            }
+        }
+        scheduler.putCached(Scheduler.KEY_EXPORT_DAO_INDEXES, daoIndexes);
 
         // first, initialize converter
         Object preExport = extractor.preExport(arg, daos);
@@ -151,7 +164,7 @@ public class Exporter<D> {
         scheduler.scheduleExportDao(out, daoIndex, 0, -1);
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
     /**
      * Invoked by Controller
      * @param preExport
@@ -161,9 +174,10 @@ public class Exporter<D> {
      * @return true when done
      */
     public Integer exportDao(OutputStream out, int daoIndex, int offset, int limit) {
-        return exportDaoImpl(out, null, null, daoIndex, daos[daoIndex], offset, limit);
+        List<Integer> daoIndexes = (List<Integer>) scheduler.getCached(Scheduler.KEY_EXPORT_DAO_INDEXES);
+        return exportDaoImpl(out, null, null, daoIndex, daos[daoIndexes.get(daoIndex)], offset, limit);
     }
-    
+
     /**
      * The implementation of the export of a Dao.
      * @return true when done
@@ -279,5 +293,4 @@ public class Exporter<D> {
     public void setScheduler(Scheduler<D> scheduler) {
         this.scheduler = scheduler;
     }
-
 }
