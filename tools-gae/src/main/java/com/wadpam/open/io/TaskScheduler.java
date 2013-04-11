@@ -64,7 +64,7 @@ public class TaskScheduler<D> extends Scheduler<D> {
         DateFormat df = new SimpleDateFormat("yyyyMMdd");
         String dateString = df.format(new Date());
         putCached(KEY_DATE_STRING, dateString);
-        
+
         // overwrite the preExport value
         putCached(KEY_PRE_EXPORT, argEmail);
     }
@@ -86,17 +86,19 @@ public class TaskScheduler<D> extends Scheduler<D> {
             @RequestParam int offset,
             @RequestParam int limit
             ) {
+
         int status = HttpStatus.CREATED.value();
         long startMillis = System.currentTimeMillis();
         Integer off = offset;
-        
+        putCached(KEY_EXPORT_STATUS, STATE_RUNNING);
+
         // create output stream
         // Create a new Blob file with mime-type "text/plain"
-        final String fileName = getDaoFilename(daoIndex);
-        
+        final String fileName = getMemCached(getDaoFilenameKey(daoIndex)) + ".csv";
+
         // Get a file service
         final FileService fileService = FileServiceFactory.getFileService();
-        
+
         try {
             AppEngineFile file = fileService.createNewBlobFile("text/csv", fileName);
             SafeBlobstoreOutputStream out = new SafeBlobstoreOutputStream(file);
@@ -160,7 +162,7 @@ public class TaskScheduler<D> extends Scheduler<D> {
             SafeBlobstoreOutputStream out = new SafeBlobstoreOutputStream(file);
 
             // Create a new Blob file with mime-type "text/plain"
-            final String fileName = getDaoFilename(daoIndex);
+            final String fileName = getMemCached(getDaoFilenameKey(daoIndex)) + ".csv";
 
             // run for some minutes
             while (null != off && System.currentTimeMillis() < startMillis + MILLIS_TO_RUN) {
@@ -199,20 +201,24 @@ public class TaskScheduler<D> extends Scheduler<D> {
     
     @RequestMapping(value="v10/done", method = RequestMethod.POST)
     public ResponseEntity processPostExport() {
-        String email = (String) getCached(KEY_PRE_EXPORT);
-        BlobKey zipKey = (BlobKey) exporter.postExport(null, exporter, email);
-        BlobInfo blobInfo = new BlobInfoFactory().loadBlobInfo(zipKey);
+        try {
+            String email = (String) getCached(KEY_PRE_EXPORT);
+            BlobKey zipKey = (BlobKey) exporter.postExport(null, exporter, email);
+            BlobInfo blobInfo = new BlobInfoFactory().loadBlobInfo(zipKey);
 
-        String link = String.format("%sblob/v10?attachment=true&key=%s", apiUrl, zipKey.getKeyString());
-        String html = String.format("Download <a href='%s'>here</a>", link);
-        LOG.debug("EXPORTED BLOB: DOWNLOAD HERE: {}", html);
+            String link = String.format("%sblob/v10?attachment=true&key=%s", apiUrl, zipKey.getKeyString());
+            String html = String.format("Download <a href='%s'>here</a>", link);
+            LOG.debug("EXPORTED BLOB: DOWNLOAD HERE: {}", html);
 
-        
-        
-        EmailSender.sendEmail(fromEmail, fromName, Arrays.asList(email), null, null,
-                String.format("Datastore export - %s", blobInfo.getFilename()),
-                null, html, null, null, null);
-        return new ResponseEntity(HttpStatus.OK);
+            EmailSender.sendEmail(fromEmail, fromName, Arrays.asList(email), null, null,
+                    String.format("Datastore export - %s", blobInfo.getFilename()),
+                    null, html, null, null, null);
+
+            return new ResponseEntity(HttpStatus.OK);
+        }
+        finally {
+            putCached(KEY_EXPORT_STATUS, STATE_DONE);
+        }
     }
 
     @Override
@@ -229,10 +235,11 @@ public class TaskScheduler<D> extends Scheduler<D> {
         return MEM_CACHE.get(key);
     }
     
-    public static String getDaoFilename(int daoIndex) {
-        final String fileName = String.format("Dao%d.csv", daoIndex);
-        return fileName;
-    }
+
+    // public static String getDaoFilename(int daoIndex) {
+    // final String fileName = String.format("Dao%d.csv", daoIndex);
+    // return fileName;
+    // }
 
     public void setFromEmail(String fromEmail) {
         this.fromEmail = fromEmail;

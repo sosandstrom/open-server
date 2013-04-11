@@ -14,11 +14,12 @@ import org.slf4j.LoggerFactory;
  * @author sosandstrom
  */
 public class Scheduler<D> {
-    
+
     protected static final Logger LOG = LoggerFactory.getLogger(Scheduler.class);
-    
+
     static final String KEY_PRE_EXPORT = "Exporter.Scheduler.preExport";
     static final String KEY_PRE_DAO = "Exporter.Scheduler.preDao";
+    static final String KEY_EXPORT_STATUS = "Exporter.Scheduler.status";
     static final Integer STATE_PENDING = 0;
     static final Integer STATE_RUNNING = 1;
     static final Integer STATE_DONE = 2;
@@ -64,7 +65,7 @@ public class Scheduler<D> {
     }
 
     public static String getDaoKey(int daoIndex) {
-        return String.format("Exporter.Scheduler.daoKey.%d", daoIndex);        
+        return String.format("Exporter.Scheduler.daoKey.%d", daoIndex);
     }
 
     /**
@@ -102,6 +103,10 @@ public class Scheduler<D> {
 
     public void setExporter(Exporter<D> exporter) {
         Scheduler.exporter = exporter;
+    }
+
+    public static Object getDaoFilenameKey(int daoIndex) {
+        return String.format("Exporter.Scheduler.daoFilenameKey.%d", daoIndex);
     }
     
 }

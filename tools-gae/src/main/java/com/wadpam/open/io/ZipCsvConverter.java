@@ -4,6 +4,8 @@
 
 package com.wadpam.open.io;
 
+import com.google.appengine.api.blobstore.BlobInfo;
+import com.google.appengine.api.blobstore.BlobInfoFactory;
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreInputStream;
 import com.google.appengine.api.files.AppEngineFile;
@@ -14,6 +16,8 @@ import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.slf4j.Logger;
@@ -39,28 +43,40 @@ public class ZipCsvConverter<D> extends CsvConverter<D> {
     @Override
     public Object postExport(OutputStream ignored, Object argExporter, Object preExport, Object postExport, D[] daos) {
         try {
-            final String zipFilename = getOutputFileName(daos);
-            final FileService fileService = FileServiceFactory.getFileService();
             
+            DateFormat df = new SimpleDateFormat("yyyyMMdd");
+            String zipFilename = "DataStore-" + df.format(new Date()) + ".zip";
+
+            int daoIndex = 0;
+            List<BlobInfo> blobInfos = new LinkedList<BlobInfo>();
+            final BlobInfoFactory BLOB_INFO_FACTORY = new BlobInfoFactory();
+            while (Scheduler.STATE_DONE.equals(TaskScheduler.getMemCached(TaskScheduler.getDaoKey(daoIndex)))) {
+                String fileKey = TaskScheduler.getMemCached(Scheduler.getDaoFilenameKey(daoIndex)) + ".csv";
+                BlobKey blobKey = (BlobKey) TaskScheduler.getMemCached(fileKey);
+                LOG.info("BLOB KEY: {} from: {}", blobKey == null ? "null" : blobKey.getKeyString(), (Scheduler.getDaoFilenameKey(daoIndex) + ".csv"));
+                BlobInfo blobInfo = BLOB_INFO_FACTORY.loadBlobInfo(blobKey);
+
+                blobInfos.add(blobInfo);
+                daoIndex++;
+            }
+
+            if (daoIndex == 1) {
+                zipFilename = String.format("%s-%s.zip", blobInfos.get(0).getFilename(), df.format(new Date()));
+            }
+            LOG.info("============== ZIP FILE NAME: {}", zipFilename);
+
+            final FileService fileService = FileServiceFactory.getFileService();
+
             AppEngineFile file = fileService.createNewBlobFile("application/zip", zipFilename);
             SafeBlobstoreOutputStream blobOutputStream = new SafeBlobstoreOutputStream(file);
             ZipOutputStream zip = new ZipOutputStream(blobOutputStream);
 
-            Exporter exporter = (Exporter) argExporter;
-            
-            String friendlyName, csvName;
-            int daoIndex = 0;
-            BlobKey csvKey;
-            for (D dao : daos) {
-                
-                friendlyName = exporter.getExtractor().getTableName(null, dao);
-                zip.putNextEntry(new ZipEntry(String.format("%s.csv", friendlyName)));
-                
+            for (BlobInfo blob : blobInfos ) {
+                zip.putNextEntry(new ZipEntry(blob.getFilename()));
+
                 // read from blob CSV, write to Zip
-                csvName = TaskScheduler.getDaoFilename(daoIndex);
-                csvKey = (BlobKey) TaskScheduler.getMemCached(csvName);
-                BlobstoreInputStream inputStream = new BlobstoreInputStream(csvKey);
-                
+                BlobstoreInputStream inputStream = new BlobstoreInputStream(blob.getBlobKey());
+
                 byte b[] = new byte[65536];
                 int count;
                 while (0 < (count = inputStream.read(b))) {
@@ -68,13 +84,15 @@ public class ZipCsvConverter<D> extends CsvConverter<D> {
                 }
                 zip.closeEntry();
                 inputStream.close();
-                
-                daoIndex++;
             }
+
             zip.close();
             return fileService.getBlobKey(file);
+
         } catch (IOException ex) {
             LOG.error("Error zipping CSVs", ex);
+        } catch (Exception e) {
+            LOG.error("Error zipping CSVs....", e);
         }
         return null;
     }

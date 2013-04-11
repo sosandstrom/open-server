@@ -18,16 +18,16 @@ import com.wadpam.open.exceptions.RestException;
  * @see Converter to serialize the output
  */
 public class Exporter<D> {
-    
+
     static final Logger LOG = LoggerFactory.getLogger(Exporter.class);
-    
+
     private Converter<D> converter;
     private Extractor<D> extractor;
-    
+
     private Scheduler<D> scheduler = new Scheduler<D>();
-    
+
     private D[] daos;
-    
+
     public Exporter(D[] daos) {
         this.daos = daos;
         scheduler.setExporter(this);
@@ -40,7 +40,7 @@ public class Exporter<D> {
     public Object export(OutputStream out, Object arg) {
         return export(out, arg, daos);
     }
-    
+
     /**
      * Entry point for export of multiple "tables". Has the following flow:
      * <ol>
@@ -59,17 +59,10 @@ public class Exporter<D> {
         LOG.info("exporting for {} daos on {}", daos.length, out);
 
         // check idle before starting export
-        String cacheKey;
-        Object state;
-
-        for (int i = 0; i < 100; i++) {
-            cacheKey = Scheduler.getDaoKey(i);
-            state = scheduler.getCached(cacheKey);
-
-            if (state != null && !Scheduler.STATE_DONE.equals(state)) {
-                // there still export process going on.
-                throw new RestException(9001, HttpStatus.CONFLICT, "Export engine is occupied. Please try later.");
-            }
+        Object exportStatus = scheduler.getCached(Scheduler.KEY_EXPORT_STATUS);
+        if (exportStatus != null && Scheduler.STATE_DONE.equals(exportStatus)) {
+            // there still export process going on - not allow to process.
+            throw new RestException(9001, HttpStatus.CONFLICT, "Export engine is occupied. Please try later.");
         }
 
         this.daos = daos;
@@ -87,8 +80,11 @@ public class Exporter<D> {
         int daoIndex = 0;
         for(D dao : daos) {
             scheduler.putCached(Scheduler.getDaoKey(daoIndex), Scheduler.STATE_PENDING);
+            scheduler.putCached(Scheduler.getDaoFilenameKey(daoIndex), extractor.getTableName(arg, dao));
             daoIndex++;
         }
+        scheduler.putCached(Scheduler.KEY_EXPORT_STATUS, Scheduler.STATE_PENDING);
+
         // clear old status in cache
         for (; daoIndex < 100; daoIndex++) {
             if (scheduler.getCached(Scheduler.getDaoKey(daoIndex)) == null) {
@@ -253,19 +249,19 @@ public class Exporter<D> {
                 daoIndex, dao, entityIndex, entity, values);
     }
 
-    public Converter getConverter() {
+    public Converter<D> getConverter() {
         return converter;
     }
 
-    public void setConverter(Converter converter) {
+    public void setConverter(Converter<D> converter) {
         this.converter = converter;
     }
 
-    public Extractor getExtractor() {
+    public Extractor<D> getExtractor() {
         return extractor;
     }
 
-    public void setExtractor(Extractor extractor) {
+    public void setExtractor(Extractor<D> extractor) {
         this.extractor = extractor;
     }
 
