@@ -186,6 +186,7 @@ public class TaskScheduler<D> extends Scheduler<D> {
         }
         catch (Exception any) {
             LOG.error(filePath, any);
+            putCached(getDaoKey(daoIndex), STATE_DONE);
         }
         return new ResponseEntity(HttpStatus.valueOf(status));
     }
@@ -193,6 +194,7 @@ public class TaskScheduler<D> extends Scheduler<D> {
     @Override
     protected void schedulePostExport(OutputStream out, Object arg) {
         // create a task
+        putCached(Scheduler.KEY_EXPORT_STATUS, Scheduler.STATE_PENDING);
         TaskOptions task = TaskOptions.Builder.withUrl(
                 String.format("%s/exporter/v10/done", basePath))
                 .retryOptions(RetryOptions.Builder.withTaskRetryLimit(0));
@@ -202,6 +204,7 @@ public class TaskScheduler<D> extends Scheduler<D> {
     @RequestMapping(value="v10/done", method = RequestMethod.POST)
     public ResponseEntity processPostExport() {
         try {
+            putCached(Scheduler.KEY_EXPORT_STATUS, Scheduler.STATE_RUNNING);
             String email = (String) getCached(KEY_PRE_EXPORT);
             BlobKey zipKey = (BlobKey) exporter.postExport(null, exporter, email);
             BlobInfo blobInfo = new BlobInfoFactory().loadBlobInfo(zipKey);

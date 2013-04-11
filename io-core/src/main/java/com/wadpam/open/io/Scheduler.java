@@ -37,10 +37,15 @@ public class Scheduler<D> {
      * @param limit 
      */
     public void scheduleExportDao(OutputStream out, int daoIndex, int offset, int limit) {
-        LOG.debug("scheduling for dao #{}, {}/{} on {}", new Object[] {
-            daoIndex, offset, limit, out
-        });
-        exporter.exportDao(out, daoIndex, offset, limit);
+        try {
+            LOG.debug("scheduling for dao #{}, {}/{} on {}", new Object[] {
+                daoIndex, offset, limit, out
+            });
+            exporter.exportDao(out, daoIndex, offset, limit);
+        }
+        catch (Exception e) {
+            putCached(getDaoKey(daoIndex), STATE_DONE);
+        }
     }
     
     /**
@@ -48,8 +53,14 @@ public class Scheduler<D> {
      */
     protected void schedulePostExport(OutputStream out, Object arg) {
         LOG.debug("scheduling for postExport on {}", out);
-        Object preExport = getCached(KEY_PRE_EXPORT);
-        exporter.postExport(out, arg, preExport);
+        putCached(Scheduler.KEY_EXPORT_STATUS, Scheduler.STATE_PENDING);
+        try {
+            Object preExport = getCached(KEY_PRE_EXPORT);
+            exporter.postExport(out, arg, preExport);
+        }
+        finally {
+            putCached(Scheduler.KEY_EXPORT_STATUS, Scheduler.STATE_DONE);
+        }
     }
 
     public Object getCached(Object key) {

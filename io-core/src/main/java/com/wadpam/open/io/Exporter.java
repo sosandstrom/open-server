@@ -58,9 +58,21 @@ public class Exporter<D> {
     public Object export(OutputStream out, Object arg, D... daos) {
         LOG.info("exporting for {} daos on {}", daos.length, out);
 
-        // check idle before starting export
+        // check if previous dao exports done
+        String cacheKey;
+        Object state;
+        for(int i = 0; i < 100; i++) {
+            cacheKey = Scheduler.getDaoKey(i);
+            state = scheduler.getCached(cacheKey);
+
+            if (state != null && !Scheduler.STATE_DONE.equals(state)) {
+                // there still export process going on.
+                throw new RestException(9001, HttpStatus.CONFLICT, "Export engine is occupied. Please try later.");
+            }
+        }
+        // check if all daos export completed
         Object exportStatus = scheduler.getCached(Scheduler.KEY_EXPORT_STATUS);
-        if (exportStatus != null && Scheduler.STATE_DONE.equals(exportStatus)) {
+        if (exportStatus != null && !Scheduler.STATE_DONE.equals(exportStatus)) {
             // there still export process going on - not allow to process.
             throw new RestException(9001, HttpStatus.CONFLICT, "Export engine is occupied. Please try later.");
         }
@@ -83,7 +95,6 @@ public class Exporter<D> {
             scheduler.putCached(Scheduler.getDaoFilenameKey(daoIndex), extractor.getTableName(arg, dao));
             daoIndex++;
         }
-        scheduler.putCached(Scheduler.KEY_EXPORT_STATUS, Scheduler.STATE_PENDING);
 
         // clear old status in cache
         for (; daoIndex < 100; daoIndex++) {
