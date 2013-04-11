@@ -51,7 +51,7 @@ public abstract class CrudController<
         J extends Object, 
         T extends Object, 
         ID extends Serializable,
-        S extends CrudService<T, ID>> {
+        S extends CrudService<T, ID>> implements CrudObservable {
     
     public static final String NAME_X_REQUESTED_WITH = "X-Requested-With";
     public static final String VALUE_X_REQUESTED_WITH_AJAX = "XMLHttpRequest";
@@ -1035,10 +1035,12 @@ public abstract class CrudController<
         return to;
     }
     
+    @Override
     public void addListener(CrudListener listener) {
         listeners.add(listener);
     }
     
+    @Override
     public void removeListener(CrudListener listener) {
         listeners.remove(listener);
     }
