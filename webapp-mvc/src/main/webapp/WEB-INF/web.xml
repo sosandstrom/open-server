@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE web-app PUBLIC
+  "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+  "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app>
+    <filter>
+        <filter-name>domainNamespaceFilter</filter-name>
+        <filter-class>com.wadpam.open.web.DomainNamespaceFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>domainNamespaceFilter</filter-name>
+        <url-pattern>/api/*</url-pattern>
+    </filter-mapping>
+
+    <security-constraint>
+        <web-resource-collection>
+            <url-pattern>/_admin/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>admin</role-name>
+        </auth-constraint>
+    </security-constraint>
+    
+    <filter>
+        <filter-name>jsonpFilter</filter-name>
+        <filter-class>com.wadpam.open.jsonp.JsonpCallbackFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>jsonpFilter</filter-name>
+        <url-pattern>/api/*</url-pattern>
+    </filter-mapping>
+
+    <servlet>
+        <servlet-name>com.wadpam.open.web.ProfileServlet</servlet-name>
+        <servlet-class>com.wadpam.open.mvc.CrudServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>com.wadpam.open.web.ProfileServlet</servlet-name>
+        <url-pattern>/api/itest/profile/*</url-pattern>
+    </servlet-mapping>
+
+</web-app>

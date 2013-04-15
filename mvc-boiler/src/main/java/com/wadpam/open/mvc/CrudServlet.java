@@ -4,6 +4,7 @@
 
 package com.wadpam.open.mvc;
 
+import com.wadpam.open.json.JBaseObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,8 +19,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
+import org.springframework.web.servlet.view.RedirectView;
 
 /**
  *
@@ -36,6 +40,8 @@ public class CrudServlet extends HttpServlet {
     static {
         MAPPER.setSerializationInclusion(JsonSerialize.Inclusion.NON_NULL);
     }
+    
+    static final Logger LOG = LoggerFactory.getLogger(CrudServlet.class);
     
     private CrudController ctrl;
     private Map<String, Object> schema;
@@ -61,6 +67,8 @@ public class CrudServlet extends HttpServlet {
             schema = ctrl.getSchema();
             primaryKeyType = (String) schema.get("primaryKeyType");
             
+            LOG.info("Initialized CrudServlet for {} with primaryKeyType {}", 
+                    String.format("%sController", resourceName), primaryKeyType);
         } catch (ClassNotFoundException ex) {
             throw new ServletException("Cannot load controller class", ex);
         } catch (InstantiationException ex) {
@@ -99,20 +107,13 @@ public class CrudServlet extends HttpServlet {
         final String uri = request.getRequestURI();
         final String method = request.getMethod();
         final String parentKeyString = request.getParameter("parentKeyString");
+        LOG.debug("Invoking CrudServlet for {} {}", method, uri);
         
         // With or without /{id} ?
         String id = null;
         Serializable primaryKey = null;
         Matcher matcher = PATTERN_WITH_ID.matcher(uri);
         if (matcher.find()) {
-            
-        }
-        else {
-            matcher = PATTERN_NO_ID.matcher(uri);
-            if (!matcher.find()) {
-                response.setStatus(400);
-                return;
-            }
             id = matcher.group(4);
             // ID is Long or String
             if ("number".equals(primaryKeyType)) {
@@ -122,11 +123,20 @@ public class CrudServlet extends HttpServlet {
                 primaryKey = id;
             }
         }
+        else {
+            matcher = PATTERN_NO_ID.matcher(uri);
+            if (!matcher.find()) {
+                response.setStatus(400);
+                return;
+            }
+        }
         final String context = matcher.group(1);
         final String domain = matcher.group(2);
         final String resource = matcher.group(3);
         Object responseBody = null;
         final Model model = new ExtendedModelMap();
+        
+        LOG.debug("Invoking Controller for {} with ID {}", resource, primaryKey);
         
         if ("GET".equalsIgnoreCase(method)) {
             
@@ -150,9 +160,22 @@ public class CrudServlet extends HttpServlet {
             
             // Create or Update resource?
             if (null == id) {
+                final String _expects = request.getParameter("_expects");
                 responseBody = ctrl.createFromJsonWithContent(request, response, domain, 200, model, requestBody);
-                // HTTP 201 Created
-                response.setStatus(201);
+                if ("200".equals(_expects)) {
+                    // HTTP 200 Created
+                    response.setStatus(200);
+                }
+                else {
+                    // HTTP 302 Redirect
+                    StringBuffer sb = request.getRequestURL();
+                    if (sb.lastIndexOf("/")+1 < sb.length()) {
+                        sb.append("/");
+                    }
+                    sb.append(((JBaseObject)responseBody).getId());
+                    responseBody = null;
+                    response.sendRedirect(sb.toString());
+                }
             }
             else {
                 // ignore response body
@@ -171,10 +194,14 @@ public class CrudServlet extends HttpServlet {
         }
 
         // serialize body to JSON, using Jackson
+        LOG.debug("Writing response for body {}", responseBody);
         if (null != responseBody) {
+            response.setContentType("application/json");
             final OutputStream out = response.getOutputStream();
             MAPPER.writeValue(out, responseBody);
-            response.setContentType("application/json");
+            out.flush();
+            out.close();
         }
+        LOG.info("Done processing request {} {}", method, uri);
     }
 }
