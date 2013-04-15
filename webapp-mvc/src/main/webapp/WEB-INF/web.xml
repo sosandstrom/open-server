@@ -33,13 +33,19 @@
     </filter-mapping>
 
     <servlet>
-        <servlet-name>com.wadpam.open.web.ProfileServlet</servlet-name>
+        <servlet-name>CrudServlet</servlet-name>
         <servlet-class>com.wadpam.open.mvc.CrudServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
+        <init-param>
+            <param-name>com.wadpam.open.CrudControllerClasses</param-name>
+            <param-value>com.wadpam.open.web.ProfileController,
+                com.wadpam.open.web.NullController
+            </param-value>
+        </init-param>
     </servlet>
     <servlet-mapping>
-        <servlet-name>com.wadpam.open.web.ProfileServlet</servlet-name>
-        <url-pattern>/api/itest/profile/*</url-pattern>
+        <servlet-name>CrudServlet</servlet-name>
+        <url-pattern>/api/*</url-pattern>
     </servlet-mapping>
 
 </web-app>

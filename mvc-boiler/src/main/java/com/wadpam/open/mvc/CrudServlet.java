@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,15 +25,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
-import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  *
  * @author sosandstrom
  */
 public class CrudServlet extends HttpServlet {
-    /** use in web.xml as init-param-name for resource name */
-    public static final String PARAM_NAME_RESOURCE = "com.wadpam.open.CrudResource";
+    /** use in web.xml as init-param-name for controller classes */
+    public static final String PARAM_NAME_CONTROLLER_CLASSES = "com.wadpam.open.CrudControllerClasses";
     
     public static final Pattern PATTERN_NO_ID = Pattern.compile("\\A/([^/]+)/([^/]+)/([^/]+)/v10[/]?\\z");
     public static final Pattern PATTERN_WITH_ID = Pattern.compile("\\A/([^/]+)/([^/]+)/([^/]+)/v10/([^/]+)[/]?\\z");
@@ -43,38 +45,41 @@ public class CrudServlet extends HttpServlet {
     
     static final Logger LOG = LoggerFactory.getLogger(CrudServlet.class);
     
-    private CrudController ctrl;
-    private Map<String, Object> schema;
-    private String primaryKeyType;
+    private final Map<String,CrudController> ctrlMap = new HashMap<String, CrudController>();
+    private final Map<String,String> primaryKeyTypeMap = new HashMap<String, String>();
     
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         
         // resolve the resource name, by convention:
-        String resourceName = config.getInitParameter(PARAM_NAME_RESOURCE);
-        // by parameter?
-        if (null == resourceName) {
-            int endIndex = config.getServletName().lastIndexOf("Servlet");
-            resourceName = config.getServletName().substring(0, endIndex);
-        }
-        try {
-            // instantiate the Controller
-            Class ctrlClass = getClass().getClassLoader().loadClass(
-                    String.format("%sController", resourceName));
-            ctrl = (CrudController) ctrlClass.newInstance();
-            
-            schema = ctrl.getSchema();
-            primaryKeyType = (String) schema.get("primaryKeyType");
-            
-            LOG.info("Initialized CrudServlet for {} with primaryKeyType {}", 
-                    String.format("%sController", resourceName), primaryKeyType);
-        } catch (ClassNotFoundException ex) {
-            throw new ServletException("Cannot load controller class", ex);
-        } catch (InstantiationException ex) {
-            throw new ServletException("Cannot instantiate controller class", ex);
-        } catch (IllegalAccessException ex) {
-            throw new ServletException("Cannot access controller class", ex);
+        String classNames[] = config.getInitParameter(PARAM_NAME_CONTROLLER_CLASSES)
+                .split(",\\s");
+        for (String className : classNames) {
+            try {
+                // instantiate the Controller
+                Class ctrlClass = getClass().getClassLoader().loadClass(className.trim());
+                RequestMapping requestMapping = (RequestMapping) ctrlClass.getAnnotation(RequestMapping.class);
+                if (null != requestMapping && 0 < requestMapping.value().length) {
+                    CrudController ctrl = (CrudController) ctrlClass.newInstance();
+                    Map schema = ctrl.getSchema();
+                    String primaryKeyType = (String) schema.get("primaryKeyType");
+                    for (String path : requestMapping.value()) {
+                        int beginIndex = path.lastIndexOf('/')+1;
+                        final String name = path.substring(beginIndex);
+                        ctrlMap.put(name, ctrl);
+                        primaryKeyTypeMap.put(name, primaryKeyType);
+                        LOG.info("Initialized CrudServlet for {} with primaryKeyType {}", 
+                                className.trim(), primaryKeyType);
+                    }
+                }
+            } catch (ClassNotFoundException ex) {
+                LOG.warn("Cannot load controller class", ex);
+            } catch (InstantiationException ex) {
+                LOG.warn("Cannot instantiate controller class", ex);
+            } catch (IllegalAccessException ex) {
+                LOG.warn("Cannot access controller class", ex);
+            }
         }
     }
 
@@ -114,9 +119,10 @@ public class CrudServlet extends HttpServlet {
         Serializable primaryKey = null;
         Matcher matcher = PATTERN_WITH_ID.matcher(uri);
         if (matcher.find()) {
+            final String resource = matcher.group(3);
             id = matcher.group(4);
             // ID is Long or String
-            if ("number".equals(primaryKeyType)) {
+            if ("number".equals(primaryKeyTypeMap.get(resource))) {
                 primaryKey = Long.parseLong(id);
             }
             else {
@@ -135,6 +141,11 @@ public class CrudServlet extends HttpServlet {
         final String resource = matcher.group(3);
         Object responseBody = null;
         final Model model = new ExtendedModelMap();
+        final CrudController ctrl = ctrlMap.get(resource);
+        if (null == ctrl) {
+            response.setStatus(404);
+            return;
+        }
         
         LOG.debug("Invoking Controller for {} with ID {}", resource, primaryKey);
         
