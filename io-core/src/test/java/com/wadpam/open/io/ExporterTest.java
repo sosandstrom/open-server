@@ -4,8 +4,8 @@
  */
 package com.wadpam.open.io;
 
-import static com.wadpam.open.io.Scheduler.KEY_PRE_EXPORT;
-import static com.wadpam.open.io.Scheduler.LOG;
+import static org.junit.Assert.assertEquals;
+
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,10 +15,10 @@ import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *

@@ -14,11 +14,13 @@ import org.slf4j.LoggerFactory;
  * @author sosandstrom
  */
 public class Scheduler<D> {
-    
+
     protected static final Logger LOG = LoggerFactory.getLogger(Scheduler.class);
-    
+
     static final String KEY_PRE_EXPORT = "Exporter.Scheduler.preExport";
     static final String KEY_PRE_DAO = "Exporter.Scheduler.preDao";
+    static final String KEY_EXPORT_STATUS = "Exporter.Scheduler.status";
+    static final String KEY_EXPORT_DAO_INDEXES = "Exporter.Scheduler.Dao.indexes";
     static final Integer STATE_PENDING = 0;
     static final Integer STATE_RUNNING = 1;
     static final Integer STATE_DONE = 2;
@@ -26,6 +28,7 @@ public class Scheduler<D> {
     protected final HashMap<Object, Object> CACHE = new HashMap<Object, Object>();
 
     protected static Exporter exporter = null;
+
     
     /**
      * Override to do processing in different thread.
@@ -36,10 +39,15 @@ public class Scheduler<D> {
      * @param limit 
      */
     public void scheduleExportDao(OutputStream out, int daoIndex, int offset, int limit) {
-        LOG.debug("scheduling for dao #{}, {}/{} on {}", new Object[] {
-            daoIndex, offset, limit, out
-        });
-        exporter.exportDao(out, daoIndex, offset, limit);
+        try {
+            LOG.debug("scheduling for dao #{}, {}/{} on {}", new Object[] {
+                daoIndex, offset, limit, out
+            });
+            exporter.exportDao(out, daoIndex, offset, limit);
+        }
+        catch (Exception e) {
+            putCached(getDaoKey(daoIndex), STATE_DONE);
+        }
     }
     
     /**
@@ -47,8 +55,14 @@ public class Scheduler<D> {
      */
     protected void schedulePostExport(OutputStream out, Object arg) {
         LOG.debug("scheduling for postExport on {}", out);
-        Object preExport = getCached(KEY_PRE_EXPORT);
-        exporter.postExport(out, arg, preExport);
+        putCached(Scheduler.KEY_EXPORT_STATUS, Scheduler.STATE_PENDING);
+        try {
+            Object preExport = getCached(KEY_PRE_EXPORT);
+            exporter.postExport(out, arg, preExport);
+        }
+        finally {
+            putCached(Scheduler.KEY_EXPORT_STATUS, Scheduler.STATE_DONE);
+        }
     }
 
     public Object getCached(Object key) {
@@ -64,7 +78,7 @@ public class Scheduler<D> {
     }
 
     public static String getDaoKey(int daoIndex) {
-        return String.format("Exporter.Scheduler.daoKey.%d", daoIndex);        
+        return String.format("Exporter.Scheduler.daoKey.%d", daoIndex);
     }
 
     /**
@@ -102,6 +116,10 @@ public class Scheduler<D> {
 
     public void setExporter(Exporter<D> exporter) {
         Scheduler.exporter = exporter;
+    }
+
+    public static Object getDaoFilenameKey(int daoIndex) {
+        return String.format("Exporter.Scheduler.daoFilenameKey.%d", daoIndex);
     }
     
 }
