@@ -11,6 +11,7 @@ public class SkipNullObjectMapper extends ObjectMapper {
 
     public void init() {
         getSerializationConfig().setSerializationInclusion(Inclusion.NON_NULL);
+        //ignore unknown properties
         getDeserializationConfig().set(Feature.FAIL_ON_UNKNOWN_PROPERTIES,false);
     }
 }
