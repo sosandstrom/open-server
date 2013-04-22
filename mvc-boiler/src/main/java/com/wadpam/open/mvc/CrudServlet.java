@@ -4,12 +4,12 @@
 
 package com.wadpam.open.mvc;
 
+import com.wadpam.open.exceptions.BadRequestException;
 import com.wadpam.open.json.JBaseObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -86,93 +86,86 @@ public class CrudServlet extends HttpServlet {
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        process(request, response);
+        try {
+            final CrudRequest cr = parseRequest(request);
+            
+            final CrudController ctrl = ctrlMap.get(cr.resource);
+            if (null == ctrl) {
+                response.setStatus(404);
+                return;
+            }
+            LOG.debug("Invoking Controller for GET {} with ID {}", cr.resource, cr.id);
+            
+            if (null != cr.id) {
+                ctrl.delete(request, response, cr.domain, cr.id, cr.parentKeyString);
+                response.setStatus(200);    
+            }
+        }
+        catch (BadRequestException ex) {
+            response.setStatus(400);
+        }
     }
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        process(request, response);
+        try {
+            final CrudRequest cr = parseRequest(request);
+            
+            Object responseBody = null;
+            final Model model = new ExtendedModelMap();
+            final CrudController ctrl = ctrlMap.get(cr.resource);
+            if (null == ctrl) {
+                response.setStatus(404);
+                return;
+            }
+            LOG.debug("Invoking Controller for GET {} with ID {}", cr.resource, cr.id);
+
+            // GET Page or GET Details?
+            if (null == cr.id) {
+                final String pageSizeString = request.getParameter("pageSize");
+                final int pageSize = Integer.parseInt(null != pageSizeString ? pageSizeString : "10");
+                final String cursorKey = request.getParameter("cursorKey");
+                responseBody = ctrl.getPage(request, response, cr.domain, 
+                        model, pageSize, cursorKey);
+            }
+            else {
+                responseBody = ctrl.get(request, response, cr.domain, 
+                        cr.id, cr.parentKeyString, model);
+            }
+            
+            response.setStatus(200);
+            
+            renderView(request, response, responseBody);
+        }
+        catch (BadRequestException ex) {
+            response.setStatus(400);
+        }
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        process(request, response);
-    }
-
-    @Override
-    protected void doPut(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        process(request, response);
-    }
-
-    protected void process(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        final String uri = request.getRequestURI();
-        final String method = request.getMethod();
-        final String parentKeyString = request.getParameter("parentKeyString");
-        LOG.debug("Invoking CrudServlet for {} {}", method, uri);
-        
-        // With or without /{id} ?
-        String id = null;
-        Serializable primaryKey = null;
-        Matcher matcher = PATTERN_WITH_ID.matcher(uri);
-        if (matcher.find()) {
-            final String resource = matcher.group(3);
-            id = matcher.group(4);
-            // ID is Long or String
-            if ("number".equals(primaryKeyTypeMap.get(resource))) {
-                primaryKey = Long.parseLong(id);
-            }
-            else {
-                primaryKey = id;
-            }
-        }
-        else {
-            matcher = PATTERN_NO_ID.matcher(uri);
-            if (!matcher.find()) {
-                response.setStatus(400);
+        try {
+            final CrudRequest cr = parseRequest(request);
+            
+            Object responseBody = null;
+            final Model model = new ExtendedModelMap();
+            final CrudController ctrl = ctrlMap.get(cr.resource);
+            if (null == ctrl) {
+                response.setStatus(404);
                 return;
             }
-        }
-        final String context = matcher.group(1);
-        final String domain = matcher.group(2);
-        final String resource = matcher.group(3);
-        Object responseBody = null;
-        final Model model = new ExtendedModelMap();
-        final CrudController ctrl = ctrlMap.get(resource);
-        if (null == ctrl) {
-            response.setStatus(404);
-            return;
-        }
-        
-        LOG.debug("Invoking Controller for {} with ID {}", resource, primaryKey);
-        
-        if ("GET".equalsIgnoreCase(method)) {
-            
-            // GET Page or GET Details?
-            if (null == id) {
-                final String pageSizeString = request.getParameter("pageSize");
-                final int pageSize = Integer.parseInt(null != pageSizeString ? pageSizeString : "10");
-                final String cursorKey = request.getParameter("cursorKey");
-                responseBody = ctrl.getPage(request, response, domain, model, pageSize, cursorKey);
-            }
-            else {
-                responseBody = ctrl.get(request, response, domain, primaryKey, parentKeyString, model);
-            }
-            
-            response.setStatus(200);
-        }
-        else if ("POST".equalsIgnoreCase(method)) {
+            LOG.debug("Invoking Controller for POST {} with ID {}", cr.resource, cr.id);
+
             // bind JSON to Object
             final InputStream in = request.getInputStream();
             Object requestBody = MAPPER.readValue(in, ctrl.jsonClass);
             
             // Create or Update resource?
-            if (null == id) {
+            if (null == cr.id) {
                 final String _expects = request.getParameter("_expects");
-                responseBody = ctrl.createFromJsonWithContent(request, response, domain, 200, model, requestBody);
+                responseBody = ctrl.createFromJsonWithContent(request, response, cr.domain, 200, model, requestBody);
                 if ("200".equals(_expects)) {
                     // HTTP 200 Created
                     response.setStatus(200);
@@ -190,20 +183,48 @@ public class CrudServlet extends HttpServlet {
             }
             else {
                 // ignore response body
-                ctrl.updateFromJson(request, response, domain, primaryKey, null, model, requestBody);
+                ctrl.updateFromJson(request, response, cr.domain, cr.id, null, model, requestBody);
                 // HTTP 204 No Content
                 response.setStatus(204);
             }
+            
+            renderView(request, response, responseBody);
         }
-        else if ("DELETE".equalsIgnoreCase(method) && null != id) {
-            ctrl.delete(request, response, domain, primaryKey, parentKeyString);
-            response.setStatus(200);
+        catch (BadRequestException ex) {
+            response.setStatus(400);
+        }
+    }
+
+    protected CrudRequest parseRequest(HttpServletRequest request) {
+        final CrudRequest cr = new CrudRequest();
+        cr.uri = request.getRequestURI();
+        cr.parentKeyString = request.getParameter("parentKeyString");
+        
+        // With or without /{id} ?
+        cr.id = null;
+        Matcher matcher = PATTERN_WITH_ID.matcher(cr.uri);
+        if (matcher.find()) {
+            cr.resource = matcher.group(3);
+            final String idString = matcher.group(4);
+            // ID is Long or String
+            cr.id = "number".equals(primaryKeyTypeMap.get(cr.resource)) ?
+                Long.parseLong(idString) : idString;
         }
         else {
-            // method not supported
-            response.setStatus(405);
+            matcher = PATTERN_NO_ID.matcher(cr.uri);
+            if (!matcher.find()) {
+                throw new BadRequestException(400, "Not a CRUD path");
+            }
         }
+        cr.context = matcher.group(1);
+        cr.domain = matcher.group(2);
+        cr.resource = matcher.group(3);
+        
+        return cr;
+    }
 
+    protected void renderView(final HttpServletRequest request, final HttpServletResponse response, 
+            final Object responseBody) throws IOException {
         // serialize body to JSON, using Jackson
         LOG.debug("Writing response for body {}", responseBody);
         if (null != responseBody) {
@@ -213,6 +234,16 @@ public class CrudServlet extends HttpServlet {
             out.flush();
             out.close();
         }
-        LOG.info("Done processing request {} {}", method, uri);
+        
+        LOG.info("Done processing request {} {}", request.getMethod(), request.getRequestURI());
+    }
+    
+    class CrudRequest {
+        String context;
+        String domain;
+        String resource;
+        Serializable id;
+        String parentKeyString;
+        String uri;
     }
 }
