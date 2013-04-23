@@ -396,10 +396,6 @@ public abstract class CrudController<
     public String getBootstrap() {
         return "bootstrap-schema.html";
     }
-    @RequestMapping(value="v10/manager.jsp", method={RequestMethod.GET, RequestMethod.POST})
-    public String getBootstrapJSP() {
-        return "bootstrap-schema";
-    }
     
     /**
      * Queries for non-deleted entities. If not found or soft-deleted, it will be excluded from the response.
