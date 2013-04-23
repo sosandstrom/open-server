@@ -69,14 +69,14 @@ public class Exporter<D> {
 
             if (state != null && !Scheduler.STATE_DONE.equals(state)) {
                 // there still export process going on.
-                throw new RestException(9001, HttpStatus.CONFLICT, "Export engine is occupied. Please try later.");
+                throw new RestException(9001, HttpStatus.CONFLICT, "There is file being exported, please try again later.");
             }
         }
         // check if all daos export completed
         Object exportStatus = scheduler.getCached(Scheduler.KEY_EXPORT_STATUS);
         if (exportStatus != null && !Scheduler.STATE_DONE.equals(exportStatus)) {
             // there still export process going on - not allow to process.
-            throw new RestException(9001, HttpStatus.CONFLICT, "Export engine is occupied. Please try later.");
+            throw new RestException(9001, HttpStatus.CONFLICT, "There is file being exported, please try again later.");
         }
 
         // Store actual index of dao
