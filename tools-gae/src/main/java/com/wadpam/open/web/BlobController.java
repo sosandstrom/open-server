@@ -1,29 +1,37 @@
 package com.wadpam.open.web;
 
-import com.google.appengine.api.blobstore.*;
-import com.google.appengine.api.images.ImagesService;
-import com.google.appengine.api.images.ImagesServiceFactory;
-import com.google.appengine.api.images.ServingUrlOptions;
-import com.wadpam.docrest.domain.RestCode;
-import com.wadpam.docrest.domain.RestReturn;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-
-import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.google.appengine.api.blobstore.BlobInfo;
+import com.google.appengine.api.blobstore.BlobInfoFactory;
+import com.google.appengine.api.blobstore.BlobKey;
+import com.google.appengine.api.blobstore.BlobstoreService;
+import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
+import com.google.appengine.api.images.ImagesService;
+import com.google.appengine.api.images.ImagesServiceFactory;
+import com.google.appengine.api.images.ServingUrlOptions;
+import com.wadpam.docrest.domain.RestCode;
+import com.wadpam.docrest.domain.RestReturn;
 
 /**
  * Mange blobs in GAE blobstore.
@@ -89,8 +97,7 @@ public class BlobController extends AbstractRestController {
     @RequestMapping(value="upload", method= RequestMethod.POST)
     @ResponseBody
     public Map<String, List<String>> uploadCallback(HttpServletRequest request,
-                                              @PathVariable String domain,
-                                              UriComponentsBuilder uriBuilder) {
+                                              @PathVariable String domain) {
         LOG.debug("Blobstore upload callback");
 
         // Get all uploaded blob info records
@@ -117,8 +124,8 @@ public class BlobController extends AbstractRestController {
                 }
                 else {
                     // serve via this BlobController
-                    accessUrl = uriBuilder.query("key={blobkey}").
-                            buildAndExpand(blobKey.getKeyString()).toUriString();
+                    accessUrl = String.format("%s://%s/api/%s/blob?key=%s", request.getScheme(), request.getHeader("Host"),
+                            domain, blobKey.getKeyString().toString());
                 }
                 urls.add(accessUrl);
             }
