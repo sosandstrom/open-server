@@ -117,8 +117,8 @@ public class BlobController extends AbstractRestController {
                 }
                 else {
                     // serve via this BlobController
-                    accessUrl = uriBuilder.query("key={blobkey}").
-                            buildAndExpand(blobKey.getKeyString()).toUriString();
+                    accessUrl = String.format("%s://%s/api/%s/blob?key=%s", request.getScheme(), request.getHeader("Host"),
+                            domain, blobKey.getKeyString().toString());
                 }
                 urls.add(accessUrl);
             }
