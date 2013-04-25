@@ -111,6 +111,10 @@ public abstract class MardaoCrudService<
     
     @Override
     public T get(String parentKeyString, ID id) {
+        if (null == id || "".equals(id)) {
+            return null;
+        }
+        
         preDao();
         try {
             // TODO: parentKeyString must be decoded by parent dao!
