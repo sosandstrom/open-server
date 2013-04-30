@@ -21,6 +21,7 @@ public class Scheduler<D> {
     static final String KEY_PRE_DAO = "Exporter.Scheduler.preDao";
     static final String KEY_EXPORT_STATUS = "Exporter.Scheduler.status";
     static final String KEY_EXPORT_DAO_INDEXES = "Exporter.Scheduler.Dao.indexes";
+    public static final String KEY_ARG = "Exporter.Scheduler.arg";
     static final Integer STATE_PENDING = 0;
     static final Integer STATE_RUNNING = 1;
     static final Integer STATE_DONE = 2;
