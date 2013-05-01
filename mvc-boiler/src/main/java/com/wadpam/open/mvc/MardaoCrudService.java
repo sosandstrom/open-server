@@ -71,10 +71,12 @@ public abstract class MardaoCrudService<
     }
     
     protected void rollbackTransaction(TransactionStatus status) {
-        if (null != transactionManager && null != status) {
+        if (null != transactionManager && null != status && !status.isCompleted()) {
+            LOG.warn("Transaction Rollback");
             transactionManager.rollback(status);
         }
     }
+    
     
     @Override
     public ID create(T domain) {
@@ -90,11 +92,12 @@ public abstract class MardaoCrudService<
 
             LOG.debug("Created {}", domain);
 
+            commitTransaction(transactionStatus);
             return id;
         }
         finally {
             postDao();
-            commitTransaction(transactionStatus);
+            rollbackTransaction(transactionStatus);
         }
     }
     
@@ -105,10 +108,11 @@ public abstract class MardaoCrudService<
         try {
             Object parentKey = dao.getPrimaryKey(parentKeyString);
             dao.delete(parentKey, id);
+            commitTransaction(transactionStatus);
         }
         finally {
             postDao();
-            commitTransaction(transactionStatus);
+            rollbackTransaction(transactionStatus);
         }
     }
 
@@ -123,10 +127,11 @@ public abstract class MardaoCrudService<
                 ids.add(i);
             }
             dao.delete(parentKey, ids);
+            commitTransaction(transactionStatus);
         }
         finally {
             postDao();
-            commitTransaction(transactionStatus);
+            rollbackTransaction(transactionStatus);
         }
     }
 
@@ -272,11 +277,12 @@ public abstract class MardaoCrudService<
 
             dao.update(domain);
 
+            commitTransaction(transactionStatus);
             return id;
         }
         finally {
             postDao();
-            commitTransaction(transactionStatus);
+            rollbackTransaction(transactionStatus);
         }
     }
     
@@ -327,10 +333,11 @@ public abstract class MardaoCrudService<
                 body.add(getSimpleKey(d));
             }
 
+            commitTransaction(transactionStatus);
             return body;
         }
         finally {
-            commitTransaction(transactionStatus);
+            rollbackTransaction(transactionStatus);
         }
     }
     
