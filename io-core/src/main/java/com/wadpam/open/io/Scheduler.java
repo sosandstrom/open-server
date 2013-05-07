@@ -47,6 +47,7 @@ public class Scheduler<D> {
             exporter.exportDao(out, daoIndex, offset, limit);
         }
         catch (Exception e) {
+            LOG.error("Export dao with issue.", e);
             putCached(getDaoKey(daoIndex), STATE_DONE);
         }
     }
@@ -84,35 +85,35 @@ public class Scheduler<D> {
 
     /**
      * @param daoIndex
-     * @return 201 Created when all done, 204 No Content 
+     * @return 201 Created when all done, 204 No Content
      */
     public int onDone(OutputStream out, Object arg, int daoIndex) {
         putCached(getDaoKey(daoIndex), STATE_DONE);
-        
+
         int i = 0;
         Object state = null;
         String cacheKey;
-        
+
         // are all Daos exported?
         do {
             cacheKey = getDaoKey(i);
             state = getCached(cacheKey);
-            LOG.debug("onDone({}) #{} has state {}", new Object[] 
-                {daoIndex, i, state});
+            LOG.debug("onDone({}) #{} has state {}", new Object[]{daoIndex, i, state});
             i++;
-        } while (STATE_DONE.equals(state));
-        
+        }
+        while (STATE_DONE.equals(state));
+
         // done?
         if (null == state) {
             schedulePostExport(out, arg);
         }
-        
-        // Created when all done, No Content 
+
+        // Created when all done, No Content
         return null == state ? 201 : 204;
     }
-    
+
     public void preExport(Object arg) {
-        
+
     }
 
     public void setExporter(Exporter<D> exporter) {

@@ -127,6 +127,7 @@ public class TaskScheduler<D> extends Scheduler<D> {
         }
         catch (Exception any) {
             LOG.error(Integer.toString(offset), any);
+            putCached(getDaoKey(daoIndex), STATE_DONE);
         }
         
         return new ResponseEntity(HttpStatus.valueOf(status));
@@ -234,7 +235,12 @@ public class TaskScheduler<D> extends Scheduler<D> {
     public void putCached(Object key, Object value) {
         MEM_CACHE.put(key, value);
     }
-    
+
+    @Override
+    public void removeCached(Object key) {
+        MEM_CACHE.delete(key);
+    }
+
     public static Object getMemCached(Object key) {
         return MEM_CACHE.get(key);
     }
