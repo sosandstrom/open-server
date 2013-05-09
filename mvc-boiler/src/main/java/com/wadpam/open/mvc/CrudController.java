@@ -409,7 +409,11 @@ public abstract class CrudController<
     public Collection<J> getExisting(
             @RequestParam ID[] i
             ) {
-        final Iterable<T> page = service.getByPrimaryKeys(Arrays.asList(i));
+        ArrayList<ID> simpleKeys = new ArrayList<ID>();
+        for (ID id : i) {
+            simpleKeys.add(id);
+        }
+        final Iterable<T> page = service.getByPrimaryKeys(simpleKeys);
         
         final Collection<J> body = convert(page);
         return body;

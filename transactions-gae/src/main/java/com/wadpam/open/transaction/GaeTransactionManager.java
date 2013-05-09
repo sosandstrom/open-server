@@ -24,7 +24,7 @@ public class GaeTransactionManager extends AbstractPlatformTransactionManager {
 
     @Override
     protected Object doGetTransaction() throws TransactionException {
-        LOG.debug("Get transaction");
+        LOG.trace("Get transaction");
 
         DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         TransactionOptions options = TransactionOptions.Builder.withXG(true);
@@ -35,7 +35,7 @@ public class GaeTransactionManager extends AbstractPlatformTransactionManager {
 
     @Override
     protected void doBegin(Object transaction, TransactionDefinition transactionDefinition) throws TransactionException {
-        LOG.debug("Begin transaction");
+        LOG.trace("Begin transaction");
 
         Transaction txn = (Transaction)transaction;
         if (null == txn)
@@ -48,7 +48,7 @@ public class GaeTransactionManager extends AbstractPlatformTransactionManager {
 
     @Override
     protected void doCommit(DefaultTransactionStatus defaultTransactionStatus) throws TransactionException {
-        LOG.debug("Commit transaction");
+        LOG.trace("Commit transaction");
 
         Transaction txn = (Transaction)defaultTransactionStatus.getTransaction();
         if (null != txn)
@@ -60,7 +60,7 @@ public class GaeTransactionManager extends AbstractPlatformTransactionManager {
 
     @Override
     protected void doRollback(DefaultTransactionStatus defaultTransactionStatus) throws TransactionException {
-        LOG.debug("Rollback transaction");
+        LOG.trace("Rollback transaction");
 
         Transaction txn = (Transaction)defaultTransactionStatus.getTransaction();
         if (null != txn) {

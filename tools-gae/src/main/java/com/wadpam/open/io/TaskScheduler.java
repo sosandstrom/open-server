@@ -30,6 +30,8 @@ import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.RetryOptions;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.wadpam.open.service.EmailSender;
+import java.io.Serializable;
+import java.util.HashMap;
 
 /**
  * Schedules using Tasks, and handles the Task callbacks.
@@ -60,13 +62,11 @@ public class TaskScheduler<D> extends Scheduler<D> {
     }
     
     @Override
-    public void preExport(Object argEmail) {
+    public void preExport(Object arg) {
         DateFormat df = new SimpleDateFormat("yyyyMMdd");
         String dateString = df.format(new Date());
         putCached(KEY_DATE_STRING, dateString);
-
-        // overwrite the preExport value
-        putCached(KEY_PRE_EXPORT, argEmail);
+        putCached(KEY_ARG, arg);
     }
     
     @Override
@@ -127,6 +127,7 @@ public class TaskScheduler<D> extends Scheduler<D> {
         }
         catch (Exception any) {
             LOG.error(Integer.toString(offset), any);
+            putCached(getDaoKey(daoIndex), STATE_DONE);
         }
         
         return new ResponseEntity(HttpStatus.valueOf(status));
@@ -205,7 +206,8 @@ public class TaskScheduler<D> extends Scheduler<D> {
     public ResponseEntity processPostExport() {
         try {
             putCached(Scheduler.KEY_EXPORT_STATUS, Scheduler.STATE_RUNNING);
-            String email = (String) getCached(KEY_PRE_EXPORT);
+            HashMap<String, Serializable> arg = (HashMap<String, Serializable>) getCached(KEY_ARG);
+            String email = (String) arg.get("email");
             BlobKey zipKey = (BlobKey) exporter.postExport(null, exporter, email);
             BlobInfo blobInfo = new BlobInfoFactory().loadBlobInfo(zipKey);
 
@@ -233,7 +235,12 @@ public class TaskScheduler<D> extends Scheduler<D> {
     public void putCached(Object key, Object value) {
         MEM_CACHE.put(key, value);
     }
-    
+
+    @Override
+    public void removeCached(Object key) {
+        MEM_CACHE.delete(key);
+    }
+
     public static Object getMemCached(Object key) {
         return MEM_CACHE.get(key);
     }

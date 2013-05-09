@@ -125,7 +125,7 @@ public class Exporter<D> {
         }
         return preExport;
     }
-        
+
     /**
      * Called by the Controller.
      * @param out
@@ -175,7 +175,8 @@ public class Exporter<D> {
      */
     public Integer exportDao(OutputStream out, int daoIndex, int offset, int limit) {
         List<Integer> daoIndexes = (List<Integer>) scheduler.getCached(Scheduler.KEY_EXPORT_DAO_INDEXES);
-        return exportDaoImpl(out, null, null, daoIndex, daos[daoIndexes.get(daoIndex)], offset, limit);
+        Object arg = scheduler.getCached(Scheduler.KEY_ARG);
+        return exportDaoImpl(out, arg, null, daoIndex, daos[daoIndexes.get(daoIndex)], offset, limit);
     }
 
     /**

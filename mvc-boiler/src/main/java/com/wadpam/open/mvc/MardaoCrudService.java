@@ -6,7 +6,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -18,6 +17,10 @@ import net.sf.mardao.core.dao.DaoImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.AbstractPlatformTransactionManager;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 /**
  *
@@ -31,6 +34,9 @@ public abstract class MardaoCrudService<
     protected static final Logger LOG = LoggerFactory.getLogger(MardaoCrudService.class);
     
     protected D dao;
+    
+    protected AbstractPlatformTransactionManager transactionManager = null;
+    protected final TransactionDefinition TRANSACTION_DEFINITION = new DefaultTransactionDefinition();
 
     @Override
     public T createDomain() {
@@ -48,6 +54,29 @@ public abstract class MardaoCrudService<
     protected void postDao() {
     }
     
+    protected TransactionStatus getTransaction() {
+        if (null == transactionManager) {
+            return null;
+        }
+        
+        
+        final TransactionStatus status = transactionManager.getTransaction(TRANSACTION_DEFINITION);
+        return status;
+    }
+    
+    protected void commitTransaction(TransactionStatus status) {
+        if (null != transactionManager && null != status) {
+            transactionManager.commit(status);
+        }
+    }
+    
+    protected void rollbackTransaction(TransactionStatus status) {
+        if (null != transactionManager && null != status && !status.isCompleted()) {
+            LOG.warn("Transaction Rollback");
+            transactionManager.rollback(status);
+        }
+    }
+    
     
     @Override
     public ID create(T domain) {
@@ -55,6 +84,7 @@ public abstract class MardaoCrudService<
             return null;
         }
         
+        final TransactionStatus transactionStatus = getTransaction();
         preDao();
         prePersist(domain);
         try {
@@ -62,27 +92,33 @@ public abstract class MardaoCrudService<
 
             LOG.debug("Created {}", domain);
 
+            commitTransaction(transactionStatus);
             return id;
         }
         finally {
             postDao();
+            rollbackTransaction(transactionStatus);
         }
     }
     
     @Override
     public void delete(String parentKeyString, ID id) {
+        final TransactionStatus transactionStatus = getTransaction();
         preDao();
         try {
             Object parentKey = dao.getPrimaryKey(parentKeyString);
             dao.delete(parentKey, id);
+            commitTransaction(transactionStatus);
         }
         finally {
             postDao();
+            rollbackTransaction(transactionStatus);
         }
     }
 
     @Override
     public void delete(String parentKeyString, ID[] id) {
+        final TransactionStatus transactionStatus = getTransaction();
         preDao();
         try {
             Object parentKey = dao.getPrimaryKey(parentKeyString);
@@ -91,9 +127,11 @@ public abstract class MardaoCrudService<
                 ids.add(i);
             }
             dao.delete(parentKey, ids);
+            commitTransaction(transactionStatus);
         }
         finally {
             postDao();
+            rollbackTransaction(transactionStatus);
         }
     }
 
@@ -111,6 +149,10 @@ public abstract class MardaoCrudService<
     
     @Override
     public T get(String parentKeyString, ID id) {
+        if (null == id || "".equals(id)) {
+            return null;
+        }
+        
         preDao();
         try {
             // TODO: parentKeyString must be decoded by parent dao!
@@ -224,6 +266,7 @@ public abstract class MardaoCrudService<
     
     @Override
     public ID update(T domain) {
+        final TransactionStatus transactionStatus = getTransaction();
         preDao();
         try {
             LOG.debug("Update {}", domain);
@@ -234,15 +277,19 @@ public abstract class MardaoCrudService<
 
             dao.update(domain);
 
+            commitTransaction(transactionStatus);
             return id;
         }
         finally {
             postDao();
+            rollbackTransaction(transactionStatus);
         }
     }
     
     @Override
     public List<ID> upsert(Iterable<T> dEntities) {
+        final TransactionStatus transactionStatus = getTransaction();
+        
         // group entities by create or update:
         final ArrayList<T> toCreate = new ArrayList<T>();
         final ArrayList<T> toUpdate = new ArrayList<T>();
@@ -259,33 +306,39 @@ public abstract class MardaoCrudService<
         LOG.debug("Creating {}, Updating {}", toCreate.size(), toUpdate.size());
         LOG.debug("Creating {}, Updating {}", toCreate, toUpdate);
         
-        // create new entities using async API
-        Future<List<?>> createFuture = null;
-        if (!toCreate.isEmpty()) {
-            createFuture = dao.persistForFuture(toCreate);
-        }
-        
-        // update in parallel
-        if (!toUpdate.isEmpty()) {
-            dao.update(toUpdate);
-        }
-        
-        // join future
-        if (null != createFuture) {
-            Collection<ID> ids = dao.getSimpleKeys(createFuture);
-//            Iterator<ID> i = ids.iterator();
-//            for (T t : toCreate) {
-//                dao.setSimpleKey(t, i.next());
-//            }
-        }
+        try {
+            // create new entities using async API
+            Future<List<?>> createFuture = null;
+            if (!toCreate.isEmpty()) {
+                createFuture = dao.persistForFuture(toCreate);
+            }
 
-        // collect the IDs
-        final ArrayList<ID> body = new ArrayList<ID>();
-        for (T d : dEntities) {
-            body.add(getSimpleKey(d));
-        }
+            // update in parallel
+            if (!toUpdate.isEmpty()) {
+                dao.update(toUpdate);
+            }
 
-        return body;
+            // join future
+            if (null != createFuture) {
+                Collection<ID> ids = dao.getSimpleKeys(createFuture);
+    //            Iterator<ID> i = ids.iterator();
+    //            for (T t : toCreate) {
+    //                dao.setSimpleKey(t, i.next());
+    //            }
+            }
+
+            // collect the IDs
+            final ArrayList<ID> body = new ArrayList<ID>();
+            for (T d : dEntities) {
+                body.add(getSimpleKey(d));
+            }
+
+            commitTransaction(transactionStatus);
+            return body;
+        }
+        finally {
+            rollbackTransaction(transactionStatus);
+        }
     }
     
     @Override
@@ -311,4 +364,9 @@ public abstract class MardaoCrudService<
             postDao();
         }
     }
+
+    public void setTransactionManager(AbstractPlatformTransactionManager transactionManager) {
+        this.transactionManager = transactionManager;
+    }
+    
 }
