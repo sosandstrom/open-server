@@ -23,6 +23,11 @@ public class WhitelistBuilder {
         return add(pathRegex, methods);
     }
     
+    public WhitelistBuilder with(Collection<Map.Entry<String, Collection<String>>> toClone) {
+        whitelist = new ArrayList<Map.Entry<String, Collection<String>>>(toClone);
+        return this;
+    }
+    
     public WhitelistBuilder add(String pathRegex, String... methods) {
         TreeSet<String> methodSet = new TreeSet<String>();
         for (String m : methods) {
