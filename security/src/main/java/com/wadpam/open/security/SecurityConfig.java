@@ -34,6 +34,12 @@ public interface SecurityConfig {
      */
     String USER = "ROLE_USER";
     
+    /** 
+     * Role given by container-based security
+     * usually via web.xml.
+     */
+    String ADMIN = "ROLE_ADMIN";
+    
 
     WhitelistBuilder WHITELIST_BUILDER = new WhitelistBuilder();
 }
