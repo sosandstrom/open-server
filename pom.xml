@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.wadpam.openserver</groupId>
     <artifactId>parent</artifactId>
-    <version>26-SNAPSHOT</version>
+    <version>27-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Open-Server parent</name>
     <url>http://github.com/sosandstrom/open-server</url>
