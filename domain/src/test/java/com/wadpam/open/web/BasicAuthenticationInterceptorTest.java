@@ -4,6 +4,8 @@
 
 package com.wadpam.open.web;
 
+import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.appengine.tools.development.testing.LocalUserServiceTestConfig;
 import com.wadpam.open.domain.DAppDomain;
 import com.wadpam.open.security.SecurityDetailsService;
 import com.wadpam.open.security.SecurityInterceptor;
@@ -26,11 +28,17 @@ public class BasicAuthenticationInterceptorTest extends TestCase {
     static final Logger LOG = LoggerFactory.getLogger(BasicAuthenticationInterceptorTest.class);
 
     static final String URI = "/api/domain/resource/v10";
+    
+   private final LocalServiceTestHelper helper =
+        new LocalServiceTestHelper(new LocalUserServiceTestConfig())
+            .setEnvIsAdmin(false).setEnvIsLoggedIn(false);
+    
     BasicAuthenticationInterceptor instance;
     
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        helper.setUp();
         instance = new BasicAuthenticationInterceptor();
         instance.setSecurityDetailsService(new SecurityDetailsService() {
             @Override
@@ -59,6 +67,7 @@ public class BasicAuthenticationInterceptorTest extends TestCase {
     @Override
     protected void tearDown() throws Exception {
         LOG.info("+++++           tearDown() {}        +++++", getName());
+        helper.tearDown();
         super.tearDown();
     }
 
