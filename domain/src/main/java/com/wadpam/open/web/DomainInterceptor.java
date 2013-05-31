@@ -48,7 +48,7 @@ public abstract class DomainInterceptor extends SecurityInterceptor {
      */
     @Override
     public String isAuthenticated(HttpServletRequest request, HttpServletResponse response, Object handler, String uri, String method, String authValue) {
-        if (null != userService && userService.isUserAdmin()) {
+        if (null != userService && userService.isUserLoggedIn() && userService.isUserAdmin()) {
             request.setAttribute(ATTR_NAME_CONTAINER_ADMIN_NAME, userService.getCurrentUser().getEmail());
             request.setAttribute(ATTR_NAME_CONTAINER_ADMIN_PRINCIPAL, userService.getCurrentUser());
         }
