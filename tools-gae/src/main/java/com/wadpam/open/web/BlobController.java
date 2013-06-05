@@ -97,7 +97,8 @@ public class BlobController extends AbstractRestController {
     @RequestMapping(value="upload", method= RequestMethod.POST)
     @ResponseBody
     public Map<String, List<String>> uploadCallback(HttpServletRequest request,
-                                              @PathVariable String domain) {
+                                              @PathVariable String domain,
+                                              @RequestParam(required=false) Integer imageSize) {
         LOG.debug("Blobstore upload callback");
 
         // Get all uploaded blob info records
@@ -119,7 +120,13 @@ public class BlobController extends AbstractRestController {
                     // we want to serve directly from ImagesService,
                     // to avoid involving the GAE app, avoid spinning up instances,
                     // and to use the awesome Google CDN.
+                    
                     ServingUrlOptions suo = ServingUrlOptions.Builder.withBlobKey(blobKey);
+                    
+                    if (null !=imageSize) {
+                        LOG.debug(" specific image size {}", imageSize);
+                        suo=suo.imageSize(imageSize);
+                    }
                     accessUrl = imagesService.getServingUrl(suo);
                 }
                 else {
