@@ -116,23 +116,29 @@ public class BlobController extends AbstractRestController {
                 final BlobKey blobKey = blobInfo.getBlobKey();
 
                 final String contentType = blobInfo.getContentType();
-                if (null != contentType && contentType.startsWith("image")) {
+                if (null != contentType && contentType.startsWith("image") ) {
                     // we want to serve directly from ImagesService,
                     // to avoid involving the GAE app, avoid spinning up instances,
                     // and to use the awesome Google CDN.
                     
                     ServingUrlOptions suo = ServingUrlOptions.Builder.withBlobKey(blobKey);
+                    LOG.debug(" specific image size {}", imageSize);
                     
-                    if (null !=imageSize) {
-                        LOG.debug(" specific image size {}", imageSize);
+                    //Valid sizes are any integer in the range [0, 1600] and is available as SERVING_SIZES_LIMIT.
+                    // if exceed we serve via BlobController
+                    if (null !=imageSize && imageSize <= ImagesService.SERVING_SIZES_LIMIT) {
+                        
                         suo=suo.imageSize(imageSize);
+                        accessUrl = imagesService.getServingUrl(suo);
+                        
+                    } else {  
+                        // serve via this BlobController
+                        accessUrl = getBlobUrl(request, domain, blobKey);
                     }
-                    accessUrl = imagesService.getServingUrl(suo);
                 }
                 else {
                     // serve via this BlobController
-                    accessUrl = String.format("%s://%s/api/%s/blob?key=%s", request.getScheme(), request.getHeader("Host"),
-                            domain, blobKey.getKeyString().toString());
+                    accessUrl = getBlobUrl(request, domain, blobKey);
                 }
                 urls.add(accessUrl);
             }
@@ -140,7 +146,10 @@ public class BlobController extends AbstractRestController {
 
         return body;
     }
-
+    private String getBlobUrl(HttpServletRequest request, String domain, BlobKey blobKey) {
+        return String.format("%s://%s/api/%s/blob?key=%s", request.getScheme(), request.getHeader("Host"),
+                domain, blobKey.getKeyString().toString());
+    }
 
 
     /**
