@@ -96,9 +96,8 @@ public class BlobController extends AbstractRestController {
     })
     @RequestMapping(value="upload", method= RequestMethod.POST)
     @ResponseBody
-    public Map<String, List<String>> uploadCallback(HttpServletRequest request,
-                                              @PathVariable String domain,
-                                              @RequestParam(required=false) Integer imageSize) {
+    public Map<String, List<String>> uploadCallback(HttpServletRequest request, @PathVariable String domain,
+            @RequestParam(required = false) Integer imageSize) {
         LOG.debug("Blobstore upload callback");
 
         // Get all uploaded blob info records
@@ -112,28 +111,26 @@ public class BlobController extends AbstractRestController {
             body.put(field.getKey(), urls);
 
             for (BlobInfo blobInfo : field.getValue()) {
-                String accessUrl;
                 final BlobKey blobKey = blobInfo.getBlobKey();
+                // serve via this BlobController
+                String accessUrl = getBlobUrl(request, domain, blobKey);
 
+                // we want to serve directly from ImagesService,
+                // to avoid involving the GAE app, avoid spinning up instances,
+                // and to use the awesome Google CDN.
                 final String contentType = blobInfo.getContentType();
-                if (null != contentType && contentType.startsWith("image")) {
-                    // we want to serve directly from ImagesService,
-                    // to avoid involving the GAE app, avoid spinning up instances,
-                    // and to use the awesome Google CDN.
-                    
+
+                // Valid sizes are any integer in the range [0, 1600] and is available as SERVING_SIZES_LIMIT.
+                // if exceed we serve via BlobController
+                if (null != contentType && contentType.startsWith("image") && null != imageSize
+                        && imageSize <= ImagesService.SERVING_SIZES_LIMIT) {
+
+                    LOG.debug(" specific image size {}", imageSize);
                     ServingUrlOptions suo = ServingUrlOptions.Builder.withBlobKey(blobKey);
-                    
-                    if (null !=imageSize) {
-                        LOG.debug(" specific image size {}", imageSize);
-                        suo=suo.imageSize(imageSize);
-                    }
+                    suo = suo.imageSize(imageSize);
                     accessUrl = imagesService.getServingUrl(suo);
                 }
-                else {
-                    // serve via this BlobController
-                    accessUrl = String.format("%s://%s/api/%s/blob?key=%s", request.getScheme(), request.getHeader("Host"),
-                            domain, blobKey.getKeyString().toString());
-                }
+
                 urls.add(accessUrl);
             }
         }
@@ -141,6 +138,10 @@ public class BlobController extends AbstractRestController {
         return body;
     }
 
+    protected static String getBlobUrl(HttpServletRequest request, String domain, BlobKey blobKey) {
+        return String.format("%s://%s/api/%s/blob?key=%s", request.getScheme(), request.getHeader("Host"), domain, blobKey
+                .getKeyString().toString());
+    }
 
 
     /**
