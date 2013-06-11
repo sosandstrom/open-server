@@ -147,7 +147,7 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
             throws IOException, ServletException {
 
         final String uri = request.getRequestURI();
-        final String method = request.getMethod();
+        final String method = getEffectiveMethod(request);
 
         // get the authentication value:
         String authValue = getAuthenticationValue(request, response, uri);
@@ -401,6 +401,16 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
             request.setAttribute(ATTR_NAME_ROLES, combinedRoles);
         }
         return (skipPath || whitelisted) ? USERNAME_ANONYMOUS : null;
+    }
+
+    protected static String getEffectiveMethod(HttpServletRequest request) {
+        final String method = request.getMethod();
+        final String _method = request.getParameter("_method");
+
+        if (SecurityConfig.GET.equals(method) && null != _method) {
+            return _method.toUpperCase();
+        }
+        return method;
     }
 
 }

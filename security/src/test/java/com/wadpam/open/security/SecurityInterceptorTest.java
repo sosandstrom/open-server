@@ -9,10 +9,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map.Entry;
-import java.util.TreeSet;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import junit.framework.TestCase;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -77,7 +79,7 @@ public class SecurityInterceptorTest extends TestCase {
         assertEquals("anonymous", SecurityInterceptor.USERNAME_ANONYMOUS, request.getAttribute(SecurityInterceptor.ATTR_NAME_USERNAME));
         assertEquals("anonymous role", SecurityInterceptor.ROLES_ANONYMOUS, request.getAttribute(SecurityInterceptor.ATTR_NAME_ROLES));
     }
-    
+
     public void testIsAuthenticatedNoSuchUser() {
         final String authValue = "test:test";
         String actual = instance.isAuthenticated(null, null, null, 
@@ -100,5 +102,14 @@ public class SecurityInterceptorTest extends TestCase {
         assertEquals("OK", "domain", actual);
         assertEquals("ATTR", "domain", request.getAttribute(SecurityInterceptor.ATTR_NAME_USERNAME));
     }
-    
+
+    public void testEffectiveMethod() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setMethod("GET");
+        request.setParameter("_method", "POST");
+        String actualMethod = SecurityInterceptor.getEffectiveMethod(request);
+        System.out.println(actualMethod);
+        assertEquals("POST", actualMethod);
+    }
+
 }
