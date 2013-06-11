@@ -39,9 +39,9 @@ public class RolesInterceptor extends HandlerInterceptorAdapter {
             final Collection<String> grantedRoles = (Collection<String>) request.getAttribute(SecurityInterceptor.ATTR_NAME_ROLES);
             
             // build the method:path String
-            final String method = request.getMethod();
+            final String method = SecurityInterceptor.getEffectiveMethod(request);
             final String requestUri = request.getRequestURI();
-            
+
             final boolean authorized = isAuthorized(RULED_METHODS, method, requestUri, grantedRoles);
             if (authorized) {
                 return true;

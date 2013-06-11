@@ -31,6 +31,12 @@ public interface SecurityDetailsService {
      */
     public static final String ROLE_USER = "ROLE_USER";
     
+    /** 
+     * Role given if user is authenticated via 
+     * Container-based security
+     */
+    public static final String ROLE_CONTAINER_ADMIN = "ROLE_CONTAINER_ADMIN";
+    
     /**
      * Loads the user details for the specified username.
      * @param request

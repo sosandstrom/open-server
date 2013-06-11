@@ -6,8 +6,6 @@ import com.wadpam.open.exceptions.NotFoundException;
 import com.wadpam.open.json.JBaseObject;
 import com.wadpam.open.json.JCursorPage;
 import com.wadpam.open.json.JLocation;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.URI;
 import java.text.ParseException;
@@ -53,7 +51,7 @@ public abstract class CrudController<
         J extends Object, 
         T extends Object, 
         ID extends Serializable,
-        S extends CrudService<T, ID>> {
+        S extends CrudService<T, ID>> implements CrudObservable {
     
     public static final String NAME_X_REQUESTED_WITH = "X-Requested-With";
     public static final String VALUE_X_REQUESTED_WITH_AJAX = "XMLHttpRequest";
@@ -353,37 +351,17 @@ public abstract class CrudController<
     }
 
     /**
-     * Writes the entities as CSV on response body
-     * @param response
-     * @param startDate
-     * @param endDate
-     * @throws IOException 
+     * get Entity details
+     * @param domain the domain namespace
+     * @param id the Entity's primary key or ID
+     * @param parentKeyString the Entity's parent key as String if any
+     * @return Entity as json object, 404 if not found
      */
-    @RestReturn(value=String.class, code={
-        @RestCode(code=200, description="A CSV stream with Tasks", message="OK")})
-    @RequestMapping(value="v10", method= RequestMethod.GET, params={"startDate"})
-    public void exportCsv(
-            HttpServletResponse response,
-            @RequestParam Long startDate,
-            @RequestParam(required=false) Long endDate
-    ) throws IOException 
-    {
-        response.setContentType("text/csv");
-        final String contentDisposition = String.format("attachment;filename=%ss.csv",
-                service.getTableName());
-        response.setHeader("Content-Disposition", contentDisposition);
-        final OutputStream out = response.getOutputStream();
-        
-        service.exportCsv(out, startDate, endDate);
-    }
-    /**
-	* get Entity detail 
-	* @param id is path-variable
-	* @return Entity as json object
-	*/
-	@RestReturn(value=Object.class, code={
-        @RestCode(code=200, description="get Entity successfully", message="OK")
-    })
+    @RestReturn(value=Object.class, code={
+        @RestCode(code=200, description="get Entity successfully", message="OK"),
+        @RestCode(code=404, description="Entity not found", message="Not Found")
+    },
+    supportsClassParams=true)
     @RequestMapping(value="v10/{id}", method=RequestMethod.GET)
     @ResponseBody
     public J get(
@@ -431,7 +409,11 @@ public abstract class CrudController<
     public Collection<J> getExisting(
             @RequestParam ID[] i
             ) {
-        final Iterable<T> page = service.getByPrimaryKeys(Arrays.asList(i));
+        ArrayList<ID> simpleKeys = new ArrayList<ID>();
+        for (ID id : i) {
+            simpleKeys.add(id);
+        }
+        final Iterable<T> page = service.getByPrimaryKeys(simpleKeys);
         
         final Collection<J> body = convert(page);
         return body;
@@ -444,7 +426,8 @@ public abstract class CrudController<
      * @return a page of entities
      */
     @RestReturn(value=JCursorPage.class, code={
-        @RestCode(code=200, description="A CursorPage with JSON entities", message="OK")})
+        @RestCode(code=200, description="A CursorPage with JSON entities", message="OK")},
+    supportsClassParams=true)
     @RequestMapping(value="v10", method= RequestMethod.GET)
     @ResponseBody
     public JCursorPage<J> getPage(
@@ -1056,10 +1039,12 @@ public abstract class CrudController<
         return to;
     }
     
+    @Override
     public void addListener(CrudListener listener) {
         listeners.add(listener);
     }
     
+    @Override
     public void removeListener(CrudListener listener) {
         listeners.remove(listener);
     }

@@ -17,3 +17,6 @@ tools-gae/src/main/java/META-INF/
 webapp-j2ee/src/main/webapp/META-INF/MANIFEST.MF
 webapp/src/main/webapp/META-INF/
 
+domain/bin/
+tools-gae/bin/
+security/bin/

@@ -2,19 +2,14 @@
  * INSERT COPYRIGHT HERE
  */
 
-package com.wadpam.open.domain;
-
-import com.wadpam.open.user.domain.DOpenUser;
-import javax.persistence.Basic;
-import javax.persistence.Entity;
+package com.wadpam.open.json;
 
 /**
  *
  * @author sosandstrom
  */
-public class DProfile extends DOpenUser {
+public class JProfile extends JBaseObject {
 
-    @Basic
     private String phoneNumber;
 
     public String getPhoneNumber() {

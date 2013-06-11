@@ -47,6 +47,8 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
     public static final String ATTR_NAME_USERNAME = "com.wadpam.open.security.username";
     public static final String ATTR_NAME_PRINCIPAL = "com.wadpam.open.security.principal";
     public static final String ATTR_NAME_ROLES = "com.wadpam.open.security.roles";
+    public static final String ATTR_NAME_CONTAINER_ADMIN_NAME = "com.wadpam.open.security.ContainerAdminName";
+    public static final String ATTR_NAME_CONTAINER_ADMIN_PRINCIPAL = "com.wadpam.open.security.ContainerAdminPrincipal";
     public static final String USERNAME_ANONYMOUS = "[ANONYMOUS]";
     
     public static final String HEADER_AUTHORIZATION = "Authorization";
@@ -145,7 +147,7 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
             throws IOException, ServletException {
 
         final String uri = request.getRequestURI();
-        final String method = request.getMethod();
+        final String method = getEffectiveMethod(request);
 
         // get the authentication value:
         String authValue = getAuthenticationValue(request, response, uri);
@@ -234,6 +236,12 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
                 if (null != previousRoles) {
                     combinedRoles.addAll(previousRoles);
                 }
+                
+                // container-based admin?
+                if (null != request.getAttribute(ATTR_NAME_CONTAINER_ADMIN_NAME)) {
+                    combinedRoles.add(SecurityDetailsService.ROLE_CONTAINER_ADMIN);
+                }
+                
                 request.setAttribute(ATTR_NAME_ROLES, combinedRoles);
             }
             return principalName;
@@ -356,6 +364,24 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
     }
 
     private String populateAnonymousUser(HttpServletRequest request, boolean skipPath, boolean whitelisted) {
+        if (null != request && null != request.getAttribute(ATTR_NAME_CONTAINER_ADMIN_NAME)) {
+            final String adminName = (String) request.getAttribute(ATTR_NAME_CONTAINER_ADMIN_NAME);
+            
+            // populate request
+            request.setAttribute(ATTR_NAME_USERNAME, adminName);
+            request.setAttribute(ATTR_NAME_PRINCIPAL, request.getAttribute(ATTR_NAME_CONTAINER_ADMIN_PRINCIPAL));
+
+            // combine roles
+            TreeSet<String> combinedRoles = new TreeSet<String>();
+            Collection<String> previousRoles = (Collection<String>) request.getAttribute(ATTR_NAME_ROLES);
+            if (null != previousRoles) {
+                combinedRoles.addAll(previousRoles);
+            }
+            combinedRoles.add(SecurityDetailsService.ROLE_CONTAINER_ADMIN);
+            request.setAttribute(ATTR_NAME_ROLES, combinedRoles);
+            return adminName;
+        }
+        
         if (skipPath && null != request) {
             // populate request
         }
@@ -375,6 +401,16 @@ public class SecurityInterceptor extends HandlerInterceptorAdapter {
             request.setAttribute(ATTR_NAME_ROLES, combinedRoles);
         }
         return (skipPath || whitelisted) ? USERNAME_ANONYMOUS : null;
+    }
+
+    protected static String getEffectiveMethod(HttpServletRequest request) {
+        final String method = request.getMethod();
+        final String _method = request.getParameter("_method");
+
+        if (SecurityConfig.GET.equals(method) && null != _method) {
+            return _method.toUpperCase();
+        }
+        return method;
     }
 
 }

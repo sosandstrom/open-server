@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.wadpam.openserver</groupId>
     <artifactId>parent</artifactId>
-    <version>22-SNAPSHOT</version>
+    <version>27-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Open-Server parent</name>
     <url>http://github.com/sosandstrom/open-server</url>
@@ -33,7 +33,7 @@
     
     <properties>
         <gae.version>1.7.5</gae.version>
-        <docrest.version>1.22</docrest.version>
+        <docrest.version>1.23</docrest.version>
         <mardao.version>2.2.3</mardao.version>
         <spring.version>3.1.1.RELEASE</spring.version>
         <spring.security.version>3.1.0.RELEASE</spring.security.version>

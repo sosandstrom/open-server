@@ -1,29 +1,37 @@
 package com.wadpam.open.web;
 
-import com.google.appengine.api.blobstore.*;
-import com.google.appengine.api.images.ImagesService;
-import com.google.appengine.api.images.ImagesServiceFactory;
-import com.google.appengine.api.images.ServingUrlOptions;
-import com.wadpam.docrest.domain.RestCode;
-import com.wadpam.docrest.domain.RestReturn;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-
-import org.apache.commons.codec.binary.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.google.appengine.api.blobstore.BlobInfo;
+import com.google.appengine.api.blobstore.BlobInfoFactory;
+import com.google.appengine.api.blobstore.BlobKey;
+import com.google.appengine.api.blobstore.BlobstoreService;
+import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
+import com.google.appengine.api.images.ImagesService;
+import com.google.appengine.api.images.ImagesServiceFactory;
+import com.google.appengine.api.images.ServingUrlOptions;
+import com.wadpam.docrest.domain.RestCode;
+import com.wadpam.docrest.domain.RestReturn;
 
 /**
  * Mange blobs in GAE blobstore.
@@ -88,9 +96,8 @@ public class BlobController extends AbstractRestController {
     })
     @RequestMapping(value="upload", method= RequestMethod.POST)
     @ResponseBody
-    public Map<String, List<String>> uploadCallback(HttpServletRequest request,
-                                              @PathVariable String domain,
-                                              UriComponentsBuilder uriBuilder) {
+    public Map<String, List<String>> uploadCallback(HttpServletRequest request, @PathVariable String domain,
+            @RequestParam(required = false) Integer imageSize) {
         LOG.debug("Blobstore upload callback");
 
         // Get all uploaded blob info records
@@ -104,22 +111,26 @@ public class BlobController extends AbstractRestController {
             body.put(field.getKey(), urls);
 
             for (BlobInfo blobInfo : field.getValue()) {
-                String accessUrl;
                 final BlobKey blobKey = blobInfo.getBlobKey();
+                // serve via this BlobController
+                String accessUrl = getBlobUrl(request, domain, blobKey);
 
+                // we want to serve directly from ImagesService,
+                // to avoid involving the GAE app, avoid spinning up instances,
+                // and to use the awesome Google CDN.
                 final String contentType = blobInfo.getContentType();
-                if (null != contentType && contentType.startsWith("image")) {
-                    // we want to serve directly from ImagesService,
-                    // to avoid involving the GAE app, avoid spinning up instances,
-                    // and to use the awesome Google CDN.
+
+                // Valid sizes are any integer in the range [0, 1600] and is available as SERVING_SIZES_LIMIT.
+                // if exceed we serve via BlobController
+                if (null != contentType && contentType.startsWith("image") && null != imageSize
+                        && imageSize <= ImagesService.SERVING_SIZES_LIMIT) {
+
+                    LOG.debug(" specific image size {}", imageSize);
                     ServingUrlOptions suo = ServingUrlOptions.Builder.withBlobKey(blobKey);
+                    suo = suo.imageSize(imageSize);
                     accessUrl = imagesService.getServingUrl(suo);
                 }
-                else {
-                    // serve via this BlobController
-                    accessUrl = uriBuilder.query("key={blobkey}").
-                            buildAndExpand(blobKey.getKeyString()).toUriString();
-                }
+
                 urls.add(accessUrl);
             }
         }
@@ -127,6 +138,10 @@ public class BlobController extends AbstractRestController {
         return body;
     }
 
+    protected static String getBlobUrl(HttpServletRequest request, String domain, BlobKey blobKey) {
+        return String.format("%s://%s/api/%s/blob?key=%s", request.getScheme(), request.getHeader("Host"), domain, blobKey
+                .getKeyString().toString());
+    }
 
 
     /**
