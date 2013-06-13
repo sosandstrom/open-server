@@ -312,7 +312,8 @@ public abstract class CrudController<
     }
 
     /**
-    * deleteFromJsonp  for cross-domain - delete an Entity and return HttpStatus.NO_CONTENT .
+    * deleteFromJsonp  for cross-domain - delete an Entity and return HttpStatus.NO_CONTENT . 
+    * use param id the ids as an array
     * @param domain the path-variable domain
     * @param id the ids as an array
     * @param _method value must be  "DELETE"	 	 
@@ -334,7 +335,8 @@ public abstract class CrudController<
         Collection simpleKeys =convertDomainPrimaryKeys(id);
         
         preService(request, domain, CrudListener.DELETE_BATCH, null, null, id);
-       //service.delete(parentKeyString, simpleKeys);
+        service.delete(parentKeyString, simpleKeys);
+
         postService(request, domain, CrudListener.DELETE_BATCH, null, id, null);
         
         return new ResponseEntity(HttpStatus.NO_CONTENT);
@@ -412,6 +414,7 @@ public abstract class CrudController<
     
     /**
      * Queries for non-deleted entities. If not found or soft-deleted, it will be excluded from the response.
+     * The param i array of ids to retrieve.
      * @param i array of ids to retrieve
      * @return a Collection of non-deleted J objects
      */
@@ -423,10 +426,7 @@ public abstract class CrudController<
             @RequestParam String[] i) {
         
         Collection simpleKeys =convertDomainPrimaryKeys(i);
-        
-        
         final Iterable<T> page = service.getByPrimaryKeys(simpleKeys);
-        
         final Collection<J> body = convert(page);
         return body;
     }
@@ -1078,6 +1078,7 @@ public abstract class CrudController<
     }
     
     protected Collection convertDomainPrimaryKeys(String[] id) {
+        LOG.debug("convertDomainPrimaryKeys : {}",  id);
         Collection simpleKeys =null;
         if (Long.class.equals(idClass)){
             simpleKeys =CrudController.toLongs(Arrays.asList(id));
