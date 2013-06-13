@@ -117,15 +117,11 @@ public abstract class MardaoCrudService<
     }
 
     @Override
-    public void delete(String parentKeyString, ID[] id) {
+    public void delete(String parentKeyString, Iterable<ID> ids) {
         final TransactionStatus transactionStatus = getTransaction();
         preDao();
         try {
             Object parentKey = dao.getPrimaryKey(parentKeyString);
-            final ArrayList<ID> ids = new ArrayList<ID>();
-            for (ID i : id) {
-                ids.add(i);
-            }
             dao.delete(parentKey, ids);
             commitTransaction(transactionStatus);
         }
@@ -173,7 +169,7 @@ public abstract class MardaoCrudService<
     }
     
     @Override
-    public Iterable<T> getByPrimaryKeys(Collection<ID> ids) {
+    public Iterable<T> getByPrimaryKeys(Iterable<ID> ids) {
         preDao();
         try {
             final Iterable<T> entities = dao.queryByPrimaryKeys(null, ids);

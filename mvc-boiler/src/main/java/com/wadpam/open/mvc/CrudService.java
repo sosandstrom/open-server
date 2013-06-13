@@ -46,11 +46,11 @@ public interface CrudService<
     /**
      * Deletes specified entities from the underlying database persistence.
      * @param parentKeyString
-     * @param id an array of IDs
+     * @param ids an array of IDs
      */
     @Transactional(readOnly = false)
     @Idempotent
-    void delete(String parentKeyString, ID[] id);
+    void delete(String parentKeyString, Iterable<ID> ids);
 
     void exportCsv(OutputStream out, Long startDate, Long endDate);
     
@@ -69,7 +69,7 @@ public interface CrudService<
      * @return 
      */
     @Idempotent
-    Iterable<T> getByPrimaryKeys(Collection<ID> ids);
+    Iterable<T> getByPrimaryKeys(Iterable<ID> ids);
 
     /**
      * Reads a page of entities from the underlying database persistence.

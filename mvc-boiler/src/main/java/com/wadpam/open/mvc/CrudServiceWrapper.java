@@ -43,8 +43,8 @@ public class CrudServiceWrapper<T extends Object, ID extends Serializable, E ext
     }
 
     @Override
-    public void delete(String parentKeyString, ID[] id) {
-        delegate.delete(parentKeyString, id);
+    public void delete(String parentKeyString, Iterable<ID> ids) {
+        delegate.delete(parentKeyString, ids);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class CrudServiceWrapper<T extends Object, ID extends Serializable, E ext
     }
 
     @Override
-    public Iterable<E> getByPrimaryKeys(Collection<ID> ids) {
+    public Iterable<E> getByPrimaryKeys(Iterable<ID> ids) {
         return (Iterable<E>) delegate.getByPrimaryKeys(ids);
     }
 
