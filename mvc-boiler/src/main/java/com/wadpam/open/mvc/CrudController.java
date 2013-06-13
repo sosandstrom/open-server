@@ -315,13 +315,13 @@ public abstract class CrudController<
             HttpServletRequest request,
             HttpServletResponse response,
             @PathVariable String domain,
-            @RequestParam ID[] id,
+            @RequestParam String[] id,
             @RequestParam(required=false) String parentKeyString
             ) {
         LOG.debug("DELETE {}/{}", parentKeyString, id);
         
         preService(request, domain, CrudListener.DELETE_BATCH, null, null, id);
-        service.delete(parentKeyString, id);
+//        service.delete(parentKeyString, id);
         postService(request, domain, CrudListener.DELETE_BATCH, null, id, null);
         
         return new ResponseEntity(HttpStatus.NO_CONTENT);
@@ -343,7 +343,7 @@ public abstract class CrudController<
             HttpServletRequest request,
             HttpServletResponse response,
             @PathVariable String domain,
-            @RequestParam ID[] id,
+            @RequestParam String[] id,
             @RequestParam(required=false) String parentKeyString,
             @RequestParam("_method") String _method
             ) {
