@@ -1,12 +1,7 @@
 package com.wadpam.open.mvc;
 
-import com.wadpam.docrest.domain.RestCode;
-import com.wadpam.docrest.domain.RestReturn;
-import com.wadpam.open.exceptions.NotFoundException;
-import com.wadpam.open.json.JBaseObject;
-import com.wadpam.open.json.JCursorPage;
-import com.wadpam.open.json.JLocation;
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -18,13 +13,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import net.sf.mardao.core.CursorPage;
 import net.sf.mardao.core.domain.AbstractCreatedUpdatedEntity;
 import net.sf.mardao.core.domain.AbstractLongEntity;
 import net.sf.mardao.core.domain.AbstractStringEntity;
 import net.sf.mardao.core.geo.DLocation;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -42,6 +40,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.view.RedirectView;
+
+import com.wadpam.docrest.domain.RestCode;
+import com.wadpam.docrest.domain.RestReturn;
+import com.wadpam.open.exceptions.NotFoundException;
+import com.wadpam.open.json.JBaseObject;
+import com.wadpam.open.json.JCursorPage;
+import com.wadpam.open.json.JLocation;
 
 /**
  *
@@ -64,11 +69,17 @@ public abstract class CrudController<
     
     protected final Class jsonClass;
     protected S service;
-    
+    protected final Class idClass;
     protected final ArrayList<CrudListener> listeners = new ArrayList<CrudListener>();
+    
+    protected CrudController(Class<J> jsonClazz, Class idClass) {
+        this.jsonClass = jsonClazz;
+        this.idClass = idClass;
+    }
     
     protected CrudController(Class<J> jsonClazz) {
         this.jsonClass = jsonClazz;
+        this.idClass = Long.class;
     }
     
     /**
@@ -320,8 +331,10 @@ public abstract class CrudController<
             ) {
         LOG.debug("DELETE {}/{}", parentKeyString, id);
         
+        Collection simpleKeys =convertDomainPrimaryKeys(id);
+        
         preService(request, domain, CrudListener.DELETE_BATCH, null, null, id);
-//        service.delete(parentKeyString, id);
+       //service.delete(parentKeyString, simpleKeys);
         postService(request, domain, CrudListener.DELETE_BATCH, null, id, null);
         
         return new ResponseEntity(HttpStatus.NO_CONTENT);
@@ -406,19 +419,18 @@ public abstract class CrudController<
         @RestCode(code=200, description="A CursorPage with JSON entities", message="OK")})
     @RequestMapping(value="v10", method={RequestMethod.GET, RequestMethod.POST}, params={"i"})
     @ResponseBody
-    public Collection<J> getExisting(
-            @RequestParam ID[] i
-            ) {
-        ArrayList<ID> simpleKeys = new ArrayList<ID>();
-        for (ID id : i) {
-            simpleKeys.add(id);
-        }
+    public Collection<J> getExisting(HttpServletRequest request,
+            @RequestParam String[] i) {
+        
+        Collection simpleKeys =convertDomainPrimaryKeys(i);
+        
+        
         final Iterable<T> page = service.getByPrimaryKeys(simpleKeys);
         
         final Collection<J> body = convert(page);
         return body;
     }
-
+    
     /**
      * Queries for a (next) page of entities
      * @param pageSize default is 10
@@ -984,7 +996,7 @@ public abstract class CrudController<
         }
         return from.getTime();
     }
-
+    
     public static Long toLong(String from) {
         if (null == from) {
             return null;
@@ -1005,7 +1017,7 @@ public abstract class CrudController<
         }
         return Long.toString(from);
     }
-
+    
     public static Collection<Long> toLongs(Collection<String> from) {
         if (null == from) {
             return null;
@@ -1065,6 +1077,15 @@ public abstract class CrudController<
         }
     }
     
+    protected Collection convertDomainPrimaryKeys(String[] id) {
+        Collection simpleKeys =null;
+        if (Long.class.equals(idClass)){
+            simpleKeys =CrudController.toLongs(Arrays.asList(id));
+        } else {
+            simpleKeys=Arrays.asList(id);
+        }
+        return simpleKeys;
+    }
     // -----------------  getters and setters    -------------------------------
 
     public S getService() {
@@ -1075,4 +1096,6 @@ public abstract class CrudController<
         this.service = service;
     }
     
+  
 }
+
