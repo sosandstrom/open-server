@@ -1,7 +1,6 @@
 package com.wadpam.open.mvc;
 
 import java.io.Serializable;
-import java.lang.reflect.Type;
 import java.net.URI;
 import java.text.ParseException;
 import java.util.ArrayList;
