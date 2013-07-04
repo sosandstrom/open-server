@@ -1,14 +1,11 @@
-package com.wadpam.open.push;
+package com.wadpam.open.push.service;
 
-import com.wadpam.open.push.urban.JUrbanResponse;
-import com.wadpam.open.json.SkipNullObjectMapper;
-import com.wadpam.open.push.urban.APS;
-import com.wadpam.open.push.urban.JUrbanRequest;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
@@ -18,6 +15,11 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
+
+import com.wadpam.open.json.SkipNullObjectMapper;
+import com.wadpam.open.push.urban.APS;
+import com.wadpam.open.push.urban.JUrbanRequest;
+import com.wadpam.open.push.urban.JUrbanResponse;
 
 /**
  *
@@ -59,17 +61,20 @@ public class UrbanPushNotificationService implements PushNotificationService {
         MAPPER.setSerializationInclusion(JsonSerialize.Inclusion.NON_NULL);
     }
     
-    protected JUrbanRequest createRequest(String[] identifiers) {
+    protected JUrbanRequest createRequest(List<String> identifiers,List<String> tags,String message) {
         final JUrbanRequest request = new JUrbanRequest();
         
-        final ArrayList<String> ids = new ArrayList();
-        for (String id : identifiers) {
-            ids.add(id.toUpperCase());
+        
+        if (null != identifiers && !identifiers.isEmpty()) {
+            request.setDevice_tokens(identifiers);
         }
         
-        request.setDevice_tokens(ids);
+        if (null != tags && !tags.isEmpty()) {
+            request.setTags(tags);
+        }
+        
         APS aps = new APS();
-        aps.setAlert("Hello Erik");
+        aps.setAlert(message);
         request.setAps(aps);
         
         return request;
@@ -81,13 +86,13 @@ public class UrbanPushNotificationService implements PushNotificationService {
      * @throws IOException exception
      */
     @Override
-    public void push(String... identifiers) throws IOException {
+    public void push(String message, String... identifiers) throws IOException {
         if (0 == identifiers.length) {
             return;
         } 
         
         final String path = String.format("%s/api/push/", BASE_URL);
-        final JUrbanRequest request = createRequest(identifiers);
+        final JUrbanRequest request = createRequest(Arrays.asList(identifiers),null,message);
         final String json = MAPPER.writeValueAsString(request);
         
         LOG.debug("push {} on {}", json, path);
@@ -96,17 +101,29 @@ public class UrbanPushNotificationService implements PushNotificationService {
     }
 
     @Override
-    public void register(String identifier) throws IOException {
+    public void register(String identifier,String... tags) throws IOException {
         final String path = String.format("%s/api/device_tokens/{identifier}/", BASE_URL);
+        
         LOG.debug("register for {} where identifier='{}'", path, identifier);
-        TEMPLATE.put(path, null, identifier.toUpperCase());
+        
+        //call remove first
+        unregister(identifier);
+        
+        if (tags != null && tags.length >0) {
+            final JUrbanRequest request = new JUrbanRequest();
+            request.setTags(Arrays.asList(tags));
+            final String json = MAPPER.writeValueAsString(request);
+            TEMPLATE.postForObject(path, request,String.class);
+        } else {
+                TEMPLATE.put(path, null, identifier);
+        }
     }
 
     @Override
     public void unregister(String identifier) throws IOException {
         final String path = String.format("%s/api/device_tokens/{identifier}/", BASE_URL);
         LOG.debug("unregister for {} where identifier='{}'", path, identifier);
-        TEMPLATE.delete(path, identifier.toUpperCase());
+        TEMPLATE.delete(path, identifier);
     }
 
     /**
@@ -119,6 +136,23 @@ public class UrbanPushNotificationService implements PushNotificationService {
     private String buildAuthorization(String username, String password) {
         final String plain = String.format("%s:%s", username, password);
         return String.format("Basic %s", Base64.encodeBase64String(plain.getBytes()));
+    }
+
+    
+    @Override
+    public void pushTags(String message,String... tags) throws IOException {
+        if (0 == tags.length) {
+            return;
+        } 
+        
+        final String path = String.format("%s/api/push/", BASE_URL);
+        final JUrbanRequest request = createRequest(null,Arrays.asList(tags),message);
+        final String json = MAPPER.writeValueAsString(request);
+        
+        LOG.debug("push {} on {}", json, path);
+        JUrbanResponse response = TEMPLATE.postForObject(path, request, JUrbanResponse.class);
+        LOG.debug("pushed {}, got {}", json, response);
+        
     }
 
 }

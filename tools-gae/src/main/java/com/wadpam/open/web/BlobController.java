@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -45,6 +46,7 @@ public class BlobController extends AbstractRestController {
 
     private final BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
     private final ImagesService imagesService = ImagesServiceFactory.getImagesService();
+    private static final BlobInfoFactory blobInfoFactory = new BlobInfoFactory();
 
     private final String HEADER_CACHE_CONTROL = "Cache-Control";
     private final String HEADER_CONTENT_DESPOSITION = "Content-Disposition";
@@ -218,4 +220,74 @@ public class BlobController extends AbstractRestController {
         BlobKey blobKey = new BlobKey(key);
         blobstoreService.delete(blobKey);
     }
+    
+    /***
+     * getLatestBlobByName - to get file from blob service
+     * 
+     * @param name fileName String
+     * @param response {@link HttpServletResponse}
+     * @throws IOException
+     */
+    @RestReturn(value = Void.class, code = {@RestCode(code = 200, description = "get file latest back in response", message = "OK")})
+    @RequestMapping(value = "latest", method = RequestMethod.GET, params = "name")
+    public void getLatestBlobByName(@RequestParam String name, HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+
+        if (name == null || name.isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        }
+
+        final BlobInfo blob = getLatestBlobResource(name);
+
+        // check blob found ?
+        if (blob != null) {
+            // serve blob
+            blobstoreService.serve(blob.getBlobKey(), response);
+
+        } else {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
+    
+    /**
+    * get the latest BlobResource
+    * 
+    * @param name of resource
+    * @return BlobInfo object
+    */
+   public static BlobInfo getLatestBlobResource(String name) {
+       // get value in mem cache
+       BlobInfo blob = null;// (BlobInfo) memCache.get(name);
+       // if (blob == null) {
+
+       Map<Long, BlobInfo> blobsFound = new HashMap<Long, BlobInfo>();
+       // lastest date created
+       long maxDate = 0;
+
+       Iterator<BlobInfo> iterator = blobInfoFactory.queryBlobInfos();
+
+       while (iterator.hasNext()) {
+           BlobInfo blobInfo = iterator.next();
+
+           // check name same as blobinfo filename
+           if (name.equals(blobInfo.getFilename())) {
+               // add element into list
+               blobsFound.put(blobInfo.getCreation().getTime(), blobInfo);
+               maxDate = Math.max(maxDate, blobInfo.getCreation().getTime());
+           }
+       }
+
+       LOG.debug(" found blob resource name {} maxDate : {} ", name, maxDate);
+
+       blob = blobsFound.get(maxDate);
+
+       // add into memCache by filename
+       // LOG.debug(" put blobInfo into memCache with key {}", name);
+       // memCache.put(name, blob);
+       // }
+       // else {
+       // LOG.debug(" found blob from memCache {} : {} ", name, blob.getBlobKey());
+       // }
+       return blob;
+   }
 }
