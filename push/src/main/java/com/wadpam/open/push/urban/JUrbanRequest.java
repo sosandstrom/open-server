@@ -12,7 +12,7 @@ public class JUrbanRequest implements java.io.Serializable {
 //	private List<String> apids;
 	private List<String> device_tokens;
 //	private List<String> aliases;
-//	private List<String> tags;
+	private List<String> tags;
 //	private List<Calendar> scheduleFor;
 //	private List<String> excludeTokens;
 	private APS aps;
@@ -51,13 +51,13 @@ public class JUrbanRequest implements java.io.Serializable {
 //		this.getAliases().add(alias);
 //	}
 //
-//	public List<String> getTags() {
-//		return tags;
-//	}
-//
-//	public void setTags(List<String> tags) {
-//		this.tags = tags;
-//	}
+	public List<String> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<String> tags) {
+		this.tags = tags;
+	}
 //
 //	public void addTag(String tag) {
 //		this.getTags().add(tag);

@@ -1,4 +1,4 @@
-package com.wadpam.open.push;
+package com.wadpam.open.push.service;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -26,9 +26,9 @@ public class ApnsWebappPushNotificationService implements PushNotificationServic
     }
 
     @Override
-    public void push(String... identifiers) throws IOException {
+    public void push(String message,String... identifiers) throws IOException {
         StringBuffer url = new StringBuffer(BASE_URL);
-        url.append("ApnsServlet?alert=finally");
+        url.append("ApnsServlet?alert="+ message);
         for (int i = 0; i < identifiers.length; i++) {
             url.append('&');
             url.append("pushToken=");
@@ -41,13 +41,19 @@ public class ApnsWebappPushNotificationService implements PushNotificationServic
     }
 
     @Override
-    public void register(String identifier) throws IOException {
+    public void register(String identifier,String ...tags) throws IOException {
         LOG.info("register {} not required", identifier);
     }
 
     @Override
     public void unregister(String identifier) throws IOException {
         LOG.info("unregister {} not required", identifier);
+    }
+
+    @Override
+    public void pushTags(String message,String... tags) throws IOException {
+        LOG.info("pushTags {} ", message);
+        
     }
     
 }
