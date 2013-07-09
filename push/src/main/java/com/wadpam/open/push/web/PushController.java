@@ -113,7 +113,7 @@ public class PushController {
      * @param message message to be sent to the client
      * @param appData the subject of the message (for email)
      * @param tag is used for grouping receivers arrays of string.
-     * @param deviceType is the type of device in case of iOS and Android. (required) for 'urban' pushType. The values are: 0 (default value): iOS, and 1 : Android.
+     * @param deviceType is the type of device in case of iOS and Android. (required) for 'urban' pushType. The values are: 0 (default value): iOS, and 1 : Android , 2 both.
      * @return a response entity with status
      * @throws Exception 
      */
@@ -125,14 +125,16 @@ public class PushController {
             @PathVariable String domain,
             @RequestParam String message, 
             @RequestParam String tag[], 
-            @RequestParam String pushType,
-            @RequestParam(value = "deviceType", defaultValue="0") long deviceType) throws Exception {
+            @RequestParam (defaultValue=PushService.PUSH_URBAN)String pushType,
+            @RequestParam(defaultValue ="0") Long deviceType) throws Exception {
         
-        if (PushService.DEVICE_TYPE_IOS == deviceType) {
+        if (PushService.DEVICE_TYPE_IOS == deviceType ) {
             pushService.pushTags(message, tag);
-        } else {
-            LOG.warn("Android is not supported!");
+        } else if (PushService.DEVICE_TYPE_ANDROID == deviceType) {
+            //pushService.pushTagsForAndroid(domain, message, tag);
+            LOG.debug("====== Push Android will be available soon ================");
         }
+        
         return new ResponseEntity(HttpStatus.OK);
     }
 

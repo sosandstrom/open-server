@@ -2,6 +2,7 @@
 package com.wadpam.open.push.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -41,6 +42,7 @@ public class PushService {
     /** Device types: IOS = 0; ANDROID = 1; */
     public static final Long                         DEVICE_TYPE_IOS             = 0L;
     public static final Long                         DEVICE_TYPE_ANDROID         = 1L;
+    public static final Long                         DEVICE_TYPE_IOS_ANDROID         = 2L;
     
     public static final int                         MAX_RECORD_TOKENS         =50;
     public static final int                         MAX_RECORD_EMAILS         =50;
@@ -127,19 +129,29 @@ public class PushService {
         return deviceToken;
     }
     
-    public void pushTags(String message,String... tags) throws Exception {
+    public void pushTags(String message, String... tags) throws Exception {
         if (null != getPushNotificationService()) {
             pushNotificationService.pushTags(message, tags);
         }
     }
-
+    public void pushTagsForAndroid(String domain,String message, String... tags)  {
+       /* LOG.debug(" sending to android ================");
+        for (String tag : tags) {
+            Iterable<DuSubscription> items = subscriptionDao.queryByTag(tag);
+            List<String> tokens = new ArrayList<String>();
+            for (DuSubscription duSubscription : items) {
+                tokens.add(duSubscription.getDeviceToken());
+            }
+            enqueueUrbanPush(domain,PUSH_URBAN,DEVICE_TYPE_ANDROID,message, tokens);
+        }*/
+    }
     public void pushTokens(String domain, String pushType, long deviceType, String message,String subject, List<String> tokens) throws Exception {
        
-        if (PushService.PUSH_URBAN.equals(deviceType)) {
-            enqueueUrbanPush(domain, pushType, deviceType ,message, tokens);            
-        } else if ( PushService.PUSH_EMAIL.equals(deviceType)) {
+        if (PushService.PUSH_URBAN.equals(pushType)) {
+            enqueueUrbanPush(domain, pushType, deviceType ,message, tokens);
+        } else if ( PushService.PUSH_EMAIL.equals(pushType)) {
             enqueueEmailPush(domain, pushType, message, subject, tokens);
-        } else if ( PushService.PUSH_SMS.equals(deviceType)) {
+        } else if ( PushService.PUSH_SMS.equals(pushType)) {
             LOG.info("push sms is not implemented");
         }
     }
@@ -183,7 +195,7 @@ public class PushService {
      * @param receivers list of subscribers
      * @throws IOException exception
      */
-    public void enqueueUrbanPush(String domain, String pushType, long deviceType, String message,List<String> tokens) throws IOException {
+    public void enqueueUrbanPush(String domain, String pushType, long deviceType, String message,List<String> tokens) {
         // obtaining the queue
         Queue urbanQueue = QueueFactory.getQueue(URBAN_QUEUE_NAME);
         TaskOptions iOSOptions = TaskOptions.Builder.withUrl(String.format(PATH_URBAN_QUEUE, domain));
@@ -207,7 +219,12 @@ public class PushService {
         }
         
         if (null != getPushNotificationService()) {
-            pushNotificationService.push(message, arrayTokens);
+            
+            try {
+                pushNotificationService.push(message, arrayTokens);
+            } catch (IOException e) {
+                LOG.error(e.getMessage(),e);
+            }
         }
     }
     
