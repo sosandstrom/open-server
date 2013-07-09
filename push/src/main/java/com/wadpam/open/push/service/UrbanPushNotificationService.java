@@ -102,26 +102,30 @@ public class UrbanPushNotificationService implements PushNotificationService {
 
     @Override
     public void register(String identifier,String... tags) throws IOException {
-        final String path = String.format("%s/api/device_tokens/{identifier}/", BASE_URL);
+        final String path = String.format("%s/api/device_tokens/%s/", BASE_URL,identifier);
         
         LOG.debug("register for {} where identifier='{}'", path, identifier);
         
         //call remove first
-        unregister(identifier);
+        try {
+            unregister(identifier);
+        } catch (Exception e) {
+            LOG.error("==============error no tokens");
+        }
         
-        if (tags != null && tags.length >0) {
+        if (null != tags && tags.length >0 && null !=tags[0]) {
             final JUrbanRequest request = new JUrbanRequest();
             request.setTags(Arrays.asList(tags));
-            final String json = MAPPER.writeValueAsString(request);
-            TEMPLATE.postForObject(path, request,String.class);
+          //  final String json = MAPPER.writeValueAsString(request);
+            TEMPLATE.put(path, request);
         } else {
-                TEMPLATE.put(path, null, identifier);
+            TEMPLATE.put(path, null);
         }
     }
 
     @Override
     public void unregister(String identifier) throws IOException {
-        final String path = String.format("%s/api/device_tokens/{identifier}/", BASE_URL);
+        final String path = String.format("%s/api/device_tokens/%s/", BASE_URL,identifier);
         LOG.debug("unregister for {} where identifier='{}'", path, identifier);
         TEMPLATE.delete(path, identifier);
     }
