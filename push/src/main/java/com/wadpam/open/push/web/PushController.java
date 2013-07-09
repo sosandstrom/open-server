@@ -111,8 +111,8 @@ public class PushController {
     /**
      * Sending push notification to subscribers (mobile devices, email addresses, or Short messages (SMS)) which is associated to the tag.
      * @param message message to be sent to the client
-     * @param appData the subject of the message (for email)
      * @param tag is used for grouping receivers arrays of string.
+     * @param pushType - string - it  is the type of push notification {urban, email, sms } by default urban
      * @param deviceType is the type of device in case of iOS and Android. (required) for 'urban' pushType. The values are: 0 (default value): iOS, and 1 : Android , 2 both.
      * @return a response entity with status
      * @throws Exception 
@@ -124,9 +124,9 @@ public class PushController {
     public ResponseEntity pushTag(HttpServletRequest request, 
             @PathVariable String domain,
             @RequestParam String message, 
-            @RequestParam String tag[], 
+            @RequestParam (value = "tag[]")String tag[], 
             @RequestParam (defaultValue=PushService.PUSH_URBAN)String pushType,
-            @RequestParam(defaultValue ="0") Long deviceType) throws Exception {
+            @RequestParam(defaultValue ="0") long deviceType) throws Exception {
         
         if (PushService.DEVICE_TYPE_IOS == deviceType ) {
             pushService.pushTags(message, tag);
