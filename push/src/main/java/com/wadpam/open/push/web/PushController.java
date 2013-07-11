@@ -139,6 +139,29 @@ public class PushController {
     }
 
     /**
+     * broadcast all push notification to subscribers (mobile devices, email addresses, or Short messages (SMS)) by device type.
+     * @param message message to be sent to the client
+     * @param pushType - string - it  is the type of push notification {urban, email, sms } by default urban
+     * @param deviceType is the type of device in case of iOS and Android. (required) for 'urban' pushType. The values are: 0 (default value): iOS, and 1 : Android , 2 both.
+     * @return a response entity with status
+     * @throws Exception 
+     */
+    @RestReturn(value = JSubscription.class, entity = JSubscription.class, code = {
+            @RestCode(code = 200, description = "On successful push", message = "OK"),
+            @RestCode(code = 401, description = "On invalid provider token", message = "Unauthorized")})
+    @RequestMapping(value = "v10/broadcast", method = RequestMethod.POST)
+    public ResponseEntity broadcast(HttpServletRequest request, 
+            @PathVariable String domain,
+            @RequestParam String message, 
+            @RequestParam (defaultValue=PushService.PUSH_URBAN)String pushType,
+            @RequestParam(defaultValue ="0") long deviceType) throws Exception {
+        
+       pushService.broadcastByPushNotification(domain, pushType, deviceType, message, null);
+        
+        return new ResponseEntity(HttpStatus.OK);
+    }
+    
+    /**
      *  Sending push notification to subscribers (tokens,email, or sms ...) base on you set pustType.
      * 
      * @param message - message to be sent to the client for urban ,sms, email content for email ,

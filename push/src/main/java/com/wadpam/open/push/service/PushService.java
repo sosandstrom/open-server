@@ -2,7 +2,10 @@
 package com.wadpam.open.push.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +14,7 @@ import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.appengine.api.taskqueue.TransientFailureException;
+import com.wadpam.open.exceptions.NotFoundException;
 import com.wadpam.open.push.dao.DuSubscriptionDao;
 import com.wadpam.open.push.domain.DuSubscription;
 import com.wadpam.open.push.json.JSubscription;
@@ -24,6 +28,7 @@ import com.wadpam.open.web.BaseConverter;
  */
 public class PushService {
 
+    
     public static final String                       PUSH_URBAN                  = "urban";
     public static final String                       PUSH_EMAIL                  = "email";
     public static final String                       PUSH_XMPP                   = "XMPP";
@@ -53,6 +58,11 @@ public class PushService {
     
     private String                                   emailFromAddress;
     private String                                   emailFromName;
+    
+    private PushNotificationService androidPushNotificationService;
+    
+    private Map<Long,PushNotificationService> pushNotificationServiceProvider = new HashMap<Long, PushNotificationService>();
+    
     /**
      * subscribe
      * 
@@ -65,14 +75,14 @@ public class PushService {
             subscriptionDao.persist(body);
         }
 
+        
+        
         //submit to notification provider
-        if (null != getPushNotificationService()) {
             try {
-                pushNotificationService.register(jSubscription.getDeviceToken(),jSubscription.getTag());
-            } catch (IOException e) {
+                getPushNotificationService(jSubscription.getDeviceType()).register(jSubscription.getDeviceToken(),jSubscription.getTag());
+            } catch (Exception e) {
                 LOG.error(e.getMessage(),e);
             }
-        } 
         return jSubscription;
     }
     
@@ -129,20 +139,16 @@ public class PushService {
     }
     
     public void pushTags(String message, String... tags) throws Exception {
-        if (null != getPushNotificationService()) {
-            pushNotificationService.pushTags(message, tags);
-        }
+        PushNotificationService service = getPushNotificationService(DEVICE_TYPE_IOS);
+        service.pushTags(message, tags);
+        
     }
     public void pushTagsForAndroid(String domain,String message, String... tags)  {
-       /* LOG.debug(" sending to android ================");
+        LOG.debug(" sending to android ================");
         for (String tag : tags) {
-            Iterable<DuSubscription> items = subscriptionDao.queryByTag(tag);
-            List<String> tokens = new ArrayList<String>();
-            for (DuSubscription duSubscription : items) {
-                tokens.add(duSubscription.getDeviceToken());
-            }
-            enqueueUrbanPush(domain,PUSH_URBAN,DEVICE_TYPE_ANDROID,message, tokens);
-        }*/
+            Iterable<DuSubscription> items = subscriptionDao.findByDeviceTypeTag(tag, DEVICE_TYPE_ANDROID);
+            enqueueUrbanPush(domain,PUSH_URBAN,DEVICE_TYPE_ANDROID,message, convertTokens(items));
+        }
     }
     public void pushTokens(String domain, String pushType, long deviceType, String message,String subject, List<String> tokens) throws Exception {
        
@@ -155,6 +161,14 @@ public class PushService {
         }
     }
     
+    public void broadcastByPushNotification(String domain, String pushType,long deviceType, String message, Map<String,String> customData) {
+        if (PUSH_URBAN.equals(pushType)) {
+            Iterable<DuSubscription> items = subscriptionDao.queryByDeviceType(deviceType);
+            enqueueUrbanPush(domain, pushType, deviceType, message, convertTokens(items));
+        } else {
+            LOG.debug("NOT implemented.........");
+        }
+    }
     /**
      * Enqueues the email for sending process
      * @param message body of the email
@@ -172,7 +186,7 @@ public class PushService {
             sendTokens =tokens;
         } else {
             sendTokens =tokens.subList(0, MAX_RECORD_TOKENS-1);
-            options.param("pustType", pushType);
+            options.param("pushType", pushType);
             options.param("message", message);
             options.param("subject", subject);
             for(int i=MAX_RECORD_TOKENS; i<tokens.size();i++) {
@@ -187,7 +201,14 @@ public class PushService {
         sendEmail(sendTokens,subject,message);
     }
 
-    
+
+    public static List<String> convertTokens( Iterable<DuSubscription> duSubscriptions) {
+        List<String> tokens = new ArrayList<String>();
+        for (DuSubscription item : duSubscriptions) {
+            tokens.add(item.getDeviceToken());
+        }
+        return tokens;
+    }
     /**
      * Enqueue the push notification for sending process
      * @param message message to be sent to the subscribers
@@ -206,7 +227,7 @@ public class PushService {
         } else {
             arrayTokens =(String[])tokens.subList(0, MAX_RECORD_TOKENS-1).toArray();
             iOSOptions.param("deviceType", String.valueOf(deviceType));
-            iOSOptions.param("pustType", pushType);
+            iOSOptions.param("pushType", pushType);
             iOSOptions.param("message", message);
             
             for(int i=MAX_RECORD_TOKENS; i<tokens.size();i++) {
@@ -217,13 +238,12 @@ public class PushService {
             }
         }
         
-        if (null != getPushNotificationService()) {
+        try {
+                PushNotificationService service = getPushNotificationService(deviceType);
+                service.push(message, arrayTokens);
             
-            try {
-                pushNotificationService.push(message, arrayTokens);
-            } catch (IOException e) {
-                LOG.error(e.getMessage(),e);
-            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
         }
     }
     
@@ -336,8 +356,16 @@ public class PushService {
         }
         return pushNotificationService;
     }
-
-
+    
+    public PushNotificationService  getPushNotificationService(Long deviceType) {
+        if ( null == pushNotificationServiceProvider || null == pushNotificationServiceProvider.get(deviceType) ) {
+            LOG.warn("*****************No push notifiction service setup*********************");
+            throw new NotFoundException(9999, "No push notifiction service setup");
+        }
+        return pushNotificationServiceProvider.get(deviceType);
+    }
+    
+    
     public void setEmailFromAddress(String emailFromAddress) {
         this.emailFromAddress = emailFromAddress;
     }
@@ -345,5 +373,18 @@ public class PushService {
 
     public void setEmailFromName(String emailFromName) {
         this.emailFromName = emailFromName;
+    }
+
+
+    public void setAndroidPushNotificationService(PushNotificationService androidPushNotificationService) {
+        this.androidPushNotificationService = androidPushNotificationService;
+    }
+
+
+    public void addPushNotificationProvider(Long deviceType,PushNotificationService pushNotificationService) {
+        if (pushNotificationServiceProvider ==  null) {
+            pushNotificationServiceProvider  = new HashMap<Long, PushNotificationService>();
+        }
+        pushNotificationServiceProvider.put(deviceType, pushNotificationService);
     }
 }
