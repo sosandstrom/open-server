@@ -3,7 +3,6 @@ package com.wadpam.open.mvc;
 import com.wadpam.open.transaction.Idempotent;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -78,7 +77,7 @@ public interface CrudService<
      * @return 
      */
     @Idempotent
-    CursorPage<T, ID> getPage(int pageSize, String cursorKey);
+    CursorPage<T> getPage(int pageSize, String cursorKey);
     
     /**
      * Extractor method to get the simple key from specified domain entity object.
@@ -138,6 +137,6 @@ public interface CrudService<
      * @return the IDs of the upserted entities
      */
     @Idempotent
-    CursorPage<ID, ID> whatsChanged(Date since, int pageSize, String cursorKey);
+    CursorPage<ID> whatsChanged(Date since, int pageSize, String cursorKey);
 
 }

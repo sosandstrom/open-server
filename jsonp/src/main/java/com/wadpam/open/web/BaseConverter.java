@@ -99,7 +99,7 @@ public abstract class BaseConverter {
         return new JLocation(from.getLatitude(), from.getLongitude());
     }
     
-    public <D extends AbstractLongEntity> JCursorPage<? extends JBaseObject> convertPage(CursorPage<D, Long> from) {
+    public <D extends AbstractLongEntity> JCursorPage<? extends JBaseObject> convertPage(CursorPage<D> from) {
         final JCursorPage<JBaseObject> to = new JCursorPage<JBaseObject>();
         
         to.setPageSize(from.getItems().size());

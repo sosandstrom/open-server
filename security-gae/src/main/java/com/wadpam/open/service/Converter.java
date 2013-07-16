@@ -10,11 +10,9 @@ import com.wadpam.open.json.*;
 import net.sf.mardao.core.CursorPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 
 /**
@@ -104,7 +102,7 @@ public class Converter extends BaseConverter {
     }
 
     // Convert pages
-    public JCursorPage<?> convert(CursorPage<?, ?> from) {
+    public JCursorPage<?> convert(CursorPage<?> from) {
         final JCursorPage<JBaseObject> to = new JCursorPage<JBaseObject>();
 
         to.setPageSize(from.getRequestedPageSize());

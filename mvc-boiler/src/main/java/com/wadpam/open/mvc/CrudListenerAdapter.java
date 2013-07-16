@@ -74,7 +74,7 @@ public class CrudListenerAdapter<J extends Object, T extends Object, ID extends 
                 postDelete(controller, service, request, namespace, id);
                 break;
             case GET_PAGE:
-                postGetPage(controller, service, request, namespace, (JCursorPage<J>) json, (String) id, (CursorPage<T, ID>) serviceResponse);
+                postGetPage(controller, service, request, namespace, (JCursorPage<J>) json, (String) id, (CursorPage<T>) serviceResponse);
                 break;
             case WHAT_CHANGED:
                 break;
@@ -140,7 +140,7 @@ public class CrudListenerAdapter<J extends Object, T extends Object, ID extends 
     protected void postDelete(CrudController controller, CrudService service, HttpServletRequest request, String namespace, Serializable id) {
     }
 
-    protected void postGetPage(CrudController<J, T, ID, S> controller, S service, HttpServletRequest request, String namespace, JCursorPage<J> jPage, String cursorKey, CursorPage<T, ID> serviceResponse) {
+    protected void postGetPage(CrudController<J, T, ID, S> controller, S service, HttpServletRequest request, String namespace, JCursorPage<J> jPage, String cursorKey, CursorPage<T> serviceResponse) {
     }
 
 }

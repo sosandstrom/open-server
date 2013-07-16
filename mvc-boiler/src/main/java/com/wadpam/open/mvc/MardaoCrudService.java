@@ -196,7 +196,7 @@ public abstract class MardaoCrudService<
     }
 
     @Override
-    public CursorPage<T, ID> getPage(int pageSize, String cursorKey) {
+    public CursorPage<T> getPage(int pageSize, String cursorKey) {
         preDao();
         try {
             return dao.queryPage(pageSize, cursorKey);
@@ -338,7 +338,7 @@ public abstract class MardaoCrudService<
     }
     
     @Override
-    public CursorPage<ID, ID> whatsChanged(Date since, int pageSize, String cursorKey) {
+    public CursorPage<ID> whatsChanged(Date since, int pageSize, String cursorKey) {
         preDao();
         try {
             // TODO: include deletes from Audit table
@@ -349,7 +349,7 @@ public abstract class MardaoCrudService<
         }
     }
     
-    public CursorPage<ID, ID> whatsChanged(Object parentKey, Date since, 
+    public CursorPage<ID> whatsChanged(Object parentKey, Date since, 
             int pageSize, String cursorKey, Filter... filters) {
         preDao();
         try {

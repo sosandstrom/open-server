@@ -70,8 +70,8 @@ public class CrudServiceWrapper<T extends Object, ID extends Serializable, E ext
     }
 
     @Override
-    public CursorPage<E, ID> getPage(int pageSize, String cursorKey) {
-        return (CursorPage<E, ID>) getDelegate().getPage(pageSize, cursorKey);
+    public CursorPage<E> getPage(int pageSize, String cursorKey) {
+        return (CursorPage<E>) getDelegate().getPage(pageSize, cursorKey);
     }
 
     @Override
@@ -105,7 +105,7 @@ public class CrudServiceWrapper<T extends Object, ID extends Serializable, E ext
     }
 
     @Override
-    public CursorPage<ID, ID> whatsChanged(Date since, int pageSize, String cursorKey) {
+    public CursorPage<ID> whatsChanged(Date since, int pageSize, String cursorKey) {
         return getDelegate().whatsChanged(since, pageSize, cursorKey);
     }
 

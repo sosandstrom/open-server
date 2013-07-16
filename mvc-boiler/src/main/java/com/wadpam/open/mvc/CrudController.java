@@ -450,7 +450,7 @@ public abstract class CrudController<
             @RequestParam(required=false) String cursorKey) {
         
         preService(request, domain, CrudListener.GET_PAGE, null, null, cursorKey);
-        final CursorPage<T, ID> page = service.getPage(pageSize, cursorKey);
+        final CursorPage<T> page = service.getPage(pageSize, cursorKey);
         final JCursorPage body = convertPageWithInner(request, response, domain, 
                 model, page);
         postService(request, domain, CrudListener.GET_PAGE, body, cursorKey, page);
@@ -724,7 +724,7 @@ public abstract class CrudController<
         @RestCode(code=304, description="Nothing changed since", message="Not Modified")})
     @RequestMapping(value="v10", method= RequestMethod.GET, headers={"If-Modified-Since"})
     @ResponseBody
-    public CursorPage<ID, ID> whatsChanged(
+    public CursorPage<ID> whatsChanged(
             HttpServletRequest request,
             WebRequest webRequest,
             @PathVariable String domain,
@@ -733,7 +733,7 @@ public abstract class CrudController<
             @RequestParam(required=false) String cursorKey) throws ParseException {
         final long currentMillis = System.currentTimeMillis();
         preService(request, domain, CrudListener.WHAT_CHANGED, null, null, cursorKey);
-        final CursorPage<ID, ID> page = service.whatsChanged(since, pageSize, cursorKey);
+        final CursorPage<ID> page = service.whatsChanged(since, pageSize, cursorKey);
         long lastModified = page.getItems().isEmpty() ? 0L : currentMillis;
         
         if (webRequest.checkNotModified(lastModified)) {
@@ -961,7 +961,7 @@ public abstract class CrudController<
         return new JLocation(from.getLatitude(), from.getLongitude());
     }
     
-    public JCursorPage<J> convertPage(CursorPage<T, ID> from) {
+    public JCursorPage<J> convertPage(CursorPage<T> from) {
         final JCursorPage<J> to = new JCursorPage<J>();
         
         to.setPageSize(from.getItems().size());
@@ -973,7 +973,7 @@ public abstract class CrudController<
     }
 
     public JCursorPage<J> convertPageWithInner(HttpServletRequest request, HttpServletResponse response,
-            String domain, Model model, CursorPage<T, ID> from) {
+            String domain, Model model, CursorPage<T> from) {
         final JCursorPage<J> to = new JCursorPage<J>();
         
         to.setPageSize(from.getItems().size());
