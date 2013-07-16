@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -62,6 +64,10 @@ public class UrbanPushNotificationService implements PushNotificationService {
     }
     
     protected JUrbanRequest createRequest(List<String> identifiers,List<String> tags,String message) {
+        
+        return createRequest(identifiers, tags, message, null);
+    }
+    protected JUrbanRequest createRequest(List<String> identifiers,List<String> tags,String message,Map<String,String> customData) {
         final JUrbanRequest request = new JUrbanRequest();
         
         
@@ -74,12 +80,12 @@ public class UrbanPushNotificationService implements PushNotificationService {
         }
         
         APS aps = new APS();
+        aps.setCustomData(customData);
         aps.setAlert(message);
         request.setAps(aps);
         
         return request;
     }
-
     /**
      *
      * @param identifiers the deviceTokens
@@ -151,6 +157,7 @@ public class UrbanPushNotificationService implements PushNotificationService {
         
         final String path = String.format("%s/api/push/", BASE_URL);
         final JUrbanRequest request = createRequest(null,Arrays.asList(tags),message);
+        
         final String json = MAPPER.writeValueAsString(request);
         
         LOG.debug("push {} on {}", json, path);
