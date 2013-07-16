@@ -15,7 +15,7 @@ The CrudController implements the following REST methods:
 and some convenient, generic methods:
 
 * Get Page of items - `GET {basePath}/v10[?pageSize=10][&cursorKey={cursorKey}]`
-* Get specified, existing items - `GET {basePath}/v10?id={id0}[&id={idN}]`
+* Get specified, existing items - `GET {basePath}/v10?i={id0}[&i={idN}]`
 * Get ids for changed items - `GET {basePath}/v10[?pageSize=10][&cursorKey={cursorKey}]` with a `If-Modified-Since: {timestampString}` HTTP header
 
 Example
