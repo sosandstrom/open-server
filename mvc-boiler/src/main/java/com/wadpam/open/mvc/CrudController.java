@@ -46,6 +46,7 @@ import com.wadpam.open.exceptions.NotFoundException;
 import com.wadpam.open.json.JBaseObject;
 import com.wadpam.open.json.JCursorPage;
 import com.wadpam.open.json.JLocation;
+import java.text.SimpleDateFormat;
 
 /**
  *
@@ -63,6 +64,9 @@ public abstract class CrudController<
     public static final int ERR_CRUD_BASE = 99000;
     public static final int ERR_DELETE_NOT_FOUND = ERR_CRUD_BASE + 1;
     public static final int ERR_GET_NOT_FOUND = ERR_CRUD_BASE + 2;
+    
+    /** Sat, 29 Oct 1994 19:43:31 GMT */
+    public static final SimpleDateFormat LAST_MODIFIED_DATE_FORMAT = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
     
     protected static final Logger LOG = LoggerFactory.getLogger(CrudController.class);
     
@@ -728,13 +732,15 @@ public abstract class CrudController<
             HttpServletRequest request,
             WebRequest webRequest,
             @PathVariable String domain,
-            @RequestHeader(value="If-Modified-Since") Date since,
+            @RequestHeader(value="If-Modified-Since") String since,
             @RequestParam(defaultValue="10") int pageSize, 
             @RequestParam(required=false) String cursorKey) throws ParseException {
         final long currentMillis = System.currentTimeMillis();
         preService(request, domain, CrudListener.WHAT_CHANGED, null, null, cursorKey);
-        final CursorPage<ID> page = service.whatsChanged(since, pageSize, cursorKey);
-        long lastModified = page.getItems().isEmpty() ? 0L : currentMillis;
+        final Date sinceDate = LAST_MODIFIED_DATE_FORMAT.parse(since);
+        final CursorPage<ID> page = service.whatsChanged(sinceDate, pageSize, cursorKey);
+        long lastModified = page.getItems().isEmpty() ? 1000L : currentMillis;
+        LOG.debug("page contains {} IDs", page.getItems().size());
         
         if (webRequest.checkNotModified(lastModified)) {
             // shortcut exit - no further processing necessary

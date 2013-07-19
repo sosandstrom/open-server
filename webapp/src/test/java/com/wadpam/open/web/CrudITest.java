@@ -3,6 +3,7 @@ package com.wadpam.open.web;
 import com.wadpam.open.json.JComplex;
 import com.wadpam.open.json.JSample;
 import java.net.URI;
+import net.sf.mardao.core.CursorPage;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -13,6 +14,9 @@ import org.springframework.web.client.RestTemplate;
 import static org.junit.Assert.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
@@ -140,4 +144,29 @@ public class CrudITest {
         assertTrue("UpdatedDate", actual.getCreatedDate() < actual.getUpdatedDate());
     }
     
+    @Test
+    public void testWhatsChanged() {
+        final String NAME = "mySampleName";
+        JSample request = new JSample();
+        request.setName("initialName");
+        URI uri = template.postForLocation(BASE_URL + "sample/v10", request);
+        request = template.getForObject(uri, JSample.class);
+        
+        // update
+        request.setName(NAME);
+        ResponseEntity entity = template.postForEntity(uri, request, JSample.class);
+        assertEquals(HttpStatus.NO_CONTENT, entity.getStatusCode());
+        
+        // first, get everything since 1970
+        HttpHeaders headers = new HttpHeaders();
+        headers.setIfModifiedSince(1L);
+        HttpEntity requestEntity = new HttpEntity(headers);
+        ResponseEntity<LongPage> pageEntity = template.exchange(BASE_URL + "sample/v10", HttpMethod.GET, 
+                                           requestEntity, LongPage.class);
+        LongPage actual = pageEntity.getBody();
+        assertFalse(actual.getItems().isEmpty());
+    }
+    
+    public static class LongPage extends CursorPage<Long> {}
+    public static class SamplePage extends CursorPage<JSample> {}
 }
