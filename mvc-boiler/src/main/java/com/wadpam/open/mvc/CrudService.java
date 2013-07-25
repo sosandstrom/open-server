@@ -132,11 +132,14 @@ public interface CrudService<
     /**
      * Returns a page of IDs, for those entities that has changed or been deleted since.
      * @param since include entities that has changed or been deleted after this value
+     * @param createdBy omit to get Entities createdBy any user, 'me' to get current user's only
+     * @param updatedBy omit to get Entities updatedBy any user, 'me' to get current user's only
      * @param pageSize
      * @param cursorKey null for first page, otherwise same value as returned in previous CursorPage
      * @return the IDs of the upserted entities
      */
     @Idempotent
-    CursorPage<ID> whatsChanged(Date since, int pageSize, String cursorKey);
+    CursorPage<ID> whatsChanged(Date since, String createdBy, String updatedBy, 
+        int pageSize, String cursorKey);
 
 }

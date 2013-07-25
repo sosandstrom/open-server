@@ -198,8 +198,10 @@ public abstract class StringWrappingCrudService<S extends AbstractStringEntity, 
     }
 
     @Override
-    public CursorPage<String> whatsChanged(Date since, int pageSize, String cursorKey) {
-        CursorPage page = getDelegate().whatsChanged(since, pageSize, cursorKey);
+    public CursorPage<String> whatsChanged(Date since, String createdBy, String updatedBy, 
+            int pageSize, String cursorKey) {
+        CursorPage page = getDelegate().whatsChanged(since, createdBy, updatedBy, 
+                pageSize, cursorKey);
         // in-page conversion
         page.setItems(convertLongDomains(page.getItems()));
         return page;

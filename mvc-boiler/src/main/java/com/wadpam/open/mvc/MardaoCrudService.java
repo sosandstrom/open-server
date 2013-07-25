@@ -338,22 +338,27 @@ public abstract class MardaoCrudService<
     }
     
     @Override
-    public CursorPage<ID> whatsChanged(Date since, int pageSize, String cursorKey) {
-        preDao();
-        try {
-            // TODO: include deletes from Audit table
-            return dao.whatsChanged(since, pageSize, cursorKey);
+    public CursorPage<ID> whatsChanged(Date since, String createdBy, String updatedBy, 
+            int pageSize, String cursorKey) {
+        
+        // are createdBy and/or updatedBy specified?
+        int fs = (null != createdBy ? 1 : 0) + (null != updatedBy ? 1 : 0);
+        Filter filters[] = new Filter[fs];
+        int i = 0;
+        if (null != createdBy) {
+            filters[i++] = dao.createEqualsFilter(dao.getCreatedByColumnName(), createdBy);
         }
-        finally {
-            postDao();
+        if (null != updatedBy) {
+            filters[i++] = dao.createEqualsFilter(dao.getUpdatedByColumnName(), updatedBy);
         }
+        
+        return whatsChanged(null, since, pageSize, cursorKey, filters);
     }
     
     public CursorPage<ID> whatsChanged(Object parentKey, Date since, 
             int pageSize, String cursorKey, Filter... filters) {
         preDao();
         try {
-            // TODO: include deletes from Audit table
             return dao.whatsChanged(parentKey, since, pageSize, cursorKey, filters);
         }
         finally {
