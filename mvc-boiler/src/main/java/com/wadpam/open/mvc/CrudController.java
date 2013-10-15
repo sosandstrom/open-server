@@ -724,8 +724,8 @@ public abstract class CrudController<
      * Header If-Modified-Since is required, timestamp of last update; use "Sat, 29 Oct 1994 19:43:31 GMT" if none
      * @param pageSize default is 10
      * @param cursorKey null to get first page
-     * @param createdBy omit to get Entities createdBy any user, 'me' to get current user's only
-     * @param updatedBy omit to get Entities updatedBy any user, 'me' to get current user's only
+     * @param byUser only return changes by this users.
+     *               Set 'me' to return changes for current user.
      * @return a page of ids that has updatedDate >= lastModified, or 304 Not Modified
      */
     @RestReturn(value=JCursorPage.class, entity=Long.class, code={
@@ -740,23 +740,18 @@ public abstract class CrudController<
             @RequestHeader(value="If-Modified-Since") String since,
             @RequestParam(defaultValue="10") int pageSize, 
             @RequestParam(required=false) String cursorKey,
-            @RequestParam(required=false) String createdBy,
-            @RequestParam(required=false) String updatedBy) throws ParseException {
+            @RequestParam(required=false) String byUser) throws ParseException {
         
         final long currentMillis = System.currentTimeMillis();
         preService(request, domain, CrudListener.WHAT_CHANGED, null, null, cursorKey);
         final Date sinceDate = LAST_MODIFIED_DATE_FORMAT.parse(since);
         
         final String principalName = (String) request.getAttribute(ATTR_NAME_USERNAME);
-        if (ALIAS_ME.equals(createdBy)) {
-            createdBy = principalName;
+        if (ALIAS_ME.equals(byUser)) {
+            byUser = principalName;
         }
-        if (ALIAS_ME.equals(updatedBy)) {
-            updatedBy = principalName;
-        }
-        
-        final CursorPage<ID> page = service.whatsChanged(sinceDate, 
-                createdBy, updatedBy, pageSize, cursorKey);
+
+        final CursorPage<ID> page = service.whatsChanged(sinceDate, byUser, pageSize, cursorKey);
         long lastModified = page.getItems().isEmpty() ? 1000L : currentMillis;
         LOG.debug("page contains {} IDs", page.getItems().size());
         

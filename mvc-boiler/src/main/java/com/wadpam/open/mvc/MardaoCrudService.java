@@ -336,35 +336,23 @@ public abstract class MardaoCrudService<
             rollbackTransaction(transactionStatus);
         }
     }
-    
+
     @Override
-    public CursorPage<ID> whatsChanged(Date since, String createdBy, String updatedBy, 
-            int pageSize, String cursorKey) {
-        
-        // are createdBy and/or updatedBy specified?
-        int fs = (null != createdBy ? 1 : 0) + (null != updatedBy ? 1 : 0);
-        Filter filters[] = new Filter[fs];
-        int i = 0;
-        if (null != createdBy) {
-            filters[i++] = dao.createEqualsFilter(dao.getCreatedByColumnName(), createdBy);
-        }
-        if (null != updatedBy) {
-            filters[i++] = dao.createEqualsFilter(dao.getUpdatedByColumnName(), updatedBy);
-        }
-        
-        return whatsChanged(null, since, pageSize, cursorKey, filters);
+    public CursorPage<ID> whatsChanged(Date since, String byUser, int pageSize, String cursorKey) {
+        return whatsChanged(null, since, byUser, pageSize, cursorKey, null);
     }
-    
-    public CursorPage<ID> whatsChanged(Object parentKey, Date since, 
+
+    public CursorPage<ID> whatsChanged(Object parentKey, Date since, String byUser,
             int pageSize, String cursorKey, Filter... filters) {
         preDao();
         try {
-            return dao.whatsChanged(parentKey, since, pageSize, cursorKey, filters);
+            return dao.whatsChanged(parentKey, since, byUser, pageSize, cursorKey, filters);
         }
         finally {
             postDao();
         }
     }
+
 
     public void setTransactionManager(AbstractPlatformTransactionManager transactionManager) {
         this.transactionManager = transactionManager;

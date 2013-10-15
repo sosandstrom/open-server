@@ -105,10 +105,8 @@ public class CrudServiceWrapper<T extends Object, ID extends Serializable, E ext
     }
 
     @Override
-    public CursorPage<ID> whatsChanged(Date since, String createdBy, String updatedBy, 
-            int pageSize, String cursorKey) {
-        return getDelegate().whatsChanged(since, createdBy, updatedBy, 
-                pageSize, cursorKey);
+    public CursorPage<ID> whatsChanged(Date since, String byUser, int pageSize, String cursorKey) {
+        return getDelegate().whatsChanged(since, byUser, pageSize, cursorKey);
     }
 
     @Override

@@ -128,18 +128,19 @@ public interface CrudService<
     @Transactional(readOnly = false)
     @Idempotent
     List<ID> upsert(Iterable<T> domains);
-    
+
     /**
-     * Returns a page of IDs, for those entities that has changed or been deleted since.
+     * Returns a page of IDs, for those entities that has changed or been deleted since a certain date.
      * @param since include entities that has changed or been deleted after this value
-     * @param createdBy omit to get Entities createdBy any user, 'me' to get current user's only
-     * @param updatedBy omit to get Entities updatedBy any user, 'me' to get current user's only
-     * @param pageSize
+     * @param byUser only included entities that has changed or been deleted by this user (optional)
+     * @param pageSize number of results to return
      * @param cursorKey null for first page, otherwise same value as returned in previous CursorPage
      * @return the IDs of the upserted entities
+     * @return the IDs of changed entities
      */
     @Idempotent
-    CursorPage<ID> whatsChanged(Date since, String createdBy, String updatedBy, 
-        int pageSize, String cursorKey);
+    CursorPage<ID> whatsChanged(Date since, String byUser, int pageSize, String cursorKey);
+
+
 
 }
