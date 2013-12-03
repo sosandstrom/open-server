@@ -124,12 +124,14 @@ public class BlobController extends AbstractRestController {
 
                 // Valid sizes are any integer in the range [0, 1600] and is available as SERVING_SIZES_LIMIT.
                 // if exceed we serve via BlobController
-                if (null != contentType && contentType.startsWith("image") && null != imageSize
-                        && imageSize <= ImagesService.SERVING_SIZES_LIMIT) {
+                if (null != contentType && contentType.startsWith("image") ) {
 
-                    LOG.debug(" specific image size {}", imageSize);
                     ServingUrlOptions suo = ServingUrlOptions.Builder.withBlobKey(blobKey);
-                    suo = suo.imageSize(imageSize);
+                    
+                    if (null != imageSize   && imageSize <= ImagesService.SERVING_SIZES_LIMIT) {
+                        LOG.debug(" specific image size {}", imageSize);
+                        suo = suo.imageSize(imageSize);
+                    }
                     accessUrl = imagesService.getServingUrl(suo);
                 }
 
